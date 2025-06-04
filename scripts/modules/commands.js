@@ -32,8 +32,11 @@ import {
 	removeTask,
 	findTaskById,
 	taskExists,
-	moveTask,
-	migrateProject
+        moveTask,
+        migrateProject,
+        delegateTask,
+        updateTaskProgress,
+        addAgentFeedback
 } from './task-manager.js';
 
 import {
@@ -2748,16 +2751,87 @@ Examples:
 			'--dry-run',
 			'Show what would be migrated without actually moving files'
 		)
-		.action(async (options) => {
-			try {
-				await migrateProject(options);
-			} catch (error) {
-				console.error(chalk.red('Error during migration:'), error.message);
-				process.exit(1);
-			}
-		});
+                .action(async (options) => {
+                        try {
+                                await migrateProject(options);
+                        } catch (error) {
+                                console.error(chalk.red('Error during migration:'), error.message);
+                                process.exit(1);
+                        }
+                });
 
-	return programInstance;
+        // delegate command
+        programInstance
+                .command('delegate')
+                .description('Assign an available agent to a task')
+                .option('-i, --id <id>', 'Task ID to delegate')
+                .option('-f, --file <file>', 'Path to the tasks file', TASKMASTER_TASKS_FILE)
+                .option('--agents <file>', 'Path to agents file', '.taskmaster/agents.json')
+                .action(async (options) => {
+                        const tasksPath = options.file || TASKMASTER_TASKS_FILE;
+                        const agentsPath = options.agents || '.taskmaster/agents.json';
+                        const taskId = options.id;
+                        if (!taskId) {
+                                console.error(chalk.red('Error: --id is required'));
+                                process.exit(1);
+                        }
+                        try {
+                                const updated = delegateTask(tasksPath, agentsPath, taskId);
+                                console.log(chalk.green(`Delegated task ${taskId} to ${updated.agent}`));
+                        } catch (error) {
+                                console.error(chalk.red(`Error delegating task: ${error.message}`));
+                                process.exit(1);
+                        }
+                });
+
+        // progress command
+        programInstance
+                .command('progress')
+                .description('Update task progress percentage')
+                .option('-i, --id <id>', 'Task ID')
+                .option('-p, --progress <number>', 'Progress 0-100')
+                .option('-f, --file <file>', 'Path to the tasks file', TASKMASTER_TASKS_FILE)
+                .action((options) => {
+                        const tasksPath = options.file || TASKMASTER_TASKS_FILE;
+                        const taskId = options.id;
+                        const progress = options.progress;
+                        if (!taskId || progress === undefined) {
+                                console.error(chalk.red('Error: --id and --progress are required'));
+                                process.exit(1);
+                        }
+                        try {
+                                const t = updateTaskProgress(tasksPath, taskId, progress);
+                                console.log(chalk.green(`Updated progress for task ${taskId} to ${t.progress}%`));
+                        } catch (error) {
+                                console.error(chalk.red(`Error updating progress: ${error.message}`));
+                                process.exit(1);
+                        }
+                });
+
+        // feedback command
+        programInstance
+                .command('feedback')
+                .description('Add feedback from an agent for a task')
+                .option('-i, --id <id>', 'Task ID')
+                .option('-a, --agent <name>', 'Agent name')
+                .option('-m, --message <text>', 'Feedback message')
+                .option('-f, --file <file>', 'Path to the tasks file', TASKMASTER_TASKS_FILE)
+                .action((options) => {
+                        const tasksPath = options.file || TASKMASTER_TASKS_FILE;
+                        if (!options.id || !options.agent || !options.message) {
+                                console.error(chalk.red('Error: --id, --agent and --message are required'));
+                                process.exit(1);
+                        }
+                        try {
+                                addAgentFeedback(tasksPath, options.id, options.agent, options.message);
+                                console.log(chalk.green('Feedback recorded'));
+                        } catch (error) {
+                                console.error(chalk.red(`Error adding feedback: ${error.message}`));
+                                process.exit(1);
+                        }
+                });
+
+        return programInstance;
 }
 
 /**
