@@ -256,3 +256,21 @@ nav a:focus {
         justify-content: flex-end;
         gap: 0.5rem;
 }
+
+.agents {
+        margin-top: 1rem;
+        background: var(--bg-alt);
+        padding: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        transition: var(--transition);
+}
+
+.agents ul {
+        list-style: none;
+        padding: 0;
+}
+
+.agents li {
+        margin-bottom: 0.25rem;
+}

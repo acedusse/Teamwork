@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { readJSON, writeJSON } from '../../scripts/modules/utils.js';
 import validate from '../middleware/validation.js';
 import { TaskSchema } from '../schemas/task.js';
+import { loadAgents, assignAgent } from '../utils/agents.js';
 
 const router = express.Router();
 
@@ -20,21 +21,9 @@ function loadTasks() {
 }
 
 function saveTasks(tasks) {
-	const data = readJSON(TASKS_FILE) || { schemaVersion: 1, tasks: [] };
-	writeJSON(TASKS_FILE, { ...data, tasks });
+        const data = readJSON(TASKS_FILE) || { schemaVersion: 1, tasks: [] };
+        writeJSON(TASKS_FILE, { ...data, tasks });
 }
-
-const TaskSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  status: z.string().optional(),
-  dependencies: z.array(z.number()).optional(),
-  priority: z.string().optional(),
-  agent: z.string().optional(),
-  epic: z.string().optional(),
-  details: z.string().optional(),
-  testStrategy: z.string().optional(),
-});
 
 router.get('/', (req, res, next) => {
 	try {
@@ -46,17 +35,22 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/', validate(TaskSchema), (req, res, next) => {
-	try {
-		const data = req.validatedBody;
-		const tasks = loadTasks();
-		const newId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
-		const newTask = { id: newId, ...data, subtasks: [] };
-		tasks.push(newTask);
-		saveTasks(tasks);
-		res.status(201).json(newTask);
-	} catch (err) {
-		next(err);
-	}
+        try {
+                const data = req.validatedBody;
+                const tasks = loadTasks();
+                const agents = loadAgents();
+                const newId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
+                let assigned = data.agent;
+                if (!assigned) {
+                        assigned = assignAgent(tasks, agents);
+                }
+                const newTask = { id: newId, ...data, agent: assigned, subtasks: [] };
+                tasks.push(newTask);
+                saveTasks(tasks);
+                res.status(201).json(newTask);
+        } catch (err) {
+                next(err);
+        }
 });
 
 router.put('/:id', validate(TaskSchema.partial()), (req, res, next) => {

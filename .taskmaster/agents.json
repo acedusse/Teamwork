@@ -1,0 +1,6 @@
+{
+  "agents": [
+    { "id": 1, "name": "Agent A", "status": "available", "capabilities": ["frontend", "backend"] },
+    { "id": 2, "name": "Agent B", "status": "available", "capabilities": ["testing"] }
+  ]
+}

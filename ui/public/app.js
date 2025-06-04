@@ -13,6 +13,8 @@ const statusClasses = {
 
 let tasks = [];
 
+let agents = [];
+
 let editId = null;
 
 const modal = document.getElementById('task-modal');
@@ -59,9 +61,9 @@ const columns = {
 };
 
 function renderBoard() {
-	Object.values(columns).forEach((col) => {
-		col.querySelectorAll('.task-card').forEach((c) => c.remove());
-	});
+        Object.values(columns).forEach((col) => {
+                col.querySelectorAll('.task-card').forEach((c) => c.remove());
+        });
 	const query = document.getElementById('task-filter').value.toLowerCase();
 	tasks
 		.filter(
@@ -72,7 +74,19 @@ function renderBoard() {
 		.forEach((task) => {
 			const col = columns[task.status] || columns.pending;
 			col.appendChild(createCard(task));
-		});
+                });
+}
+
+function renderAgents() {
+        const list = document.getElementById('agent-list');
+        if (!list) return;
+        list.innerHTML = '';
+        agents.forEach((a) => {
+                const li = document.createElement('li');
+                const caps = a.capabilities ? a.capabilities.join(', ') : '';
+                li.textContent = `${a.name} - ${a.status}${caps ? ` (${caps})` : ''}`;
+                list.appendChild(li);
+        });
 }
 
 Object.values(columns).forEach((col) => {
@@ -175,14 +189,18 @@ form.addEventListener('submit', async (e) => {
 });
 
 async function init() {
-	try {
-		const res = await fetch('/api/tasks');
-		const data = await res.json();
-		tasks = data.tasks || [];
-		renderBoard();
-	} catch (err) {
-		console.error('Failed to load tasks', err);
-	}
+        try {
+                const res = await fetch('/api/tasks');
+                const data = await res.json();
+                tasks = data.tasks || [];
+                renderBoard();
+                const ares = await fetch('/api/agents');
+                const adata = await ares.json();
+                agents = adata.agents || [];
+                renderAgents();
+        } catch (err) {
+                console.error('Failed to load tasks', err);
+        }
 }
 
 init();
