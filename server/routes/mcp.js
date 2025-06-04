@@ -1,5 +1,5 @@
 import express from 'express';
-import taskMasterCore from '../../mcp-server/src/core/task-master-core.js';
+import * as taskMasterCore from '../../mcp-server/src/core/task-master-core.js';
 import { broadcast } from '../websocket.js';
 
 const router = express.Router();

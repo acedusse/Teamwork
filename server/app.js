@@ -6,6 +6,9 @@ import { fileURLToPath } from 'url';
 import logger from '../mcp-server/src/logger.js';
 import tasksRouter from './routes/tasks.js';
 import statusRouter from './routes/status.js';
+import prdRouter from './routes/prd.js';
+import generateTasksRouter from './routes/generate-tasks.js';
+import agentsRouter from './routes/agents.js';
 import mcpRouter from './routes/mcp.js';
 import sanitizeBody from './middleware/sanitize.js';
 import errorHandler from './middleware/error-handler.js';
@@ -35,6 +38,9 @@ const staticDir = isProd
   : path.join(__dirname, '../ui/public');
 app.use(express.static(staticDir));
 app.use('/api/tasks', tasksRouter);
+app.use('/api/agents', agentsRouter);
+app.use('/api/prd', prdRouter);
+app.use('/api/generate-tasks', generateTasksRouter);
 app.use('/api/mcp', mcpRouter);
 app.use('/api', statusRouter);
 
