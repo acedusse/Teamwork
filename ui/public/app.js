@@ -1,10 +1,10 @@
-const priorityColors = {
+export const priorityColors = {
 	high: '#e74c3c',
 	medium: '#f1c40f',
 	low: '#2ecc71'
 };
 
-const statusClasses = {
+export const statusClasses = {
 	pending: 'status-pending',
 	'in-progress': 'status-progress',
 	review: 'status-review',
@@ -19,7 +19,7 @@ let editId = null;
 
 let socket = null;
 
-function connectWebSocket() {
+export function connectWebSocket() {
         const statusEl = document.getElementById('connection-status');
         const proto = location.protocol === 'https:' ? 'wss' : 'ws';
         const url = `${proto}://${location.host}`;
@@ -51,16 +51,16 @@ function connectWebSocket() {
 const modal = document.getElementById('task-modal');
 const form = document.getElementById('task-form');
 
-function showModal() {
+export function showModal() {
         modal.classList.remove('hidden');
 }
 
-function hideModal() {
+export function hideModal() {
         modal.classList.add('hidden');
         form.reset();
 }
 
-function createCard(task) {
+export function createCard(task) {
 	const card = document.createElement('div');
 	card.className = 'task-card';
 	card.draggable = true;
@@ -91,7 +91,7 @@ const columns = {
 	done: document.querySelector('.column[data-status="done"]')
 };
 
-function renderBoard() {
+export function renderBoard() {
         Object.values(columns).forEach((col) => {
                 col.querySelectorAll('.task-card').forEach((c) => c.remove());
         });
@@ -108,7 +108,7 @@ function renderBoard() {
                 });
 }
 
-function renderAgents() {
+export function renderAgents() {
         const list = document.getElementById('agent-list');
         if (!list) return;
         list.innerHTML = '';
@@ -219,7 +219,7 @@ form.addEventListener('submit', async (e) => {
         }
 });
 
-async function init() {
+export async function init() {
         try {
                 const res = await fetch('/api/tasks');
                 const data = await res.json();
@@ -234,7 +234,7 @@ async function init() {
 init();
 connectWebSocket();
 
-async function loadMetrics() {
+export async function loadMetrics() {
         try {
                 const [velRes, burnRes] = await Promise.all([
                         fetch('/api/velocity'),
@@ -287,3 +287,15 @@ function renderBurndownChart(data) {
 }
 
 loadMetrics();
+
+export const __test = {
+        setTasks(newTasks) {
+                tasks = newTasks;
+        },
+        getTasks() {
+                return tasks;
+        },
+        getSocket() {
+                return socket;
+        }
+};

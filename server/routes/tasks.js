@@ -54,7 +54,7 @@ router.post('/', validate(TaskSchema), (req, res, next) => {
                 const data = req.validatedBody;
                 const tasks = loadTasks();
                 const newId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
-                const newTask = { id: newId, ...data, subtasks: [] };
+                const newTask = { id: newId, ...data, subtasks: [], createdAt: new Date().toISOString() };
                 tasks.push(newTask);
                 saveTasks(tasks);
                 broadcast({ type: 'tasksUpdated', tasks });
@@ -81,6 +81,9 @@ router.put('/:id', validate(TaskSchema.partial()), (req, res, next) => {
                         return;
                 }
                 tasks[index] = { ...tasks[index], ...update };
+                if (update.status === 'done' && !tasks[index].completedAt) {
+                        tasks[index].completedAt = new Date().toISOString();
+                }
                 saveTasks(tasks);
                 broadcast({ type: 'tasksUpdated', tasks });
                 res.set('X-Tasks-Version', String(getVersion()));
