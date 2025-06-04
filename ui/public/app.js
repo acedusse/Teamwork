@@ -287,3 +287,36 @@ function renderBurndownChart(data) {
 }
 
 loadMetrics();
+
+async function runCliCommand(command) {
+        const outputEl = document.getElementById('cli-output');
+        const historyEl = document.getElementById('cli-history');
+        try {
+                const res = await fetch('/api/cli', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ command })
+                });
+                const data = await res.json();
+                outputEl.textContent = data.output || data.error || '';
+                const li = document.createElement('li');
+                li.textContent = `${new Date().toLocaleTimeString()} - ${command}`;
+                historyEl.prepend(li);
+                if (data.data && data.data.tasks) {
+                        tasks = data.data.tasks;
+                        renderBoard();
+                }
+        } catch (err) {
+                outputEl.textContent = 'Error executing command';
+                console.error(err);
+        }
+}
+
+document.getElementById('cli-run').addEventListener('click', () => {
+        const input = document.getElementById('cli-input');
+        const command = input.value.trim();
+        if (command) {
+                runCliCommand(command);
+                input.value = '';
+        }
+});
