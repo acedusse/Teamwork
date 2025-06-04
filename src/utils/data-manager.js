@@ -1,17 +1,18 @@
 import fs from 'fs';
 import path from 'path';
 import {
-	TASKMASTER_DIR,
-	TASKMASTER_TASKS_FILE,
-	TASKMASTER_CONFIG_FILE
+        TASKMASTER_DIR,
+        TASKMASTER_TASKS_FILE,
+        TASKMASTER_CONFIG_FILE
 } from '../constants/paths.js';
 import {
-	findProjectRoot,
-	findTasksPath,
-	resolveTasksOutputPath
+        findProjectRoot,
+        findTasksPath,
+        resolveTasksOutputPath
 } from './path-utils.js';
 import { tasksFileSchema } from './tasks-schema.js';
 import { getLoggerOrDefault } from './logger-utils.js';
+import { ensureTaskmasterDirs } from './directory-utils.js';
 
 /**
  * Manages reading and writing Task Master data files.
@@ -21,11 +22,13 @@ export default class TaskMasterDataManager {
 	 * @param {string|null} projectRoot - Optional project root. Defaults to auto discovery.
 	 * @param {Object|null} logger - Optional logger object.
 	 */
-	constructor(projectRoot = null, logger = null) {
-		this.projectRoot = projectRoot || findProjectRoot() || process.cwd();
-		this.logger = getLoggerOrDefault(logger);
-		this.tasksPath = null;
-	}
+        constructor(projectRoot = null, logger = null) {
+                this.projectRoot = projectRoot || findProjectRoot() || process.cwd();
+                this.logger = getLoggerOrDefault(logger);
+                this.tasksPath = null;
+                // Ensure base directory structure exists on creation
+                ensureTaskmasterDirs(this.projectRoot, this.logger);
+        }
 
 	/**
 	 * Get the absolute path to the .taskmaster directory.
@@ -39,19 +42,11 @@ export default class TaskMasterDataManager {
 	 * Ensure the .taskmaster directory exists.
 	 * @returns {string|null} Created directory path or null on error.
 	 */
-	ensureTaskmasterDir() {
-		const dir = this.getTaskmasterDir();
-		try {
-			if (!fs.existsSync(dir)) {
-				fs.mkdirSync(dir, { recursive: true });
-				this.logger.info(`Created directory: ${dir}`);
-			}
-			return dir;
-		} catch (err) {
-			this.logger.error(`Failed to create directory ${dir}: ${err.message}`);
-			return null;
-		}
-	}
+        ensureTaskmasterDir() {
+                const dir = this.getTaskmasterDir();
+                const success = ensureTaskmasterDirs(this.projectRoot, this.logger);
+                return success ? dir : null;
+        }
 
 	/**
 	 * Read the contents of a sub directory inside .taskmaster.
