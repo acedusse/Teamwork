@@ -31,6 +31,9 @@ import generateSprintReport from './task-manager/sprint-report.js';
 import renderReportTemplate from './task-manager/report-template.js';
 import scheduleReport from './task-manager/schedule-reports.js';
 import { readComplexityReport } from './utils.js';
+import delegateTask from './task-manager/delegate-task.js';
+import updateTaskProgress from './task-manager/update-task-progress.js';
+import addAgentFeedback from './task-manager/add-agent-feedback.js';
 // Export task manager functions
 export {
 	parsePRD,
