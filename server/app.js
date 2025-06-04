@@ -11,11 +11,13 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // Middleware
+
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json());
 app.use((req, _res, next) => {
-	logger.info(`${req.method} ${req.url}`);
-	next();
+logger.info(`${req.method} ${req.url}`);
+next();
+
 });
 app.use(express.static(path.join(__dirname, '../ui/public')));
 app.use('/api/tasks', tasksRouter);

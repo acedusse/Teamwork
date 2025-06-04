@@ -1,15 +1,92 @@
 import express from 'express';
-import TaskMasterDataManager from '../../src/utils/data-manager.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { z } from 'zod';
+import { readJSON, writeJSON } from '../../scripts/modules/utils.js';
 
 const router = express.Router();
-const dataManager = new TaskMasterDataManager();
 
-router.get('/', (_req, res) => {
-	const tasks = dataManager.readTasks();
-	if (!tasks) {
-		return res.status(500).json({ error: 'Failed to load tasks' });
-	}
-	res.json(tasks);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const TASKS_FILE = process.env.TASKS_FILE || path.join(__dirname, '../../.taskmaster/tasks/tasks.json');
+
+function loadTasks() {
+  const data = readJSON(TASKS_FILE) || { tasks: [] };
+  return Array.isArray(data.tasks) ? data.tasks : [];
+}
+
+function saveTasks(tasks) {
+  writeJSON(TASKS_FILE, { tasks });
+}
+
+const TaskSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  status: z.string().optional(),
+  dependencies: z.array(z.number()).optional(),
+  priority: z.string().optional(),
+  details: z.string().optional(),
+  testStrategy: z.string().optional(),
+});
+
+router.get('/', (req, res, next) => {
+  try {
+    const tasks = loadTasks();
+    res.json({ tasks });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/', (req, res, next) => {
+  try {
+    const data = TaskSchema.parse(req.body);
+    const tasks = loadTasks();
+    const newId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
+    const newTask = { id: newId, ...data, subtasks: [] };
+    tasks.push(newTask);
+    saveTasks(tasks);
+    res.status(201).json(newTask);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/:id', (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const update = TaskSchema.partial().parse(req.body);
+    const tasks = loadTasks();
+    const index = tasks.findIndex((t) => t.id === id);
+    if (index === -1) {
+      res.status(404).json({ error: 'Task not found' });
+      return;
+    }
+    tasks[index] = { ...tasks[index], ...update };
+    saveTasks(tasks);
+    res.json(tasks[index]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/:id', (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const tasks = loadTasks();
+    const index = tasks.findIndex((t) => t.id === id);
+    if (index === -1) {
+      res.status(404).json({ error: 'Task not found' });
+      return;
+    }
+    tasks.splice(index, 1);
+    saveTasks(tasks);
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+
 });
 
 export default router;
