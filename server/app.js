@@ -4,6 +4,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import logger from '../mcp-server/src/logger.js';
 import tasksRouter from './routes/tasks.js';
+import sprintsRouter from './routes/sprints.js';
+import agentsRouter from './routes/agents.js';
+import prdRouter from './routes/prd.js';
+import generateTasksRouter from './routes/generate-tasks.js';
 import statusRouter from './routes/status.js';
 import mcpRouter from './routes/mcp.js';
 import sanitizeBody from './middleware/sanitize.js';
@@ -25,6 +29,10 @@ app.use((req, _res, next) => {
 });
 app.use(express.static(path.join(__dirname, '../ui/public')));
 app.use('/api/tasks', tasksRouter);
+app.use('/api/agents', agentsRouter);
+app.use('/api/prd', prdRouter);
+app.use('/api/generate-tasks', generateTasksRouter);
+app.use('/api/sprints', sprintsRouter);
 app.use('/api/mcp', mcpRouter);
 app.use('/api', statusRouter);
 
