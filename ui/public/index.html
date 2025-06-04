@@ -32,16 +32,17 @@
     </aside>
 
     <main class="board">
-      <div class="column">
+      <div class="filter"><input id="task-filter" type="text" placeholder="Filter tasks..."></div>
+      <div class="column" data-status="pending">
         <h3>Backlog</h3>
       </div>
-      <div class="column">
+      <div class="column" data-status="in-progress">
         <h3>In Progress</h3>
       </div>
-      <div class="column">
+      <div class="column" data-status="review">
         <h3>Review</h3>
       </div>
-      <div class="column">
+      <div class="column" data-status="done">
         <h3>Done</h3>
       </div>
     </main>
@@ -61,5 +62,6 @@
       toggle.textContent = theme === 'dark' ? '☀️' : '🌙';
     });
   </script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
