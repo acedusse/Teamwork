@@ -31,12 +31,14 @@ import {
 	updateSubtaskById,
 	removeTask,
 	findTaskById,
-	taskExists,
+        taskExists,
         moveTask,
         migrateProject,
-        delegateTask,
-        updateTaskProgress,
-        addAgentFeedback
+        exportTasks,
+        generatePdfReport,
+        generateSprintReport,
+        renderReportTemplate,
+        scheduleReport
 } from './task-manager.js';
 
 import {
@@ -2760,78 +2762,92 @@ Examples:
                         }
                 });
 
-        // delegate command
         programInstance
-                .command('delegate')
-                .description('Assign an available agent to a task')
-                .option('-i, --id <id>', 'Task ID to delegate')
-                .option('-f, --file <file>', 'Path to the tasks file', TASKMASTER_TASKS_FILE)
-                .option('--agents <file>', 'Path to agents file', '.taskmaster/agents.json')
-                .action(async (options) => {
-                        const tasksPath = options.file || TASKMASTER_TASKS_FILE;
-                        const agentsPath = options.agents || '.taskmaster/agents.json';
-                        const taskId = options.id;
-                        if (!taskId) {
-                                console.error(chalk.red('Error: --id is required'));
-                                process.exit(1);
-                        }
-                        try {
-                                const updated = delegateTask(tasksPath, agentsPath, taskId);
-                                console.log(chalk.green(`Delegated task ${taskId} to ${updated.agent}`));
-                        } catch (error) {
-                                console.error(chalk.red(`Error delegating task: ${error.message}`));
-                                process.exit(1);
-                        }
-                });
-
-        // progress command
-        programInstance
-                .command('progress')
-                .description('Update task progress percentage')
-                .option('-i, --id <id>', 'Task ID')
-                .option('-p, --progress <number>', 'Progress 0-100')
-                .option('-f, --file <file>', 'Path to the tasks file', TASKMASTER_TASKS_FILE)
+                .command('export')
+                .description('Export tasks to CSV or JSON')
+                .option('-f, --file <file>', 'Path to tasks.json', TASKMASTER_TASKS_FILE)
+                .option('-o, --output <file>', 'Output file path', 'tasks.csv')
+                .option('-F, --format <format>', 'Export format', 'csv')
                 .action((options) => {
-                        const tasksPath = options.file || TASKMASTER_TASKS_FILE;
-                        const taskId = options.id;
-                        const progress = options.progress;
-                        if (!taskId || progress === undefined) {
-                                console.error(chalk.red('Error: --id and --progress are required'));
-                                process.exit(1);
-                        }
                         try {
-                                const t = updateTaskProgress(tasksPath, taskId, progress);
-                                console.log(chalk.green(`Updated progress for task ${taskId} to ${t.progress}%`));
-                        } catch (error) {
-                                console.error(chalk.red(`Error updating progress: ${error.message}`));
+                                exportTasks(options.file || TASKMASTER_TASKS_FILE, options.output, options.format);
+                                console.log(chalk.green(`✓ Exported tasks to ${options.output}`));
+                        } catch (err) {
+                                console.error(chalk.red(`Error exporting tasks: ${err.message}`));
                                 process.exit(1);
                         }
                 });
 
-        // feedback command
         programInstance
-                .command('feedback')
-                .description('Add feedback from an agent for a task')
-                .option('-i, --id <id>', 'Task ID')
-                .option('-a, --agent <name>', 'Agent name')
-                .option('-m, --message <text>', 'Feedback message')
-                .option('-f, --file <file>', 'Path to the tasks file', TASKMASTER_TASKS_FILE)
+                .command('report')
+                .description('Generate PDF task report')
+                .option('-f, --file <file>', 'Path to tasks.json', TASKMASTER_TASKS_FILE)
+                .option('-o, --output <file>', 'Output PDF file', 'report.pdf')
                 .action((options) => {
-                        const tasksPath = options.file || TASKMASTER_TASKS_FILE;
-                        if (!options.id || !options.agent || !options.message) {
-                                console.error(chalk.red('Error: --id, --agent and --message are required'));
-                                process.exit(1);
-                        }
                         try {
-                                addAgentFeedback(tasksPath, options.id, options.agent, options.message);
-                                console.log(chalk.green('Feedback recorded'));
-                        } catch (error) {
-                                console.error(chalk.red(`Error adding feedback: ${error.message}`));
+                                generatePdfReport(options.file || TASKMASTER_TASKS_FILE, options.output);
+                                console.log(chalk.green(`✓ Generated PDF report at ${options.output}`));
+                        } catch (err) {
+                                console.error(chalk.red(`Error generating report: ${err.message}`));
                                 process.exit(1);
                         }
                 });
 
-        return programInstance;
+        programInstance
+                .command('sprint-report')
+                .description('Generate JSON sprint report')
+                .option('-f, --file <file>', 'Path to tasks.json', TASKMASTER_TASKS_FILE)
+                .option('-s, --sprint <id>', 'Sprint identifier', '1')
+                .option('-o, --output <file>', 'Output file', 'sprint-report.json')
+                .action((options) => {
+                        try {
+                                const report = generateSprintReport(options.file || TASKMASTER_TASKS_FILE, options.sprint);
+                                fs.writeFileSync(options.output, JSON.stringify(report, null, 2));
+                                console.log(chalk.green(`✓ Generated sprint report ${options.output}`));
+                        } catch (err) {
+                                console.error(chalk.red(`Error generating sprint report: ${err.message}`));
+                                process.exit(1);
+                        }
+                });
+
+        programInstance
+                .command('render-report')
+                .description('Render tasks with a template')
+                .option('-f, --file <file>', 'Path to tasks.json', TASKMASTER_TASKS_FILE)
+                .option('-t, --template <file>', 'Template file')
+                .option('-o, --output <file>', 'Output file', 'report.txt')
+                .action((options) => {
+                        if (!options.template) {
+                                console.error(chalk.red('Error: --template is required'));
+                                process.exit(1);
+                        }
+                        try {
+                                const data = { tasks: readJSON(options.file || TASKMASTER_TASKS_FILE).tasks };
+                                renderReportTemplate(options.template, data, options.output);
+                                console.log(chalk.green(`✓ Rendered report to ${options.output}`));
+                        } catch (err) {
+                                console.error(chalk.red(`Error rendering report: ${err.message}`));
+                                process.exit(1);
+                        }
+                });
+
+        programInstance
+                .command('schedule-report')
+                .description('Schedule periodic PDF reports')
+                .option('-f, --file <file>', 'Path to tasks.json', TASKMASTER_TASKS_FILE)
+                .option('-o, --output <file>', 'Output file', 'report.pdf')
+                .option('-c, --cron <pattern>', 'Cron pattern', '0 9 * * *')
+                .action((options) => {
+                        try {
+                                scheduleReport(options.cron, () => generatePdfReport(options.file || TASKMASTER_TASKS_FILE, options.output));
+                                console.log(chalk.green(`✓ Scheduled report using pattern ${options.cron}`));
+                        } catch (err) {
+                                console.error(chalk.red(`Error scheduling report: ${err.message}`));
+                                process.exit(1);
+                        }
+                });
+
+	return programInstance;
 }
 
 /**

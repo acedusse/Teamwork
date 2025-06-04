@@ -25,6 +25,11 @@ import taskExists from './task-manager/task-exists.js';
 import isTaskDependentOn from './task-manager/is-task-dependent.js';
 import moveTask from './task-manager/move-task.js';
 import { migrateProject } from './task-manager/migrate.js';
+import exportTasks from './task-manager/export-tasks.js';
+import generatePdfReport from './task-manager/generate-pdf-report.js';
+import generateSprintReport from './task-manager/sprint-report.js';
+import renderReportTemplate from './task-manager/report-template.js';
+import scheduleReport from './task-manager/schedule-reports.js';
 import { readComplexityReport } from './utils.js';
 import delegateTask from './task-manager/delegate-task.js';
 import updateTaskProgress from './task-manager/update-task-progress.js';
@@ -51,10 +56,12 @@ export {
 	findTaskById,
 	taskExists,
 	isTaskDependentOn,
-	moveTask,
+        moveTask,
         readComplexityReport,
         migrateProject,
-        delegateTask,
-        updateTaskProgress,
-        addAgentFeedback
+        exportTasks,
+        generatePdfReport,
+        generateSprintReport,
+        renderReportTemplate,
+        scheduleReport
 };
