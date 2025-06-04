@@ -1,10 +1,10 @@
-const priorityColors = {
+export const priorityColors = {
 	high: '#e74c3c',
 	medium: '#f1c40f',
 	low: '#2ecc71'
 };
 
-const statusClasses = {
+export const statusClasses = {
 	pending: 'status-pending',
 	'in-progress': 'status-progress',
 	review: 'status-review',
@@ -21,57 +21,48 @@ let editId = null;
 
 let socket = null;
 
-function connectWebSocket() {
-	const statusEl = document.getElementById('connection-status');
-	const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-	const url = `${proto}://${location.host}`;
-	socket = new WebSocket(url);
-	socket.addEventListener('open', () => {
-		statusEl.textContent = 'Connected';
-		statusEl.classList.remove('disconnected');
-		statusEl.classList.add('connected');
-	});
-	socket.addEventListener('close', () => {
-		statusEl.textContent = 'Disconnected';
-		statusEl.classList.remove('connected');
-		statusEl.classList.add('disconnected');
-		setTimeout(connectWebSocket, 3000);
-	});
-	socket.addEventListener('message', (e) => {
-		try {
-			const msg = JSON.parse(e.data);
-			if (msg.type === 'tasksUpdated' && Array.isArray(msg.tasks)) {
-				tasks = msg.tasks;
-				renderBoard();
-			}
-		} catch (err) {
-			console.error('Invalid message', err);
-		}
-	});
+export function connectWebSocket() {
+        const statusEl = document.getElementById('connection-status');
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        const url = `${proto}://${location.host}`;
+        socket = new WebSocket(url);
+        socket.addEventListener('open', () => {
+                statusEl.textContent = 'Connected';
+                statusEl.classList.remove('disconnected');
+                statusEl.classList.add('connected');
+        });
+        socket.addEventListener('close', () => {
+                statusEl.textContent = 'Disconnected';
+                statusEl.classList.remove('connected');
+                statusEl.classList.add('disconnected');
+                setTimeout(connectWebSocket, 3000);
+        });
+        socket.addEventListener('message', (e) => {
+                try {
+                        const msg = JSON.parse(e.data);
+                        if (msg.type === 'tasksUpdated' && Array.isArray(msg.tasks)) {
+                                tasks = msg.tasks;
+                                renderBoard();
+                        }
+                } catch (err) {
+                        console.error('Invalid message', err);
+                }
+        });
 }
 
 const modal = document.getElementById('task-modal');
 const form = document.getElementById('task-form');
 
-function showModal() {
-	modal.classList.remove('hidden');
+export function showModal() {
+        modal.classList.remove('hidden');
 }
 
-function hideModal() {
-	modal.classList.add('hidden');
-	form.reset();
+export function hideModal() {
+        modal.classList.add('hidden');
+        form.reset();
 }
 
-function highlightText(text, query) {
-	if (!query) return text;
-	const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-	return text.replace(
-		new RegExp(escaped, 'gi'),
-		(m) => `<span class="highlight">${m}</span>`
-	);
-}
-
-function createCard(task, query) {
+export function createCard(task) {
 	const card = document.createElement('div');
 	card.className = 'task-card';
 	card.draggable = true;
@@ -108,18 +99,11 @@ const columns = {
 	done: document.querySelector('.column[data-status="done"]')
 };
 
-function renderBoard() {
-	Object.values(columns).forEach((col) => {
-		col.querySelectorAll('.task-card').forEach((c) => c.remove());
-	});
-	const query = document
-		.getElementById('task-filter')
-		.value.trim()
-		.toLowerCase();
-	const agentF = document.getElementById('agent-filter').value;
-	const epicF = document.getElementById('epic-filter').value;
-	const priorityF = document.getElementById('priority-filter').value;
-
+export function renderBoard() {
+        Object.values(columns).forEach((col) => {
+                col.querySelectorAll('.task-card').forEach((c) => c.remove());
+        });
+	const query = document.getElementById('task-filter').value.toLowerCase();
 	tasks
 		.filter((t) => {
 			const matchesQuery =
@@ -137,85 +121,16 @@ function renderBoard() {
 		});
 }
 
-function renderAgents() {
-	const list = document.getElementById('agent-list');
-	if (!list) return;
-	list.innerHTML = '';
-	agents.forEach((a) => {
-		const li = document.createElement('li');
-		const caps = a.capabilities ? a.capabilities.join(', ') : '';
-		li.textContent = `${a.name} - ${a.status}${caps ? ` (${caps})` : ''}`;
-		list.appendChild(li);
-	});
-}
-
-function updateFilterOptions() {
-	const agentSel = document.getElementById('agent-filter');
-	const epicSel = document.getElementById('epic-filter');
-	const agentsSet = [...new Set(tasks.map((t) => t.agent).filter(Boolean))];
-	const epicsSet = [...new Set(tasks.map((t) => t.epic).filter(Boolean))];
-	agentSel
-		.querySelectorAll('option:not(:first-child)')
-		.forEach((o) => o.remove());
-	epicSel
-		.querySelectorAll('option:not(:first-child)')
-		.forEach((o) => o.remove());
-	agentsSet.forEach((a) => {
-		const opt = document.createElement('option');
-		opt.value = a;
-		opt.textContent = a;
-		agentSel.appendChild(opt);
-	});
-	epicsSet.forEach((e) => {
-		const opt = document.createElement('option');
-		opt.value = e;
-		opt.textContent = e;
-		epicSel.appendChild(opt);
-	});
-}
-
-function loadSavedFilters() {
-	try {
-		savedFilters = JSON.parse(localStorage.getItem('savedFilters')) || [];
-	} catch {
-		savedFilters = [];
-	}
-}
-
-function renderSavedFilterOptions() {
-	const sel = document.getElementById('saved-filters');
-	sel.innerHTML = '<option value="">Saved filters</option>';
-	savedFilters.forEach((f, i) => {
-		const opt = document.createElement('option');
-		opt.value = i;
-		opt.textContent = f.name;
-		sel.appendChild(opt);
-	});
-}
-
-function saveCurrentFilter() {
-	const name = prompt('Filter name?');
-	if (!name) return;
-	const filter = {
-		name,
-		query: document.getElementById('task-filter').value.trim(),
-		agent: document.getElementById('agent-filter').value,
-		epic: document.getElementById('epic-filter').value,
-		priority: document.getElementById('priority-filter').value
-	};
-	savedFilters.push(filter);
-	localStorage.setItem('savedFilters', JSON.stringify(savedFilters));
-	renderSavedFilterOptions();
-}
-
-function applyFilterSet(index) {
-	const f = savedFilters[index];
-	if (!f) return;
-	document.getElementById('task-filter').value = f.query;
-	document.getElementById('agent-filter').value = f.agent;
-	document.getElementById('epic-filter').value = f.epic;
-	document.getElementById('priority-filter').value = f.priority;
-	renderBoard();
+export function renderAgents() {
+        const list = document.getElementById('agent-list');
+        if (!list) return;
+        list.innerHTML = '';
+        agents.forEach((a) => {
+                const li = document.createElement('li');
+                const caps = a.capabilities ? a.capabilities.join(', ') : '';
+                li.textContent = `${a.name} - ${a.status}${caps ? ` (${caps})` : ''}`;
+                list.appendChild(li);
+        });
 }
 
 Object.values(columns).forEach((col) => {
@@ -334,16 +249,16 @@ form.addEventListener('submit', async (e) => {
 	}
 });
 
-async function init() {
-	try {
-		const res = await fetch('/api/tasks');
-		const data = await res.json();
-		tasks = data.tasks || [];
-		updateFilterOptions();
-		renderBoard();
-	} catch (err) {
-		console.error('Failed to load tasks', err);
-	}
+export async function init() {
+        try {
+                const res = await fetch('/api/tasks');
+                const data = await res.json();
+                tasks = data.tasks || [];
+                renderBoard();
+
+        } catch (err) {
+                console.error('Failed to load tasks', err);
+        }
 }
 
 loadSavedFilters();
@@ -351,19 +266,19 @@ renderSavedFilterOptions();
 init();
 connectWebSocket();
 
-async function loadMetrics() {
-	try {
-		const [velRes, burnRes] = await Promise.all([
-			fetch('/api/velocity'),
-			fetch('/api/burndown')
-		]);
-		const velocity = await velRes.json();
-		const burndown = await burnRes.json();
-		renderVelocityChart(velocity.data || []);
-		renderBurndownChart(burndown.data || []);
-	} catch (err) {
-		console.error('Failed to load metrics', err);
-	}
+export async function loadMetrics() {
+        try {
+                const [velRes, burnRes] = await Promise.all([
+                        fetch('/api/velocity'),
+                        fetch('/api/burndown')
+                ]);
+                const velocity = await velRes.json();
+                const burndown = await burnRes.json();
+                renderVelocityChart(velocity.data || []);
+                renderBurndownChart(burndown.data || []);
+        } catch (err) {
+                console.error('Failed to load metrics', err);
+        }
 }
 
 function renderVelocityChart(data) {
@@ -405,35 +320,14 @@ function renderBurndownChart(data) {
 
 loadMetrics();
 
-async function runCliCommand(command) {
-        const outputEl = document.getElementById('cli-output');
-        const historyEl = document.getElementById('cli-history');
-        try {
-                const res = await fetch('/api/cli', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ command })
-                });
-                const data = await res.json();
-                outputEl.textContent = data.output || data.error || '';
-                const li = document.createElement('li');
-                li.textContent = `${new Date().toLocaleTimeString()} - ${command}`;
-                historyEl.prepend(li);
-                if (data.data && data.data.tasks) {
-                        tasks = data.data.tasks;
-                        renderBoard();
-                }
-        } catch (err) {
-                outputEl.textContent = 'Error executing command';
-                console.error(err);
+export const __test = {
+        setTasks(newTasks) {
+                tasks = newTasks;
+        },
+        getTasks() {
+                return tasks;
+        },
+        getSocket() {
+                return socket;
         }
-}
-
-document.getElementById('cli-run').addEventListener('click', () => {
-        const input = document.getElementById('cli-input');
-        const command = input.value.trim();
-        if (command) {
-                runCliCommand(command);
-                input.value = '';
-        }
-});
+};

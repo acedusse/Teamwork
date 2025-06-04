@@ -115,11 +115,12 @@
     "ink": "^5.0.1",
     "jest": "^29.7.0",
     "jest-environment-node": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "mock-fs": "^5.5.0",
     "prettier": "^3.5.3",
     "react": "^18.3.1",
     "supertest": "^7.1.0",
-    "tsx": "^4.16.2",
-    "esbuild": "^0.25.0"
+    "tsx": "^4.16.2"
+    ,"axe-core": "^4.8.1"
   }
 }

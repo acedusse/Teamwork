@@ -16,7 +16,9 @@ import agentsRouter from './routes/agents.js';
 import prdRouter from './routes/prd.js';
 import generateTasksRouter from './routes/generate-tasks.js';
 import mcpRouter from './routes/mcp.js';
-import cliRouter from './routes/cli.js';
+import prdRouter from './routes/prd.js';
+import agentsRouter from './routes/agents.js';
+import generateTasksRouter from './routes/generate-tasks.js';
 import sanitizeBody from './middleware/sanitize.js';
 import errorHandler from './middleware/error-handler.js';
 
@@ -55,7 +57,6 @@ app.use('/api/tasks', tasksRouter);
 app.use('/api/agents', agentsRouter);
 app.use('/api/prd', prdRouter);
 app.use('/api/generate-tasks', generateTasksRouter);
-app.use('/api/sprints', sprintsRouter);
 app.use('/api/mcp', mcpRouter);
 app.use('/api/cli', cliRouter);
 app.use('/api', statusRouter);
