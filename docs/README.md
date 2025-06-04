@@ -11,12 +11,15 @@ Welcome to the Task Master documentation. Use the links below to navigate to the
 
 - [Command Reference](command-reference.md) - Complete list of all available commands
 - [Task Structure](task-structure.md) - Understanding the task format and features
+- [Project Architecture](architecture.md) - High level overview of the codebase
+- [API Documentation](api/README.md) - Using Task Master programmatically
 
 ## Examples & Licensing
 
 - [Example Interactions](examples.md) - Common Cursor AI interaction examples
 - [Licensing Information](licensing.md) - Detailed information about the license
 - [Dashboard Demo](dashboard/index.html) - Sample web UI for managing your AI team
+- [Changelog Format](changelog-format.md) - How release notes are maintained
 
 ## Need More Help?
 

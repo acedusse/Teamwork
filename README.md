@@ -193,6 +193,8 @@ For more detailed information, check out the documentation in the `docs` directo
 - [Task Structure](docs/task-structure.md) - Understanding the task format and features
 - [Example Interactions](docs/examples.md) - Common Cursor AI interaction examples
 - [Migration Guide](docs/migration-guide.md) - Guide to migrating to the new project structure
+- [Project Architecture](docs/architecture.md) - Overview of how the codebase fits together
+- [API Documentation](docs/api/README.md) - Extend Task Master programmatically
 
 ## Troubleshooting
 
