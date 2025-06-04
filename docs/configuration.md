@@ -99,6 +99,17 @@ PERPLEXITY_API_KEY=pplx-your-key-here
 # GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-credentials.json
 ```
 
+### Server Settings
+
+```bash
+# Port for the MCP server (optional)
+PORT=3000
+# Allowed CORS origin for HTTP transport
+CORS_ORIGIN=*
+# Logging level for server output
+LOG_LEVEL=info
+```
+
 ## Troubleshooting
 
 ### Configuration Errors
