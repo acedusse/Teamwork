@@ -20,6 +20,7 @@ Welcome to the Task Master documentation. Use the links below to navigate to the
 - [Licensing Information](licensing.md) - Detailed information about the license
 - [Dashboard Demo](dashboard/index.html) - Sample web UI for managing your AI team
 - [Changelog Format](changelog-format.md) - How release notes are maintained
+- [Release Process](release-process.md) - Versioning and automated publishing
 
 ## Need More Help?
 

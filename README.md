@@ -195,6 +195,7 @@ For more detailed information, check out the documentation in the `docs` directo
 - [Migration Guide](docs/migration-guide.md) - Guide to migrating to the new project structure
 - [Project Architecture](docs/architecture.md) - Overview of how the codebase fits together
 - [API Documentation](docs/api/README.md) - Extend Task Master programmatically
+- [Release Process](docs/release-process.md) - How versions and changelogs are managed
 
 ## Troubleshooting
 
