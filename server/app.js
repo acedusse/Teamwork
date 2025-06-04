@@ -4,7 +4,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import logger from '../mcp-server/src/logger.js';
 import tasksRouter from './routes/tasks.js';
-import statusRouter from './routes/status.js';
+import sanitizeBody from './middleware/sanitize.js';
+import errorHandler from './middleware/error-handler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,10 +16,10 @@ const app = express();
 
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json());
+app.use(sanitizeBody);
 app.use((req, _res, next) => {
-logger.info(`${req.method} ${req.url}`);
-next();
-
+	logger.info(`${req.method} ${req.url}`);
+	next();
 });
 app.use(express.static(path.join(__dirname, '../ui/public')));
 app.use('/api/tasks', tasksRouter);
@@ -30,17 +31,10 @@ app.get('/health', (_req, res) => {
 });
 
 // 404 handler
-app.use((_req, res, next) => {
-	res.status(404);
-	res.json({ error: 'Not Found' });
+app.use((_req, res) => {
+	res.status(404).json({ error: 'Not Found' });
 });
 
-// Error handler
-// eslint-disable-next-line no-unused-vars
-app.use((err, _req, res, _next) => {
-	logger.error(err);
-	res.status(err.status || 500);
-	res.json({ error: err.message || 'Internal Server Error' });
-});
+app.use(errorHandler);
 
 export default app;
