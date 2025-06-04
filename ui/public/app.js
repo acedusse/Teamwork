@@ -12,6 +12,77 @@ const statusClasses = {
 };
 
 let tasks = [];
+let socket;
+const statusEl = document.getElementById('connection-status');
+let retryTimeout;
+
+function setStatus(state) {
+	if (!statusEl) return;
+	statusEl.textContent =
+		state === 'connected'
+			? 'Connected'
+			: state === 'connecting'
+				? 'Connecting...'
+				: 'Disconnected';
+	statusEl.classList.remove('connected', 'disconnected');
+	if (state === 'connected') statusEl.classList.add('connected');
+	if (state === 'disconnected') statusEl.classList.add('disconnected');
+}
+
+function handleMessage(event) {
+	try {
+		const msg = JSON.parse(event.data);
+		switch (msg.type) {
+			case 'tasks':
+				tasks = msg.tasks;
+				renderBoard();
+				break;
+			case 'taskAdded':
+				tasks.push(msg.task);
+				renderBoard();
+				break;
+			case 'taskUpdated': {
+				const idx = tasks.findIndex((t) => t.id === msg.task.id);
+				if (idx !== -1) {
+					tasks[idx] = msg.task;
+					renderBoard();
+				}
+				break;
+			}
+			case 'taskDeleted':
+				tasks = tasks.filter((t) => t.id !== msg.id);
+				renderBoard();
+				break;
+			default:
+				console.warn('Unknown message', msg);
+		}
+	} catch (err) {
+		console.error('WebSocket message error', err);
+	}
+}
+
+function connectWebSocket() {
+	const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+	setStatus('connecting');
+	socket = new WebSocket(`${protocol}://${location.host}`);
+
+	socket.addEventListener('open', () => {
+		setStatus('connected');
+	});
+	socket.addEventListener('message', handleMessage);
+	socket.addEventListener('close', () => {
+		setStatus('disconnected');
+		if (!retryTimeout) {
+			retryTimeout = setTimeout(() => {
+				retryTimeout = null;
+				connectWebSocket();
+			}, 3000);
+		}
+	});
+	socket.addEventListener('error', () => {
+		socket.close();
+	});
+}
 
 function createCard(task) {
 	const card = document.createElement('div');
@@ -77,6 +148,9 @@ Object.values(columns).forEach((col) => {
 		if (task) {
 			task.status = col.dataset.status;
 			renderBoard();
+			if (socket && socket.readyState === WebSocket.OPEN) {
+				socket.send(JSON.stringify({ type: 'taskUpdated', task }));
+			}
 		}
 	});
 });
@@ -95,3 +169,4 @@ async function init() {
 }
 
 init();
+connectWebSocket();
