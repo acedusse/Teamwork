@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import logger from '../mcp-server/src/logger.js';
 import tasksRouter from './routes/tasks.js';
+import statusRouter from './routes/status.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,10 +22,11 @@ next();
 });
 app.use(express.static(path.join(__dirname, '../ui/public')));
 app.use('/api/tasks', tasksRouter);
+app.use('/api', statusRouter);
 
-// Health check route
+// Legacy health check route
 app.get('/health', (_req, res) => {
-	res.json({ status: 'ok' });
+        res.json({ status: 'ok' });
 });
 
 // 404 handler
