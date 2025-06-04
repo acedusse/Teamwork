@@ -1,0 +1,485 @@
+openapi: 3.0.0
+info:
+  title: Task Master API
+  version: 1.0.0
+  description: REST API for managing tasks, agents and sprints in Task Master.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/tasks:
+    get:
+      summary: List tasks
+      responses:
+        '200':
+          description: Array of tasks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Task'
+    post:
+      summary: Create a task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+  /api/tasks/{id}:
+    put:
+      summary: Update a task
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '200':
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+    delete:
+      summary: Delete a task
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: Deleted
+  /api/agents:
+    get:
+      summary: List agents
+      responses:
+        '200':
+          description: Array of agents
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Agent'
+    post:
+      summary: Create agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Agent'
+      responses:
+        '201':
+          description: Created agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+  /api/agents/{id}:
+    put:
+      summary: Update agent
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Agent'
+      responses:
+        '200':
+          description: Updated agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+  /api/agents/metrics:
+    get:
+      summary: Agent performance metrics
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/agents/history:
+    get:
+      summary: Agent assignment history
+      responses:
+        '200':
+          description: History data
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/prd:
+    get:
+      summary: Get PRD content
+      responses:
+        '200':
+          description: PRD text
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: string
+    post:
+      summary: Update PRD content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Saved PRD
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: string
+  /api/generate-tasks:
+    post:
+      summary: Generate tasks from PRD
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateTasksOptions'
+      responses:
+        '200':
+          description: Generation result
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/sprints:
+    get:
+      summary: List sprints
+      responses:
+        '200':
+          description: Array of sprints
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sprints:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Sprint'
+    post:
+      summary: Create sprint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sprint'
+      responses:
+        '201':
+          description: Created sprint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sprint'
+  /api/sprints/{id}:
+    put:
+      summary: Update sprint
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sprint'
+      responses:
+        '200':
+          description: Updated sprint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sprint'
+  /api/sprints/{id}/plan:
+    post:
+      summary: Autoplan sprint
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: Planned sprint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sprint'
+  /api/sprints/metrics:
+    get:
+      summary: Sprint metrics
+      responses:
+        '200':
+          description: Metrics
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/mcp/command:
+    post:
+      summary: Execute MCP command
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  type: string
+                params:
+                  type: object
+      responses:
+        '200':
+          description: Command result
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/cli:
+    post:
+      summary: Execute CLI command
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  type: string
+      responses:
+        '200':
+          description: CLI output
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/cli/history:
+    get:
+      summary: Get CLI command history
+      responses:
+        '200':
+          description: History
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/status:
+    get:
+      summary: Task status summary
+      responses:
+        '200':
+          description: Status data
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/metrics:
+    get:
+      summary: Task metrics
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/velocity:
+    get:
+      summary: Velocity over time
+      responses:
+        '200':
+          description: Velocity data
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/burndown:
+    get:
+      summary: Burndown chart data
+      responses:
+        '200':
+          description: Burndown
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/progress:
+    get:
+      summary: Overall progress
+      responses:
+        '200':
+          description: Progress data
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/team-performance:
+    get:
+      summary: Team performance metrics
+      responses:
+        '200':
+          description: Performance data
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/trends:
+    get:
+      summary: Trends data
+      responses:
+        '200':
+          description: Trends data
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/ready:
+    get:
+      summary: Readiness check
+      responses:
+        '200':
+          description: Ready
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  schemas:
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        priority:
+          type: string
+        agent:
+          type: string
+        epic:
+          type: string
+        details:
+          type: string
+        testStrategy:
+          type: string
+        createdAt:
+          type: string
+        completedAt:
+          type: string
+    Agent:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        status:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+    Sprint:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        goal:
+          type: string
+        startDate:
+          type: string
+        endDate:
+          type: string
+        status:
+          type: string
+        tasks:
+          type: array
+          items:
+            type: integer
+        createdAt:
+          type: string
+        completedAt:
+          type: string
+    GenerateTasksOptions:
+      type: object
+      properties:
+        numTasks:
+          type: integer
+        force:
+          type: boolean
+        append:
+          type: boolean
+        research:
+          type: boolean
