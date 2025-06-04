@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { readJSON, writeJSON } from '../../scripts/modules/utils.js';
 import validate from '../middleware/validation.js';
 import { TaskSchema } from '../schemas/task.js';
+import { loadAgents, assignAgent } from '../utils/agents.js';
 
 const router = express.Router();
 
@@ -34,17 +35,22 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/', validate(TaskSchema), (req, res, next) => {
-	try {
-		const data = req.validatedBody;
-		const tasks = loadTasks();
-		const newId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
-		const newTask = { id: newId, ...data, subtasks: [] };
-		tasks.push(newTask);
-		saveTasks(tasks);
-		res.status(201).json(newTask);
-	} catch (err) {
-		next(err);
-	}
+        try {
+                const data = req.validatedBody;
+                const tasks = loadTasks();
+                const agents = loadAgents();
+                const newId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
+                let assigned = data.agent;
+                if (!assigned) {
+                        assigned = assignAgent(tasks, agents);
+                }
+                const newTask = { id: newId, ...data, agent: assigned, subtasks: [] };
+                tasks.push(newTask);
+                saveTasks(tasks);
+                res.status(201).json(newTask);
+        } catch (err) {
+                next(err);
+        }
 });
 
 router.put('/:id', validate(TaskSchema.partial()), (req, res, next) => {
