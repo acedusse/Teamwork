@@ -16,6 +16,7 @@ Welcome to the Task Master documentation. Use the links below to navigate to the
 
 - [Example Interactions](examples.md) - Common Cursor AI interaction examples
 - [Licensing Information](licensing.md) - Detailed information about the license
+- [Dashboard Demo](dashboard/index.html) - Sample web UI for managing your AI team
 
 ## Need More Help?
 
