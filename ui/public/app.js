@@ -53,6 +53,69 @@ export function connectWebSocket() {
 const modal = document.getElementById('task-modal');
 const form = document.getElementById('task-form');
 
+const defaultShortcuts = {
+        newTask: 'n',
+        toggleTheme: 'd',
+        focusSearch: '/',
+        showHelp: '?'
+};
+
+let shortcuts = loadShortcuts();
+
+function loadShortcuts() {
+        try {
+                const data = JSON.parse(localStorage.getItem('shortcuts'));
+                return { ...defaultShortcuts, ...(data || {}) };
+        } catch {
+                return { ...defaultShortcuts };
+        }
+}
+
+export function setShortcut(action, key) {
+        shortcuts[action] = key;
+        localStorage.setItem('shortcuts', JSON.stringify(shortcuts));
+}
+
+function toggleTheme() {
+        const btn = document.getElementById('theme-toggle');
+        const theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+function toggleHelp() {
+        const overlay = document.getElementById('help-overlay');
+        overlay.classList.toggle('hidden');
+}
+
+function handleShortcut(e) {
+        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+        switch (e.key) {
+                case shortcuts.newTask:
+                        e.preventDefault();
+                        editId = null;
+                        form.reset();
+                        document.getElementById('modal-title').textContent = 'Create Task';
+                        showModal();
+                        break;
+                case shortcuts.toggleTheme:
+                        e.preventDefault();
+                        toggleTheme();
+                        break;
+                case shortcuts.focusSearch:
+                        e.preventDefault();
+                        document.getElementById('task-filter').focus();
+                        break;
+                case shortcuts.showHelp:
+                        e.preventDefault();
+                        toggleHelp();
+                        break;
+        }
+}
+
+document.addEventListener('keydown', handleShortcut);
+
 export function showModal() {
         modal.classList.remove('hidden');
 }
@@ -329,5 +392,8 @@ export const __test = {
         },
         getSocket() {
                 return socket;
+        },
+        setShortcuts(map) {
+                shortcuts = { ...shortcuts, ...map };
         }
 };
