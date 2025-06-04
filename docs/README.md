@@ -6,6 +6,7 @@ Welcome to the Task Master documentation. Use the links below to navigate to the
 
 - [Configuration Guide](configuration.md) - Set up environment variables and customize Task Master
 - [Tutorial](tutorial.md) - Step-by-step guide to getting started with Task Master
+- [User Guide](user-guide.md) - Overview with feature tutorials and FAQ
 
 ## Reference
 
