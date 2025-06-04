@@ -42,6 +42,14 @@ import {
 } from './task-manager.js';
 
 import {
+        cleanupDatabase,
+        backupDatabase,
+        migrateData,
+        runDiagnostics,
+        runUpdate
+} from './maintenance/index.js';
+
+import {
 	addDependency,
 	removeDependency,
 	validateDependenciesCommand,
@@ -2843,6 +2851,51 @@ Examples:
                                 console.log(chalk.green(`✓ Scheduled report using pattern ${options.cron}`));
                         } catch (err) {
                                 console.error(chalk.red(`Error scheduling report: ${err.message}`));
+                                process.exit(1);
+                        }
+                });
+
+        programInstance
+                .command('maintenance')
+                .description('Run maintenance tasks like cleanup and backup')
+                .option('-f, --file <file>', 'Path to tasks.json', TASKMASTER_TASKS_FILE)
+                .option('--cleanup', 'Remove completed tasks')
+                .option('--backup', 'Create backup of tasks.json')
+                .option('--migrate', 'Run data migration')
+                .option('--diagnostics', 'Print task statistics')
+                .option('--update', 'Apply update procedures')
+                .action(async (options) => {
+                        const tasksPath = options.file || TASKMASTER_TASKS_FILE;
+                        try {
+                                if (options.backup) {
+                                        const p = backupDatabase(tasksPath);
+                                        console.log(chalk.green(`✓ Backup created at ${p}`));
+                                }
+                                if (options.cleanup) {
+                                        const result = cleanupDatabase(tasksPath);
+                                        console.log(chalk.green(`✓ Removed ${result.removed} completed tasks`));
+                                }
+                                if (options.update) {
+                                        const res = runUpdate(tasksPath);
+                                        if (res.updated) {
+                                                console.log(chalk.green('✓ Task data updated'));
+                                        } else {
+                                                console.log(chalk.yellow('No updates applied'));
+                                        }
+                                }
+                                if (options.diagnostics) {
+                                        const stats = runDiagnostics(tasksPath);
+                                        console.log(chalk.blue(`Total tasks: ${stats.total}`));
+                                        for (const [status, count] of Object.entries(stats.statuses)) {
+                                                console.log(chalk.blue(`${status}: ${count}`));
+                                        }
+                                }
+                                if (options.migrate) {
+                                        await migrateData(options);
+                                        console.log(chalk.green('✓ Migration completed'));
+                                }
+                        } catch (err) {
+                                console.error(chalk.red(`Error running maintenance: ${err.message}`));
                                 process.exit(1);
                         }
                 });
