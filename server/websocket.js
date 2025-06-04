@@ -2,7 +2,7 @@ import { WebSocketServer } from 'ws';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import logger from '../mcp-server/src/logger.js';
+import logger from './utils/logger.js';
 import { readJSON } from '../scripts/modules/utils.js';
 
 const __filename = fileURLToPath(import.meta.url);
