@@ -1,0 +1,11 @@
+# Task ID: 100
+# Title: Core Express Server Implementation
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Create core Express server with middleware
+# Details:
+Implement Express server with CORS and JSON parsing. Add static file serving for dashboard. Setup error handling middleware. Add request logging middleware. Implement graceful shutdown handling.
+
+# Test Strategy:
+

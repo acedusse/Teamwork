@@ -1,0 +1,11 @@
+# Task ID: 114
+# Title: MCP Protocol Integration
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Integrate UI server with Model Control Protocol
+# Details:
+Add MCP server capabilities to UI backend. Implement editor integration commands. Add support for Cursor, VS Code, Windsurf. Create MCP configuration templates. Document MCP setup.
+
+# Test Strategy:
+

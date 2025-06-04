@@ -1,0 +1,11 @@
+# Task ID: 105
+# Title: Project Status & Analytics API
+# Status: pending
+# Dependencies: None
+# Priority: low
+# Description: Implement project analytics and status endpoints
+# Details:
+GET /api/status for project overview. GET /api/analytics for metrics. Add task completion trends. Include agent workload analytics. Implement caching for performance.
+
+# Test Strategy:
+

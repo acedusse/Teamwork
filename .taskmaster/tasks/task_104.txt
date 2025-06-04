@@ -1,0 +1,11 @@
+# Task ID: 104
+# Title: PRD Integration API
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Create API endpoints for PRD parsing and task generation
+# Details:
+GET /api/prd to get PRD content. POST /api/generate-tasks to generate tasks from PRD. Integrate with TaskMaster AI logic. Add PRD validation and parsing. Include batch task creation.
+
+# Test Strategy:
+

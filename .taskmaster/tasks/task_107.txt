@@ -1,0 +1,11 @@
+# Task ID: 107
+# Title: Task Board Component
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Implement Kanban-style task board with drag & drop
+# Details:
+Create four-column board (Backlog, In Progress, Review, Done). Implement drag and drop. Add task cards with priority color coding, agent avatars, epic labels. Include task filtering and search.
+
+# Test Strategy:
+

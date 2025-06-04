@@ -1,0 +1,11 @@
+# Task ID: 102
+# Title: Tasks API Endpoints
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Implement RESTful API endpoints for task management
+# Details:
+GET/POST/PUT/DELETE endpoints for tasks. Add validation and error responses. Include task filtering and sorting capabilities.
+
+# Test Strategy:
+

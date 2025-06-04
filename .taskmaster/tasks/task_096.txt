@@ -1,0 +1,11 @@
+# Task ID: 96
+# Title: Project Structure Setup
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Create foundational project structure for TaskMaster UI integration
+# Details:
+Create task-master-ui directory structure. Setup package.json with required dependencies. Create folder structure: public/, src/, scripts/. Initialize Git repository with proper .gitignore. Document folder structure in README.
+
+# Test Strategy:
+

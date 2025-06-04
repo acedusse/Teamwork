@@ -1,0 +1,11 @@
+# Task ID: 120
+# Title: Developer Documentation
+# Status: pending
+# Dependencies: None
+# Priority: medium
+# Description: Create technical documentation for developers
+# Details:
+API documentation with OpenAPI/Swagger. Architecture diagrams. Contributing guidelines. Code style guide. Development workflow documentation.
+
+# Test Strategy:
+

@@ -1,0 +1,11 @@
+# Task ID: 112
+# Title: Existing TaskMaster Core Integration
+# Status: pending
+# Dependencies: None
+# Priority: high
+# Description: Integrate with existing TaskMaster CLI functionality
+# Details:
+Analyze existing TaskMaster codebase. Extract reusable core logic into modules. Create bridge between UI and CLI components. Maintain backward compatibility. Document integration architecture.
+
+# Test Strategy:
+
