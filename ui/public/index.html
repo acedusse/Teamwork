@@ -1,10 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>TaskMaster UI</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskMaster Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<h1>Welcome to TaskMaster UI</h1>
+  <header>
+    <div class="header-inner">
+      <h1>TaskMaster</h1>
+      <nav>
+        <ul>
+          <li><a href="#">Dashboard</a></li>
+          <li><a href="#">Tasks</a></li>
+          <li><a href="#">Settings</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <aside class="sidebar">
+      <h2>Sidebar</h2>
+      <ul>
+        <li><a href="#">Create Task</a></li>
+        <li><a href="#">Reports</a></li>
+        <li><a href="#">Team</a></li>
+      </ul>
+    </aside>
+
+    <main class="board">
+      <div class="column">
+        <h3>Backlog</h3>
+      </div>
+      <div class="column">
+        <h3>In Progress</h3>
+      </div>
+      <div class="column">
+        <h3>Review</h3>
+      </div>
+      <div class="column">
+        <h3>Done</h3>
+      </div>
+    </main>
+  </div>
 </body>
 </html>
