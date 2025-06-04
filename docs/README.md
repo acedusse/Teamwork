@@ -6,6 +6,7 @@ Welcome to the Task Master documentation. Use the links below to navigate to the
 
 - [Configuration Guide](configuration.md) - Set up environment variables and customize Task Master
 - [Tutorial](tutorial.md) - Step-by-step guide to getting started with Task Master
+- [CLI to UI Migration](cli-to-ui-migration.md) - Transition from CLI-only usage to the web dashboard
 
 ## Reference
 
