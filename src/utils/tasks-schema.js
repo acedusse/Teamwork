@@ -24,4 +24,7 @@ export const taskSchema = z
 	})
 	.passthrough();
 
-export const tasksFileSchema = z.object({ tasks: z.array(taskSchema) });
+export const tasksFileSchema = z.object({
+	schemaVersion: z.number().default(1),
+	tasks: z.array(taskSchema)
+});

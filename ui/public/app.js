@@ -12,6 +12,7 @@ const statusClasses = {
 };
 
 let tasks = [];
+
 let editId = null;
 
 const modal = document.getElementById('task-modal');
@@ -90,6 +91,9 @@ Object.values(columns).forEach((col) => {
 		if (task) {
 			task.status = col.dataset.status;
 			renderBoard();
+			if (socket && socket.readyState === WebSocket.OPEN) {
+				socket.send(JSON.stringify({ type: 'taskUpdated', task }));
+			}
 		}
         });
 });
@@ -182,3 +186,4 @@ async function init() {
 }
 
 init();
+connectWebSocket();

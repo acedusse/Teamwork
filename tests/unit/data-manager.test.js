@@ -95,6 +95,7 @@ describe('TaskMasterDataManager', () => {
 	test('validateTasksData checks structure', () => {
 		const manager = new TaskMasterDataManager();
 		const valid = {
+			schemaVersion: 1,
 			tasks: [
 				{
 					id: 1,
@@ -111,10 +112,10 @@ describe('TaskMasterDataManager', () => {
 	});
 
 	test('readTasks uses findTasksPath and stores path', () => {
-		readSpy.mockReturnValue('{"tasks": []}');
+		readSpy.mockReturnValue('{"schemaVersion":1,"tasks": []}');
 		const manager = new TaskMasterDataManager();
 		const data = manager.readTasks();
-		expect(data).toEqual({ tasks: [] });
+		expect(data).toEqual({ schemaVersion: 1, tasks: [] });
 		expect(manager.tasksPath).toBe('/project/.taskmaster/tasks/tasks.json');
 	});
 
@@ -124,6 +125,7 @@ describe('TaskMasterDataManager', () => {
 		const manager = new TaskMasterDataManager();
 		manager.tasksPath = '/project/.taskmaster/tasks/tasks.json';
 		const result = manager.writeTasks({
+			schemaVersion: 1,
 			tasks: [
 				{
 					id: 1,
