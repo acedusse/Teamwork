@@ -54,9 +54,10 @@ const staticDir = isProd
   : path.join(__dirname, '../ui/public');
 app.use(express.static(staticDir));
 app.use('/api/tasks', tasksRouter);
-app.use('/api/agents', agentsRouter);
 app.use('/api/prd', prdRouter);
 app.use('/api/generate-tasks', generateTasksRouter);
+app.use('/api/agents', agentsRouter);
+
 app.use('/api/mcp', mcpRouter);
 app.use('/api/cli', cliRouter);
 app.use('/api', statusRouter);

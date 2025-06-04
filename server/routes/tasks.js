@@ -81,8 +81,9 @@ router.put('/:id', validate(TaskSchema.partial()), (req, res, next) => {
                         res.status(404).json({ error: 'Task not found' });
                         return;
                 }
+                const prevStatus = tasks[index].status;
                 tasks[index] = { ...tasks[index], ...update };
-                if (update.status === 'done' && !tasks[index].completedAt) {
+                if (update.status === 'done' && prevStatus !== 'done') {
                         tasks[index].completedAt = new Date().toISOString();
                 }
                 saveTasks(tasks);

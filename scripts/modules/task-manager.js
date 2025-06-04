@@ -26,6 +26,9 @@ import isTaskDependentOn from './task-manager/is-task-dependent.js';
 import moveTask from './task-manager/move-task.js';
 import { migrateProject } from './task-manager/migrate.js';
 import { readComplexityReport } from './utils.js';
+import delegateTask from './task-manager/delegate-task.js';
+import updateTaskProgress from './task-manager/update-task-progress.js';
+import addAgentFeedback from './task-manager/add-agent-feedback.js';
 // Export task manager functions
 export {
 	parsePRD,
@@ -49,6 +52,9 @@ export {
 	taskExists,
 	isTaskDependentOn,
 	moveTask,
-	readComplexityReport,
-	migrateProject
+        readComplexityReport,
+        migrateProject,
+        delegateTask,
+        updateTaskProgress,
+        addAgentFeedback
 };
