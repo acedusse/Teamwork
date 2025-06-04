@@ -35,25 +35,27 @@ describe('tasks API', () => {
 		expect(res.body.tasks).toEqual([]);
 	});
 
-	test('POST /api/tasks creates task', async () => {
-		const res = await request(app)
-			.post('/api/tasks')
-			.send({ title: 'Test', description: 'Desc' });
-		expect(res.status).toBe(201);
-		expect(res.body.title).toBe('Test');
+        test('POST /api/tasks creates task', async () => {
+                const res = await request(app)
+                        .post('/api/tasks')
+                        .send({ title: 'Test', description: 'Desc' });
+                expect(res.status).toBe(201);
+                expect(res.body.title).toBe('Test');
+                expect(res.body.createdAt).toBeDefined();
 
-		const data = JSON.parse(fs.readFileSync(tasksPath, 'utf-8'));
-		expect(data.tasks.length).toBe(1);
-	});
+                const data = JSON.parse(fs.readFileSync(tasksPath, 'utf-8'));
+                expect(data.tasks.length).toBe(1);
+        });
 
 	test('PUT /api/tasks/:id updates task', async () => {
 		await request(app)
 			.post('/api/tasks')
 			.send({ title: 'Test', description: 'Desc' });
-		const res = await request(app).put('/api/tasks/1').send({ status: 'done' });
-		expect(res.status).toBe(200);
-		expect(res.body.status).toBe('done');
-	});
+                const res = await request(app).put('/api/tasks/1').send({ status: 'done' });
+                expect(res.status).toBe(200);
+                expect(res.body.status).toBe('done');
+                expect(res.body.completedAt).toBeDefined();
+        });
 
 	test('DELETE /api/tasks/:id removes task', async () => {
 		await request(app)
