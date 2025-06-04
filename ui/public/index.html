@@ -53,6 +53,12 @@
     </section>
   </div>
 
+  <section class="metrics">
+    <h2>Statistics</h2>
+    <canvas id="velocityChart" width="400" height="200"></canvas>
+    <canvas id="burndownChart" width="400" height="200"></canvas>
+  </section>
+
   <div id="task-modal" class="modal hidden">
     <form id="task-form" class="modal-content">
       <h3 id="modal-title">Create Task</h3>
@@ -114,6 +120,7 @@
       toggle.textContent = theme === 'dark' ? '☀️' : '🌙';
     });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="app.js"></script>
 </body>
 </html>

@@ -35,37 +35,46 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/', validate(TaskSchema), (req, res, next) => {
-        try {
-                const data = req.validatedBody;
-                const tasks = loadTasks();
-                const agents = loadAgents();
-                const newId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
-                let assigned = data.agent;
-                if (!assigned) {
-                        assigned = assignAgent(tasks, agents);
-                }
-                const newTask = { id: newId, ...data, agent: assigned, subtasks: [] };
-                tasks.push(newTask);
-                saveTasks(tasks);
-                res.status(201).json(newTask);
-        } catch (err) {
-                next(err);
-        }
+
+	try {
+		const data = req.validatedBody;
+		const tasks = loadTasks();
+		const newId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
+                const timestamp = new Date().toISOString();
+                const newTask = {
+                        id: newId,
+                        ...data,
+                        createdAt: timestamp,
+                        completedAt: data.status === 'done' ? timestamp : undefined,
+                        subtasks: []
+                };
+		tasks.push(newTask);
+		saveTasks(tasks);
+		res.status(201).json(newTask);
+	} catch (err) {
+		next(err);
+	}
+
 });
 
 router.put('/:id', validate(TaskSchema.partial()), (req, res, next) => {
 	try {
 		const id = parseInt(req.params.id, 10);
-		const update = req.validatedBody;
-		const tasks = loadTasks();
-		const index = tasks.findIndex((t) => t.id === id);
-		if (index === -1) {
-			res.status(404).json({ error: 'Task not found' });
-			return;
-		}
-		tasks[index] = { ...tasks[index], ...update };
-		saveTasks(tasks);
-		res.json(tasks[index]);
+                const update = req.validatedBody;
+                const tasks = loadTasks();
+                const index = tasks.findIndex((t) => t.id === id);
+                if (index === -1) {
+                        res.status(404).json({ error: 'Task not found' });
+                        return;
+                }
+                const existing = tasks[index];
+                const updated = { ...existing, ...update };
+                if (update.status === 'done' && existing.status !== 'done') {
+                        updated.completedAt = new Date().toISOString();
+                }
+                tasks[index] = updated;
+                saveTasks(tasks);
+                res.json(updated);
 	} catch (err) {
 		next(err);
 	}

@@ -63,6 +63,105 @@ function getMetricsData() {
   return data;
 }
 
+function getVelocityData(days = 7) {
+  const key = `velocity-${days}`;
+  const cached = cache.get(key);
+  if (cached) return cached;
+  const tasks = loadTasks();
+  const today = new Date();
+  const start = new Date();
+  start.setDate(today.getDate() - (days - 1));
+  const map = {};
+  for (let i = 0; i < days; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const keyDate = d.toISOString().slice(0, 10);
+    map[keyDate] = 0;
+  }
+  for (const t of tasks) {
+    if (!t.completedAt) continue;
+    const d = t.completedAt.slice(0, 10);
+    if (d in map) map[d]++;
+  }
+  const data = Object.entries(map).map(([date, count]) => ({ date, count }));
+  cache.set(key, data);
+  return data;
+}
+
+function getBurndownData(days = 7) {
+  const key = `burndown-${days}`;
+  const cached = cache.get(key);
+  if (cached) return cached;
+  const tasks = loadTasks();
+  const today = new Date();
+  const start = new Date();
+  start.setDate(today.getDate() - (days - 1));
+  let remaining = tasks.length;
+  const data = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const completedToday = tasks.filter(
+      (t) => t.completedAt && t.completedAt.slice(0, 10) === dateStr
+    ).length;
+    remaining -= completedToday;
+    data.push({ date: dateStr, remaining });
+  }
+  cache.set(key, data);
+  return data;
+}
+
+function getProgressData() {
+  const metrics = getMetricsData();
+  return { completionRate: metrics.completionRate };
+}
+
+function getTeamPerformanceData() {
+  const cached = cache.get('team');
+  if (cached) return cached;
+  const tasks = loadTasks();
+  const team = {};
+  for (const t of tasks) {
+    const agent = t.agent || 'Unassigned';
+    if (!team[agent]) team[agent] = { completed: 0, total: 0 };
+    team[agent].total++;
+    if (t.status === 'done') team[agent].completed++;
+  }
+  cache.set('team', team);
+  return team;
+}
+
+function getTrendData(days = 30) {
+  const key = `trends-${days}`;
+  const cached = cache.get(key);
+  if (cached) return cached;
+  const tasks = loadTasks();
+  const today = new Date();
+  const start = new Date();
+  start.setDate(today.getDate() - (days - 1));
+  const map = {};
+  for (let i = 0; i < days; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const keyDate = d.toISOString().slice(0, 10);
+    map[keyDate] = { created: 0, completed: 0 };
+  }
+  for (const t of tasks) {
+    if (t.createdAt) {
+      const d = t.createdAt.slice(0, 10);
+      if (map[d]) map[d].created++;
+    }
+    if (t.completedAt) {
+      const d = t.completedAt.slice(0, 10);
+      if (map[d]) map[d].completed++;
+    }
+  }
+  const data = Object.entries(map).map(([date, val]) => ({ date, ...val }));
+  cache.set(key, data);
+  return data;
+}
+
 router.get('/status', (req, res, next) => {
   try {
     const data = getStatusData();
@@ -75,6 +174,51 @@ router.get('/status', (req, res, next) => {
 router.get('/metrics', (req, res, next) => {
   try {
     const data = getMetricsData();
+    res.json(success(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/velocity', (req, res, next) => {
+  try {
+    const data = getVelocityData();
+    res.json(success(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/burndown', (req, res, next) => {
+  try {
+    const data = getBurndownData();
+    res.json(success(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/progress', (req, res, next) => {
+  try {
+    const data = getProgressData();
+    res.json(success(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/team-performance', (req, res, next) => {
+  try {
+    const data = getTeamPerformanceData();
+    res.json(success(data));
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/trends', (req, res, next) => {
+  try {
+    const data = getTrendData();
     res.json(success(data));
   } catch (err) {
     next(err);
