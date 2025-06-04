@@ -20,21 +20,9 @@ function loadTasks() {
 }
 
 function saveTasks(tasks) {
-	const data = readJSON(TASKS_FILE) || { schemaVersion: 1, tasks: [] };
-	writeJSON(TASKS_FILE, { ...data, tasks });
+        const data = readJSON(TASKS_FILE) || { schemaVersion: 1, tasks: [] };
+        writeJSON(TASKS_FILE, { ...data, tasks });
 }
-
-const TaskSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  status: z.string().optional(),
-  dependencies: z.array(z.number()).optional(),
-  priority: z.string().optional(),
-  agent: z.string().optional(),
-  epic: z.string().optional(),
-  details: z.string().optional(),
-  testStrategy: z.string().optional(),
-});
 
 router.get('/', (req, res, next) => {
 	try {
