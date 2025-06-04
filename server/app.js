@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import logger from '../mcp-server/src/logger.js';
@@ -13,6 +14,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const isProd = process.env.NODE_ENV === 'production';
+
+if (isProd) {
+  app.use(helmet());
+  app.set('trust proxy', 1);
+}
 
 // Middleware
 
@@ -23,7 +30,10 @@ app.use((req, _res, next) => {
 	logger.info(`${req.method} ${req.url}`);
 	next();
 });
-app.use(express.static(path.join(__dirname, '../ui/public')));
+const staticDir = isProd
+  ? path.join(__dirname, '../dist/public')
+  : path.join(__dirname, '../ui/public');
+app.use(express.static(staticDir));
 app.use('/api/tasks', tasksRouter);
 app.use('/api/mcp', mcpRouter);
 app.use('/api', statusRouter);

@@ -229,4 +229,8 @@ router.get('/health', (_req, res) => {
   res.json(success({ status: 'ok' }));
 });
 
+router.get('/ready', (_req, res) => {
+  res.json(success({ status: 'ready' }));
+});
+
 export default router;
