@@ -16,9 +16,8 @@ import agentsRouter from './routes/agents.js';
 import prdRouter from './routes/prd.js';
 import generateTasksRouter from './routes/generate-tasks.js';
 import mcpRouter from './routes/mcp.js';
-import sanitizeInputs from './middleware/sanitize.js';
-import rateLimiter from './middleware/rate-limit.js';
-import authenticate from './middleware/auth.js';
+import cliRouter from './routes/cli.js';
+import sanitizeBody from './middleware/sanitize.js';
 import errorHandler from './middleware/error-handler.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -58,6 +57,7 @@ app.use('/api/prd', prdRouter);
 app.use('/api/generate-tasks', generateTasksRouter);
 app.use('/api/sprints', sprintsRouter);
 app.use('/api/mcp', mcpRouter);
+app.use('/api/cli', cliRouter);
 app.use('/api', statusRouter);
 
 // Legacy health check route
