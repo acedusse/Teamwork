@@ -1,13 +1,11 @@
 import { FastMCP } from 'fastmcp';
 import path from 'path';
-import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import logger from './logger.js';
 import { registerTaskMasterTools } from './tools/index.js';
+import config from './config.js';
 
-// Load environment variables
-dotenv.config();
 
 // Constants
 const __filename = fileURLToPath(import.meta.url);
@@ -65,11 +63,23 @@ class TaskMasterMCPServer {
 			await this.init();
 		}
 
-		// Start the FastMCP server with increased timeout
-		await this.server.start({
-			transportType: 'stdio',
-			timeout: 120000 // 2 minutes timeout (in milliseconds)
-		});
+                // Start the FastMCP server with increased timeout
+                if (config.port) {
+                        await this.server.start({
+                                transportType: 'sse',
+                                timeout: 120000,
+                                sse: {
+                                        endpoint: '/sse',
+                                        port: config.port,
+                                        cors: { origin: config.corsOrigin }
+                                }
+                        });
+                } else {
+                        await this.server.start({
+                                transportType: 'stdio',
+                                timeout: 120000 // 2 minutes timeout (in milliseconds)
+                        });
+                }
 
 		return this;
 	}
