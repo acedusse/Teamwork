@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import { readJSON, writeJSON } from '../../scripts/modules/utils.js';
 import validate from '../middleware/validation.js';
 import { TaskSchema } from '../schemas/task.js';
+import { loadAgents, assignAgent } from '../utils/agents.js';
 
 const router = express.Router();
 
@@ -34,6 +35,7 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/', validate(TaskSchema), (req, res, next) => {
+
 	try {
 		const data = req.validatedBody;
 		const tasks = loadTasks();
@@ -52,6 +54,7 @@ router.post('/', validate(TaskSchema), (req, res, next) => {
 	} catch (err) {
 		next(err);
 	}
+
 });
 
 router.put('/:id', validate(TaskSchema.partial()), (req, res, next) => {
