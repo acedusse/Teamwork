@@ -46,63 +46,58 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/', validate(TaskSchema), (req, res, next) => {
-	try {
-		const clientVersion = Number(req.get('x-tasks-version'));
-		if (clientVersion && clientVersion !== getVersion()) {
-			res.status(409).json({ error: 'Task data out of date' });
-			return;
-		}
-		const data = req.validatedBody;
-		const tasks = loadTasks();
-		const newId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
-		const timestamp = new Date().toISOString();
-		const assigned = assignAgent ? assignAgent(loadAgents(), data) : null;
-		const newTask = {
-			id: newId,
-			...data,
-			createdAt: timestamp,
-			completedAt: data.status === 'done' ? timestamp : undefined,
-			agent: assigned ? assigned.id : data.agent,
-			subtasks: []
-		};
-		tasks.push(newTask);
-		saveTasks(tasks);
-		broadcast({ type: 'tasksUpdated', tasks });
-		res.set('X-Tasks-Version', String(getVersion()));
-		res.status(201).json(newTask);
-	} catch (err) {
-		next(err);
-	}
+        try {
+                const clientVersion = Number(req.get('x-tasks-version'));
+                if (clientVersion && clientVersion !== getVersion()) {
+                        res.status(409).json({ error: 'Task data out of date' });
+                        return;
+                }
+                const data = req.validatedBody;
+                const tasks = loadTasks();
+                const newId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
+                const newTask = {
+                        id: newId,
+                        ...data,
+                        createdAt: new Date().toISOString(),
+                        subtasks: []
+                };
+                tasks.push(newTask);
+                saveTasks(tasks);
+                broadcast({ type: 'tasksUpdated', tasks });
+                res.set('X-Tasks-Version', String(getVersion()));
+                res.status(201).json(newTask);
+        } catch (err) {
+                next(err);
+        }
 });
 
 router.put('/:id', validate(TaskSchema.partial()), (req, res, next) => {
-	try {
-		const clientVersion = Number(req.get('x-tasks-version'));
-		if (clientVersion && clientVersion !== getVersion()) {
-			res.status(409).json({ error: 'Task data out of date' });
-			return;
-		}
-		const id = parseInt(req.params.id, 10);
-		const update = req.validatedBody;
-		const tasks = loadTasks();
-		const index = tasks.findIndex((t) => t.id === id);
-		if (index === -1) {
-			res.status(404).json({ error: 'Task not found' });
-			return;
-		}
-		const existing = tasks[index];
-		const updated = { ...existing, ...update };
-		if (update.status === 'done' && existing.status !== 'done') {
-			updated.completedAt = new Date().toISOString();
-		}
-		tasks[index] = updated;
-		saveTasks(tasks);
-		broadcast({ type: 'tasksUpdated', tasks });
-		res.set('X-Tasks-Version', String(getVersion()));
-		res.json(updated);
-	} catch (err) {
-		next(err);
-	}
+        try {
+                const clientVersion = Number(req.get('x-tasks-version'));
+                if (clientVersion && clientVersion !== getVersion()) {
+                        res.status(409).json({ error: 'Task data out of date' });
+                        return;
+                }
+                const id = parseInt(req.params.id, 10);
+                const update = req.validatedBody;
+                const tasks = loadTasks();
+                const index = tasks.findIndex((t) => t.id === id);
+                if (index === -1) {
+                        res.status(404).json({ error: 'Task not found' });
+                        return;
+                }
+                const prevStatus = tasks[index].status;
+                tasks[index] = { ...tasks[index], ...update };
+                if (update.status === 'done' && prevStatus !== 'done') {
+                        tasks[index].completedAt = new Date().toISOString();
+                }
+                saveTasks(tasks);
+                broadcast({ type: 'tasksUpdated', tasks });
+                res.set('X-Tasks-Version', String(getVersion()));
+                res.json(tasks[index]);
+        } catch (err) {
+                next(err);
+        }
 });
 
 router.delete('/:id', (req, res, next) => {
