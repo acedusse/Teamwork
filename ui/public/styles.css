@@ -75,6 +75,17 @@ nav a:focus {
 	transition: color 0.3s ease;
 }
 
+.connection-status {
+	margin-left: 1rem;
+	font-size: 0.9rem;
+}
+.connection-status.connected {
+	color: #2ecc71;
+}
+.connection-status.disconnected {
+	color: #e74c3c;
+}
+
 .theme-toggle:focus {
 	outline: 2px solid var(--accent);
 	outline-offset: 2px;

@@ -23,10 +23,11 @@ app.use((req, _res, next) => {
 });
 app.use(express.static(path.join(__dirname, '../ui/public')));
 app.use('/api/tasks', tasksRouter);
+app.use('/api', statusRouter);
 
-// Health check route
+// Legacy health check route
 app.get('/health', (_req, res) => {
-	res.json({ status: 'ok' });
+        res.json({ status: 'ok' });
 });
 
 // 404 handler
