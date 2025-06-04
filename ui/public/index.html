@@ -33,7 +33,24 @@
     </aside>
 
     <main class="board">
-      <div class="filter"><input id="task-filter" type="text" placeholder="Filter tasks..."></div>
+      <div class="filter">
+        <input id="task-filter" type="text" placeholder="Search tasks...">
+        <select id="agent-filter"><option value="">All agents</option></select>
+        <select id="epic-filter"><option value="">All epics</option></select>
+        <select id="priority-filter">
+          <option value="">All priorities</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <button id="save-filter" type="button">Save Filter</button>
+        <select id="saved-filters"><option value="">Saved filters</option></select>
+        <div class="quick-filters">
+          <button data-priority="high" type="button">High</button>
+          <button data-priority="medium" type="button">Medium</button>
+          <button data-priority="low" type="button">Low</button>
+        </div>
+      </div>
       <div class="column" data-status="pending">
         <h3>Backlog</h3>
       </div>
@@ -57,6 +74,15 @@
     <h2>Statistics</h2>
     <canvas id="velocityChart" width="400" height="200"></canvas>
     <canvas id="burndownChart" width="400" height="200"></canvas>
+  </section>
+
+  <section class="cli">
+    <h2>CLI Command</h2>
+    <input id="cli-input" type="text" placeholder="e.g., list" />
+    <button id="cli-run">Run</button>
+    <pre id="cli-output"></pre>
+    <h3>History</h3>
+    <ul id="cli-history"></ul>
   </section>
 
   <div id="task-modal" class="modal hidden">

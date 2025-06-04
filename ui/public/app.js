@@ -15,6 +15,8 @@ let tasks = [];
 
 let agents = [];
 
+let savedFilters = [];
+
 let editId = null;
 
 let socket = null;
@@ -69,8 +71,14 @@ export function createCard(task) {
 	card.style.borderLeftColor = priorityColors[task.priority] || '#ccc';
 
 	const title = document.createElement('strong');
-	title.textContent = task.title;
+	title.innerHTML = highlightText(task.title, query);
 	card.appendChild(title);
+
+	if (task.description) {
+		const desc = document.createElement('p');
+		desc.innerHTML = highlightText(task.description, query);
+		card.appendChild(desc);
+	}
 
 	const status = document.createElement('span');
 	status.className = `status ${statusClasses[task.status] || ''}`;
@@ -97,15 +105,20 @@ export function renderBoard() {
         });
 	const query = document.getElementById('task-filter').value.toLowerCase();
 	tasks
-		.filter(
-			(t) =>
+		.filter((t) => {
+			const matchesQuery =
+				!query ||
 				t.title.toLowerCase().includes(query) ||
-				(t.description && t.description.toLowerCase().includes(query))
-		)
+				(t.description && t.description.toLowerCase().includes(query));
+			const matchesAgent = !agentF || t.agent === agentF;
+			const matchesEpic = !epicF || t.epic === epicF;
+			const matchesPriority = !priorityF || t.priority === priorityF;
+			return matchesQuery && matchesAgent && matchesEpic && matchesPriority;
+		})
 		.forEach((task) => {
 			const col = columns[task.status] || columns.pending;
-			col.appendChild(createCard(task));
-                });
+			col.appendChild(createCard(task, query));
+		});
 }
 
 export function renderAgents() {
@@ -140,83 +153,100 @@ Object.values(columns).forEach((col) => {
 				socket.send(JSON.stringify({ type: 'taskUpdated', task }));
 			}
 		}
-        });
+	});
 });
 
 document.querySelector('.board').addEventListener('click', (e) => {
-        const card = e.target.closest('.task-card');
-        if (!card) return;
-        const task = tasks.find((t) => String(t.id) === card.dataset.id);
-        if (task) {
-                editId = task.id;
-                form.title.value = task.title;
-                form.description.value = task.description;
-                form.priority.value = task.priority || 'medium';
-                form.status.value = task.status || 'pending';
-                form.agent.value = task.agent || '';
-                form.epic.value = task.epic || '';
-                document.getElementById('modal-title').textContent = 'Edit Task';
-                showModal();
-        }
+	const card = e.target.closest('.task-card');
+	if (!card) return;
+	const task = tasks.find((t) => String(t.id) === card.dataset.id);
+	if (task) {
+		editId = task.id;
+		form.title.value = task.title;
+		form.description.value = task.description;
+		form.priority.value = task.priority || 'medium';
+		form.status.value = task.status || 'pending';
+		form.agent.value = task.agent || '';
+		form.epic.value = task.epic || '';
+		document.getElementById('modal-title').textContent = 'Edit Task';
+		showModal();
+	}
 });
 
 document.getElementById('task-filter').addEventListener('input', renderBoard);
+document.getElementById('agent-filter').addEventListener('change', renderBoard);
+document.getElementById('epic-filter').addEventListener('change', renderBoard);
+document
+	.getElementById('priority-filter')
+	.addEventListener('change', renderBoard);
+document
+	.getElementById('save-filter')
+	.addEventListener('click', saveCurrentFilter);
+document.getElementById('saved-filters').addEventListener('change', (e) => {
+	if (e.target.value) applyFilterSet(Number(e.target.value));
+});
+document.querySelectorAll('.quick-filters button').forEach((btn) => {
+	btn.addEventListener('click', () => {
+		document.getElementById('priority-filter').value = btn.dataset.priority;
+		renderBoard();
+	});
+});
 
 document.getElementById('create-task-link').addEventListener('click', (e) => {
-        e.preventDefault();
-        editId = null;
-        form.reset();
-        document.getElementById('modal-title').textContent = 'Create Task';
-        showModal();
+	e.preventDefault();
+	editId = null;
+	form.reset();
+	document.getElementById('modal-title').textContent = 'Create Task';
+	showModal();
 });
 
 document.getElementById('task-cancel').addEventListener('click', (e) => {
-        e.preventDefault();
-        hideModal();
+	e.preventDefault();
+	hideModal();
 });
 
 form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const payload = {
-                title: form.title.value.trim(),
-                description: form.description.value.trim(),
-                priority: form.priority.value,
-                status: form.status.value,
-                agent: form.agent.value,
-                epic: form.epic.value
-        };
-        if (!payload.title || !payload.description) {
-                alert('Title and description are required');
-                return;
-        }
-        try {
-                let res;
-                if (editId) {
-                        res = await fetch(`/api/tasks/${editId}` , {
-                                method: 'PUT',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(payload)
-                        });
-                } else {
-                        res = await fetch('/api/tasks', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(payload)
-                        });
-                }
-                if (!res.ok) throw new Error('Request failed');
-                const data = await res.json();
-                if (editId) {
-                        const index = tasks.findIndex((t) => t.id === editId);
-                        tasks[index] = data;
-                } else {
-                        tasks.push(data);
-                }
-                hideModal();
-                renderBoard();
-        } catch (err) {
-                console.error('Failed to save task', err);
-        }
+	e.preventDefault();
+	const payload = {
+		title: form.title.value.trim(),
+		description: form.description.value.trim(),
+		priority: form.priority.value,
+		status: form.status.value,
+		agent: form.agent.value,
+		epic: form.epic.value
+	};
+	if (!payload.title || !payload.description) {
+		alert('Title and description are required');
+		return;
+	}
+	try {
+		let res;
+		if (editId) {
+			res = await fetch(`/api/tasks/${editId}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
+			});
+		} else {
+			res = await fetch('/api/tasks', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
+			});
+		}
+		if (!res.ok) throw new Error('Request failed');
+		const data = await res.json();
+		if (editId) {
+			const index = tasks.findIndex((t) => t.id === editId);
+			tasks[index] = data;
+		} else {
+			tasks.push(data);
+		}
+		hideModal();
+		renderBoard();
+	} catch (err) {
+		console.error('Failed to save task', err);
+	}
 });
 
 export async function init() {
@@ -231,6 +261,8 @@ export async function init() {
         }
 }
 
+loadSavedFilters();
+renderSavedFilterOptions();
 init();
 connectWebSocket();
 
@@ -250,40 +282,40 @@ export async function loadMetrics() {
 }
 
 function renderVelocityChart(data) {
-        const ctx = document.getElementById('velocityChart');
-        if (!ctx) return;
-        new Chart(ctx, {
-                type: 'bar',
-                data: {
-                        labels: data.map((d) => d.date),
-                        datasets: [
-                                {
-                                        label: 'Tasks Completed',
-                                        data: data.map((d) => d.count),
-                                        backgroundColor: '#667eea'
-                                }
-                        ]
-                }
-        });
+	const ctx = document.getElementById('velocityChart');
+	if (!ctx) return;
+	new Chart(ctx, {
+		type: 'bar',
+		data: {
+			labels: data.map((d) => d.date),
+			datasets: [
+				{
+					label: 'Tasks Completed',
+					data: data.map((d) => d.count),
+					backgroundColor: '#667eea'
+				}
+			]
+		}
+	});
 }
 
 function renderBurndownChart(data) {
-        const ctx = document.getElementById('burndownChart');
-        if (!ctx) return;
-        new Chart(ctx, {
-                type: 'line',
-                data: {
-                        labels: data.map((d) => d.date),
-                        datasets: [
-                                {
-                                        label: 'Remaining Tasks',
-                                        data: data.map((d) => d.remaining),
-                                        borderColor: '#e74c3c',
-                                        fill: false
-                                }
-                        ]
-                }
-        });
+	const ctx = document.getElementById('burndownChart');
+	if (!ctx) return;
+	new Chart(ctx, {
+		type: 'line',
+		data: {
+			labels: data.map((d) => d.date),
+			datasets: [
+				{
+					label: 'Remaining Tasks',
+					data: data.map((d) => d.remaining),
+					borderColor: '#e74c3c',
+					fill: false
+				}
+			]
+		}
+	});
 }
 
 loadMetrics();
