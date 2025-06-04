@@ -262,3 +262,22 @@ task-master models --setup
 ```
 
 Configuration is stored in `.taskmasterconfig` in your project root. API keys are still managed via `.env` or MCP configuration. Use `task-master models` without flags to see available built-in models. Use `--setup` for a guided experience.
+
+## Maintenance
+
+```bash
+# Remove completed tasks
+task-master maintenance --cleanup
+
+# Create backup of tasks.json
+task-master maintenance --backup
+
+# Run diagnostic summary
+task-master maintenance --diagnostics
+
+# Update task data schema
+task-master maintenance --update
+
+# Perform full migration to new structure
+task-master maintenance --migrate
+```
