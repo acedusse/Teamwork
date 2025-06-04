@@ -119,11 +119,11 @@ describe('TaskMasterDataManager', () => {
 		expect(manager.tasksPath).toBe('/project/.taskmaster/tasks/tasks.json');
 	});
 
-	test('writeTasks uses stored path', () => {
-		existsSpy.mockReturnValue(true);
-		writeSpy.mockImplementation(() => {});
-		const manager = new TaskMasterDataManager();
-		manager.tasksPath = '/project/.taskmaster/tasks/tasks.json';
+        test('writeTasks uses stored path', () => {
+                existsSpy.mockReturnValue(true);
+                writeSpy.mockImplementation(() => {});
+                const manager = new TaskMasterDataManager();
+                manager.tasksPath = '/project/.taskmaster/tasks/tasks.json';
 		const result = manager.writeTasks({
 			schemaVersion: 1,
 			tasks: [
@@ -137,7 +137,32 @@ describe('TaskMasterDataManager', () => {
 				}
 			]
 		});
-		expect(fs.writeFileSync).toHaveBeenCalled();
-		expect(result).toBe(true);
-	});
+                expect(fs.writeFileSync).toHaveBeenCalled();
+                expect(result).toBe(true);
+        });
+
+        test('readDirectory returns file list and handles errors', () => {
+                const dirSpy = jest.spyOn(fs, 'readdirSync');
+                dirSpy.mockReturnValue(['a.txt']);
+                const manager = new TaskMasterDataManager();
+                const files = manager.readDirectory('sub');
+                expect(dirSpy).toHaveBeenCalledWith('/project/.taskmaster/sub');
+                expect(files).toEqual(['a.txt']);
+                dirSpy.mockImplementation(() => { throw new Error('fail'); });
+                const files2 = manager.readDirectory('sub');
+                expect(files2).toEqual([]);
+                dirSpy.mockRestore();
+        });
+
+        test('config read/write and validation', () => {
+                readSpy.mockReturnValue('{"models":{},"global":{}}');
+                const manager = new TaskMasterDataManager();
+                const cfg = manager.readConfig();
+                expect(cfg).toEqual({ models: {}, global: {} });
+                const ok = manager.writeConfig({ models: {}, global: {} });
+                expect(ok).toBe(true);
+                expect(fs.writeFileSync).toHaveBeenCalled();
+                expect(manager.validateConfigData({ models: {}, global: {} })).toBe(true);
+                expect(manager.validateConfigData({})).toBe(false);
+        });
 });

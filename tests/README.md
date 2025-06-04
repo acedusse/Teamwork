@@ -5,7 +5,10 @@ This directory contains tests for the Task Master CLI. The tests are organized i
 ## Test Structure
 
 - `unit/`: Unit tests for individual functions and components
-- `integration/`: Integration tests for testing interactions between components
+- `integration/`: Integration tests for testing interactions between components.
+  Includes a full workflow test that starts the Express server and WebSocket
+  layer to verify UI-to-backend communication, file persistence and real-time
+  updates.
 - `e2e/`: End-to-end tests for testing complete workflows
 - `fixtures/`: Test fixtures and sample data
 
@@ -41,7 +44,9 @@ Integration tests focus on testing interactions between components. These tests 
 
 ### End-to-End Tests
 
-End-to-end tests focus on testing complete workflows from a user's perspective. These tests ensure that the CLI works correctly as a whole.
+End-to-end tests focus on testing complete workflows from a user's perspective.
+Use `npm run test:e2e` to execute the shell based scenarios that exercise the CLI
+against real project files.
 
 ## Test Fixtures
 
