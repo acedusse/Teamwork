@@ -17,6 +17,7 @@
           <li><a href="#">Settings</a></li>
         </ul>
       </nav>
+      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
     </div>
   </header>
 
@@ -45,5 +46,20 @@
       </div>
     </main>
   </div>
+
+  <script>
+    const toggle = document.getElementById('theme-toggle');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const stored = localStorage.getItem('theme');
+    const current = stored || (prefersDark ? 'dark' : 'light');
+    document.body.setAttribute('data-theme', current);
+    toggle.textContent = current === 'dark' ? '☀️' : '🌙';
+    toggle.addEventListener('click', () => {
+      const theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      toggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+    });
+  </script>
 </body>
 </html>
