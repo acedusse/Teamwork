@@ -175,15 +175,69 @@ form.addEventListener('submit', async (e) => {
 });
 
 async function init() {
-	try {
-		const res = await fetch('/api/tasks');
-		const data = await res.json();
-		tasks = data.tasks || [];
-		renderBoard();
-	} catch (err) {
-		console.error('Failed to load tasks', err);
-	}
+        try {
+                const res = await fetch('/api/tasks');
+                const data = await res.json();
+                tasks = data.tasks || [];
+                renderBoard();
+        } catch (err) {
+                console.error('Failed to load tasks', err);
+        }
 }
 
 init();
 connectWebSocket();
+
+async function loadMetrics() {
+        try {
+                const [velRes, burnRes] = await Promise.all([
+                        fetch('/api/velocity'),
+                        fetch('/api/burndown')
+                ]);
+                const velocity = await velRes.json();
+                const burndown = await burnRes.json();
+                renderVelocityChart(velocity.data || []);
+                renderBurndownChart(burndown.data || []);
+        } catch (err) {
+                console.error('Failed to load metrics', err);
+        }
+}
+
+function renderVelocityChart(data) {
+        const ctx = document.getElementById('velocityChart');
+        if (!ctx) return;
+        new Chart(ctx, {
+                type: 'bar',
+                data: {
+                        labels: data.map((d) => d.date),
+                        datasets: [
+                                {
+                                        label: 'Tasks Completed',
+                                        data: data.map((d) => d.count),
+                                        backgroundColor: '#667eea'
+                                }
+                        ]
+                }
+        });
+}
+
+function renderBurndownChart(data) {
+        const ctx = document.getElementById('burndownChart');
+        if (!ctx) return;
+        new Chart(ctx, {
+                type: 'line',
+                data: {
+                        labels: data.map((d) => d.date),
+                        datasets: [
+                                {
+                                        label: 'Remaining Tasks',
+                                        data: data.map((d) => d.remaining),
+                                        borderColor: '#e74c3c',
+                                        fill: false
+                                }
+                        ]
+                }
+        });
+}
+
+loadMetrics();

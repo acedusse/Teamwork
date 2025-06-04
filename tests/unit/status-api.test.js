@@ -15,10 +15,11 @@ describe('status API', () => {
   beforeEach(async () => {
     tmpDir = fs.mkdtempSync(path.join(__dirname, 'tmp-'));
     tasksPath = path.join(tmpDir, 'tasks.json');
+    const now = new Date().toISOString();
     const tasks = [
-      { id: 1, title: 'A', description: 'd', status: 'done', subtasks: [] },
-      { id: 2, title: 'B', description: 'd', status: 'in-progress', subtasks: [] },
-      { id: 3, title: 'C', description: 'd', status: 'pending', subtasks: [] }
+      { id: 1, title: 'A', description: 'd', status: 'done', createdAt: now, completedAt: now, subtasks: [] },
+      { id: 2, title: 'B', description: 'd', status: 'in-progress', createdAt: now, subtasks: [] },
+      { id: 3, title: 'C', description: 'd', status: 'pending', createdAt: now, subtasks: [] }
     ];
     fs.writeFileSync(tasksPath, JSON.stringify({ tasks }, null, 2));
     process.env.TASKS_FILE = tasksPath;
@@ -54,5 +55,12 @@ describe('status API', () => {
     expect(res.body.success).toBe(true);
     expect(res.body.data.byStatus.done).toBe(1);
     expect(res.body.data.completionRate).toBeCloseTo(1 / 3);
+  });
+
+  test('GET /api/velocity', async () => {
+    const res = await request(app).get('/api/velocity');
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.data)).toBe(true);
   });
 });
