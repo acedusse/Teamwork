@@ -194,7 +194,54 @@ nav a:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
-	* {
-		transition: none !important;
-	}
+        * {
+                transition: none !important;
+        }
+}
+
+.hidden {
+        display: none;
+}
+
+.modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+}
+
+.modal-content {
+        background: var(--bg-alt);
+        color: var(--text);
+        padding: 1rem;
+        border-radius: 4px;
+        width: 90%;
+        max-width: 400px;
+}
+
+.modal-content label {
+        display: block;
+        margin-bottom: 0.5rem;
+}
+
+.modal-content input,
+.modal-content textarea,
+.modal-content select {
+        width: 100%;
+        padding: 0.5rem;
+        margin-top: 0.25rem;
+        margin-bottom: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: var(--bg);
+        color: var(--text);
+}
+
+.form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
 }

@@ -25,7 +25,7 @@
     <aside class="sidebar">
       <h2>Sidebar</h2>
       <ul>
-        <li><a href="#">Create Task</a></li>
+        <li><a href="#" id="create-task-link">Create Task</a></li>
         <li><a href="#">Reports</a></li>
         <li><a href="#">Team</a></li>
       </ul>
@@ -46,6 +46,53 @@
         <h3>Done</h3>
       </div>
     </main>
+  </div>
+
+  <div id="task-modal" class="modal hidden">
+    <form id="task-form" class="modal-content">
+      <h3 id="modal-title">Create Task</h3>
+      <label>Title
+        <input type="text" name="title" required>
+      </label>
+      <label>Description
+        <textarea name="description" required></textarea>
+      </label>
+      <label>Agent
+        <select name="agent">
+          <option value="">Select agent</option>
+          <option>Agent A</option>
+          <option>Agent B</option>
+        </select>
+      </label>
+      <label>Epic
+        <select name="epic">
+          <option value="">Select epic</option>
+          <option>Frontend</option>
+          <option>Backend</option>
+          <option>DevOps</option>
+        </select>
+      </label>
+      <label>Priority
+        <select name="priority">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </label>
+      <label>Status
+        <select name="status">
+          <option value="pending">Backlog</option>
+          <option value="in-progress">In Progress</option>
+          <option value="review">Review</option>
+          <option value="done">Done</option>
+        </select>
+      </label>
+      <div class="form-actions">
+        <button type="submit">Save</button>
+        <button type="reset" id="task-reset">Reset</button>
+        <button type="button" id="task-cancel">Cancel</button>
+      </div>
+    </form>
   </div>
 
   <script>

@@ -12,6 +12,19 @@ const statusClasses = {
 };
 
 let tasks = [];
+let editId = null;
+
+const modal = document.getElementById('task-modal');
+const form = document.getElementById('task-form');
+
+function showModal() {
+        modal.classList.remove('hidden');
+}
+
+function hideModal() {
+        modal.classList.add('hidden');
+        form.reset();
+}
 
 function createCard(task) {
 	const card = document.createElement('div');
@@ -78,10 +91,84 @@ Object.values(columns).forEach((col) => {
 			task.status = col.dataset.status;
 			renderBoard();
 		}
-	});
+        });
+});
+
+document.querySelector('.board').addEventListener('click', (e) => {
+        const card = e.target.closest('.task-card');
+        if (!card) return;
+        const task = tasks.find((t) => String(t.id) === card.dataset.id);
+        if (task) {
+                editId = task.id;
+                form.title.value = task.title;
+                form.description.value = task.description;
+                form.priority.value = task.priority || 'medium';
+                form.status.value = task.status || 'pending';
+                form.agent.value = task.agent || '';
+                form.epic.value = task.epic || '';
+                document.getElementById('modal-title').textContent = 'Edit Task';
+                showModal();
+        }
 });
 
 document.getElementById('task-filter').addEventListener('input', renderBoard);
+
+document.getElementById('create-task-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        editId = null;
+        form.reset();
+        document.getElementById('modal-title').textContent = 'Create Task';
+        showModal();
+});
+
+document.getElementById('task-cancel').addEventListener('click', (e) => {
+        e.preventDefault();
+        hideModal();
+});
+
+form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+                title: form.title.value.trim(),
+                description: form.description.value.trim(),
+                priority: form.priority.value,
+                status: form.status.value,
+                agent: form.agent.value,
+                epic: form.epic.value
+        };
+        if (!payload.title || !payload.description) {
+                alert('Title and description are required');
+                return;
+        }
+        try {
+                let res;
+                if (editId) {
+                        res = await fetch(`/api/tasks/${editId}` , {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                        });
+                } else {
+                        res = await fetch('/api/tasks', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                        });
+                }
+                if (!res.ok) throw new Error('Request failed');
+                const data = await res.json();
+                if (editId) {
+                        const index = tasks.findIndex((t) => t.id === editId);
+                        tasks[index] = data;
+                } else {
+                        tasks.push(data);
+                }
+                hideModal();
+                renderBoard();
+        } catch (err) {
+                console.error('Failed to save task', err);
+        }
+});
 
 async function init() {
 	try {

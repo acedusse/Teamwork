@@ -26,6 +26,8 @@ const TaskSchema = z.object({
   status: z.string().optional(),
   dependencies: z.array(z.number()).optional(),
   priority: z.string().optional(),
+  agent: z.string().optional(),
+  epic: z.string().optional(),
   details: z.string().optional(),
   testStrategy: z.string().optional(),
 });
