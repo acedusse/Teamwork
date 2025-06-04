@@ -1,0 +1,17 @@
+{
+  "name": "taskmaster-ui",
+  "version": "1.0.0",
+  "description": "UI integration for Task Master",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}

@@ -64,3 +64,4 @@ dev-debug.log
 
 # NPMRC
 .npmrc
+ui/node_modules/
