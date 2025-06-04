@@ -6,6 +6,7 @@ import { readJSON, writeJSON } from '../../scripts/modules/utils.js';
 import validate from '../middleware/validation.js';
 import { TaskSchema } from '../schemas/task.js';
 import { broadcast } from '../websocket.js';
+import { loadAgents, assignAgent, recordAssignment } from '../utils/agents.js';
 
 const router = express.Router();
 
@@ -13,15 +14,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const TASKS_FILE =
-        process.env.TASKS_FILE ||
-        path.join(__dirname, '../../.taskmaster/tasks/tasks.json');
+	process.env.TASKS_FILE ||
+	path.join(__dirname, '../../.taskmaster/tasks/tasks.json');
 
 function getVersion() {
-        try {
-                return fs.statSync(TASKS_FILE).mtimeMs;
-        } catch {
-                return Date.now();
-        }
+	try {
+		return fs.statSync(TASKS_FILE).mtimeMs;
+	} catch {
+		return Date.now();
+	}
 }
 
 function loadTasks() {
@@ -30,88 +31,107 @@ function loadTasks() {
 }
 
 function saveTasks(tasks) {
-        const data = readJSON(TASKS_FILE) || { schemaVersion: 1, tasks: [] };
-        writeJSON(TASKS_FILE, { ...data, tasks });
+	const data = readJSON(TASKS_FILE) || { schemaVersion: 1, tasks: [] };
+	writeJSON(TASKS_FILE, { ...data, tasks });
 }
 
 router.get('/', (req, res, next) => {
-        try {
-                const tasks = loadTasks();
-                res.set('X-Tasks-Version', String(getVersion()));
-                res.json({ tasks });
-        } catch (err) {
-                next(err);
-        }
+	try {
+		const tasks = loadTasks();
+		res.set('X-Tasks-Version', String(getVersion()));
+		res.json({ tasks });
+	} catch (err) {
+		next(err);
+	}
 });
 
 router.post('/', validate(TaskSchema), (req, res, next) => {
-        try {
-                const clientVersion = Number(req.get('x-tasks-version'));
-                if (clientVersion && clientVersion !== getVersion()) {
-                        res.status(409).json({ error: 'Task data out of date' });
-                        return;
-                }
-                const data = req.validatedBody;
-                const tasks = loadTasks();
-                const newId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
-                const newTask = { id: newId, ...data, subtasks: [] };
-                tasks.push(newTask);
-                saveTasks(tasks);
-                broadcast({ type: 'tasksUpdated', tasks });
-                res.set('X-Tasks-Version', String(getVersion()));
-                res.status(201).json(newTask);
-        } catch (err) {
-                next(err);
-        }
+	try {
+		const clientVersion = Number(req.get('x-tasks-version'));
+		if (clientVersion && clientVersion !== getVersion()) {
+			res.status(409).json({ error: 'Task data out of date' });
+			return;
+		}
+		const data = req.validatedBody;
+		const tasks = loadTasks();
+		const newId = tasks.length ? Math.max(...tasks.map((t) => t.id)) + 1 : 1;
+		const agents = loadAgents();
+		const assigned = assignAgent(tasks, agents, data);
+		const newTask = {
+			id: newId,
+			...data,
+			agent: assigned || data.agent,
+			createdAt: new Date().toISOString(),
+			subtasks: []
+		};
+		tasks.push(newTask);
+		if (assigned) recordAssignment(newId, assigned);
+		saveTasks(tasks);
+		broadcast({ type: 'tasksUpdated', tasks });
+		res.set('X-Tasks-Version', String(getVersion()));
+		res.status(201).json(newTask);
+	} catch (err) {
+		next(err);
+	}
 });
 
 router.put('/:id', validate(TaskSchema.partial()), (req, res, next) => {
-        try {
-                const clientVersion = Number(req.get('x-tasks-version'));
-                if (clientVersion && clientVersion !== getVersion()) {
-                        res.status(409).json({ error: 'Task data out of date' });
-                        return;
-                }
-                const id = parseInt(req.params.id, 10);
-                const update = req.validatedBody;
-                const tasks = loadTasks();
-                const index = tasks.findIndex((t) => t.id === id);
-                if (index === -1) {
-                        res.status(404).json({ error: 'Task not found' });
-                        return;
-                }
-                tasks[index] = { ...tasks[index], ...update };
-                saveTasks(tasks);
-                broadcast({ type: 'tasksUpdated', tasks });
-                res.set('X-Tasks-Version', String(getVersion()));
-                res.json(tasks[index]);
-        } catch (err) {
-                next(err);
-        }
+	try {
+		const clientVersion = Number(req.get('x-tasks-version'));
+		if (clientVersion && clientVersion !== getVersion()) {
+			res.status(409).json({ error: 'Task data out of date' });
+			return;
+		}
+		const id = parseInt(req.params.id, 10);
+		const update = req.validatedBody;
+		const tasks = loadTasks();
+		const index = tasks.findIndex((t) => t.id === id);
+		if (index === -1) {
+			res.status(404).json({ error: 'Task not found' });
+			return;
+		}
+		const original = tasks[index];
+		tasks[index] = { ...original, ...update };
+		if (update.status === 'done' && !original.completedAt) {
+			tasks[index].completedAt = new Date().toISOString();
+		}
+		const agents = loadAgents();
+		const assigned = assignAgent(tasks, agents, tasks[index]);
+		if (assigned) {
+			tasks[index].agent = assigned;
+			if (assigned !== original.agent) recordAssignment(id, assigned);
+		}
+		saveTasks(tasks);
+		broadcast({ type: 'tasksUpdated', tasks });
+		res.set('X-Tasks-Version', String(getVersion()));
+		res.json(tasks[index]);
+	} catch (err) {
+		next(err);
+	}
 });
 
 router.delete('/:id', (req, res, next) => {
-        try {
-                const clientVersion = Number(req.get('x-tasks-version'));
-                if (clientVersion && clientVersion !== getVersion()) {
-                        res.status(409).json({ error: 'Task data out of date' });
-                        return;
-                }
-                const id = parseInt(req.params.id, 10);
-                const tasks = loadTasks();
-                const index = tasks.findIndex((t) => t.id === id);
-                if (index === -1) {
-                        res.status(404).json({ error: 'Task not found' });
-                        return;
-                }
-                tasks.splice(index, 1);
-                saveTasks(tasks);
-                broadcast({ type: 'tasksUpdated', tasks });
-                res.set('X-Tasks-Version', String(getVersion()));
-                res.status(204).end();
-        } catch (err) {
-                next(err);
-        }
+	try {
+		const clientVersion = Number(req.get('x-tasks-version'));
+		if (clientVersion && clientVersion !== getVersion()) {
+			res.status(409).json({ error: 'Task data out of date' });
+			return;
+		}
+		const id = parseInt(req.params.id, 10);
+		const tasks = loadTasks();
+		const index = tasks.findIndex((t) => t.id === id);
+		if (index === -1) {
+			res.status(404).json({ error: 'Task not found' });
+			return;
+		}
+		tasks.splice(index, 1);
+		saveTasks(tasks);
+		broadcast({ type: 'tasksUpdated', tasks });
+		res.set('X-Tasks-Version', String(getVersion()));
+		res.status(204).end();
+	} catch (err) {
+		next(err);
+	}
 });
 
 export default router;
