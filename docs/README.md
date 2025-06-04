@@ -12,7 +12,7 @@ Welcome to the Task Master documentation. Use the links below to navigate to the
 - [Command Reference](command-reference.md) - Complete list of all available commands
 - [Task Structure](task-structure.md) - Understanding the task format and features
 - [Project Architecture](architecture.md) - High level overview of the codebase
-- [API Documentation](api/README.md) - Using Task Master programmatically
+- [API Documentation](api/README.md) - REST API reference and OpenAPI explorer
 
 ## Examples & Licensing
 
