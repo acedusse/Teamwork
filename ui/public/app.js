@@ -17,6 +17,37 @@ let agents = [];
 
 let editId = null;
 
+let socket = null;
+
+function connectWebSocket() {
+        const statusEl = document.getElementById('connection-status');
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+        const url = `${proto}://${location.host}`;
+        socket = new WebSocket(url);
+        socket.addEventListener('open', () => {
+                statusEl.textContent = 'Connected';
+                statusEl.classList.remove('disconnected');
+                statusEl.classList.add('connected');
+        });
+        socket.addEventListener('close', () => {
+                statusEl.textContent = 'Disconnected';
+                statusEl.classList.remove('connected');
+                statusEl.classList.add('disconnected');
+                setTimeout(connectWebSocket, 3000);
+        });
+        socket.addEventListener('message', (e) => {
+                try {
+                        const msg = JSON.parse(e.data);
+                        if (msg.type === 'tasksUpdated' && Array.isArray(msg.tasks)) {
+                                tasks = msg.tasks;
+                                renderBoard();
+                        }
+                } catch (err) {
+                        console.error('Invalid message', err);
+                }
+        });
+}
+
 const modal = document.getElementById('task-modal');
 const form = document.getElementById('task-form');
 
