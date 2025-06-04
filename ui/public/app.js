@@ -12,76 +12,19 @@ const statusClasses = {
 };
 
 let tasks = [];
-let socket;
-const statusEl = document.getElementById('connection-status');
-let retryTimeout;
 
-function setStatus(state) {
-	if (!statusEl) return;
-	statusEl.textContent =
-		state === 'connected'
-			? 'Connected'
-			: state === 'connecting'
-				? 'Connecting...'
-				: 'Disconnected';
-	statusEl.classList.remove('connected', 'disconnected');
-	if (state === 'connected') statusEl.classList.add('connected');
-	if (state === 'disconnected') statusEl.classList.add('disconnected');
+let editId = null;
+
+const modal = document.getElementById('task-modal');
+const form = document.getElementById('task-form');
+
+function showModal() {
+        modal.classList.remove('hidden');
 }
 
-function handleMessage(event) {
-	try {
-		const msg = JSON.parse(event.data);
-		switch (msg.type) {
-			case 'tasks':
-				tasks = msg.tasks;
-				renderBoard();
-				break;
-			case 'taskAdded':
-				tasks.push(msg.task);
-				renderBoard();
-				break;
-			case 'taskUpdated': {
-				const idx = tasks.findIndex((t) => t.id === msg.task.id);
-				if (idx !== -1) {
-					tasks[idx] = msg.task;
-					renderBoard();
-				}
-				break;
-			}
-			case 'taskDeleted':
-				tasks = tasks.filter((t) => t.id !== msg.id);
-				renderBoard();
-				break;
-			default:
-				console.warn('Unknown message', msg);
-		}
-	} catch (err) {
-		console.error('WebSocket message error', err);
-	}
-}
-
-function connectWebSocket() {
-	const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-	setStatus('connecting');
-	socket = new WebSocket(`${protocol}://${location.host}`);
-
-	socket.addEventListener('open', () => {
-		setStatus('connected');
-	});
-	socket.addEventListener('message', handleMessage);
-	socket.addEventListener('close', () => {
-		setStatus('disconnected');
-		if (!retryTimeout) {
-			retryTimeout = setTimeout(() => {
-				retryTimeout = null;
-				connectWebSocket();
-			}, 3000);
-		}
-	});
-	socket.addEventListener('error', () => {
-		socket.close();
-	});
+function hideModal() {
+        modal.classList.add('hidden');
+        form.reset();
 }
 
 function createCard(task) {
@@ -152,10 +95,84 @@ Object.values(columns).forEach((col) => {
 				socket.send(JSON.stringify({ type: 'taskUpdated', task }));
 			}
 		}
-	});
+        });
+});
+
+document.querySelector('.board').addEventListener('click', (e) => {
+        const card = e.target.closest('.task-card');
+        if (!card) return;
+        const task = tasks.find((t) => String(t.id) === card.dataset.id);
+        if (task) {
+                editId = task.id;
+                form.title.value = task.title;
+                form.description.value = task.description;
+                form.priority.value = task.priority || 'medium';
+                form.status.value = task.status || 'pending';
+                form.agent.value = task.agent || '';
+                form.epic.value = task.epic || '';
+                document.getElementById('modal-title').textContent = 'Edit Task';
+                showModal();
+        }
 });
 
 document.getElementById('task-filter').addEventListener('input', renderBoard);
+
+document.getElementById('create-task-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        editId = null;
+        form.reset();
+        document.getElementById('modal-title').textContent = 'Create Task';
+        showModal();
+});
+
+document.getElementById('task-cancel').addEventListener('click', (e) => {
+        e.preventDefault();
+        hideModal();
+});
+
+form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+                title: form.title.value.trim(),
+                description: form.description.value.trim(),
+                priority: form.priority.value,
+                status: form.status.value,
+                agent: form.agent.value,
+                epic: form.epic.value
+        };
+        if (!payload.title || !payload.description) {
+                alert('Title and description are required');
+                return;
+        }
+        try {
+                let res;
+                if (editId) {
+                        res = await fetch(`/api/tasks/${editId}` , {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                        });
+                } else {
+                        res = await fetch('/api/tasks', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                        });
+                }
+                if (!res.ok) throw new Error('Request failed');
+                const data = await res.json();
+                if (editId) {
+                        const index = tasks.findIndex((t) => t.id === editId);
+                        tasks[index] = data;
+                } else {
+                        tasks.push(data);
+                }
+                hideModal();
+                renderBoard();
+        } catch (err) {
+                console.error('Failed to save task', err);
+        }
+});
 
 async function init() {
 	try {

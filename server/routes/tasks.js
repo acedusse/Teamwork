@@ -24,6 +24,18 @@ function saveTasks(tasks) {
 	writeJSON(TASKS_FILE, { ...data, tasks });
 }
 
+const TaskSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  status: z.string().optional(),
+  dependencies: z.array(z.number()).optional(),
+  priority: z.string().optional(),
+  agent: z.string().optional(),
+  epic: z.string().optional(),
+  details: z.string().optional(),
+  testStrategy: z.string().optional(),
+});
+
 router.get('/', (req, res, next) => {
 	try {
 		const tasks = loadTasks();
