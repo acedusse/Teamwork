@@ -1,150 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TaskMaster Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Dev Team Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-      <div class="header-inner">
-        <h1>TaskMaster</h1>
-        <nav>
-          <ul>
-            <li><a href="#">Dashboard</a></li>
-            <li><a href="#">Tasks</a></li>
-            <li><a href="#">Settings</a></li>
-          </ul>
-        </nav>
-        <span id="connection-status" class="connection-status">Connecting...</span>
-        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
-      </div>
-  </header>
-
-  <div class="container">
-    <aside class="sidebar">
-      <h2>Sidebar</h2>
-      <ul>
-        <li><a href="#" id="create-task-link">Create Task</a></li>
-        <li><a href="#">Reports</a></li>
-        <li><a href="#">Team</a></li>
-      </ul>
-    </aside>
-
-    <main class="board">
-      <div class="filter">
-        <input id="task-filter" type="text" placeholder="Search tasks...">
-        <select id="agent-filter"><option value="">All agents</option></select>
-        <select id="epic-filter"><option value="">All epics</option></select>
-        <select id="priority-filter">
-          <option value="">All priorities</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
-        </select>
-        <button id="save-filter" type="button">Save Filter</button>
-        <select id="saved-filters"><option value="">Saved filters</option></select>
-        <div class="quick-filters">
-          <button data-priority="high" type="button">High</button>
-          <button data-priority="medium" type="button">Medium</button>
-          <button data-priority="low" type="button">Low</button>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AI Development Command Center</h1>
+            <p>Orchestrate your AI software development team with precision and insight</p>
+            <span id="connection-status" class="connection-status">Connecting...</span>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">🌙</button>
         </div>
-      </div>
-      <div class="column" data-status="pending">
-        <h3>Backlog</h3>
-      </div>
-      <div class="column" data-status="in-progress">
-        <h3>In Progress</h3>
-      </div>
-      <div class="column" data-status="review">
-        <h3>Review</h3>
-      </div>
-      <div class="column" data-status="done">
-        <h3>Done</h3>
-      </div>
-    </main>
-    <section class="agents">
-      <h3>Agents</h3>
-      <ul id="agent-list"></ul>
-    </section>
-  </div>
 
-  <section class="metrics">
-    <h2>Statistics</h2>
-    <canvas id="velocityChart" width="400" height="200"></canvas>
-    <canvas id="burndownChart" width="400" height="200"></canvas>
-  </section>
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>📋 Active Sprint</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 68%"></div>
+                </div>
+                <p>Sprint 3.2 - 68% Complete</p>
+                <p style="color: #666; font-size: 0.9rem;">5 days remaining</p>
+            </div>
+            <div class="card">
+                <h3>🎯 Project Health</h3>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: #28a745; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">A+</div>
+                    <div>
+                        <p style="font-weight: 600;">Excellent</p>
+                        <p style="color: #666; font-size: 0.9rem;">On track for delivery</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>⚡ Team Velocity</h3>
+                <div style="font-size: 2rem; font-weight: bold; color: #667eea;">42</div>
+                <p style="color: #666;">Story points this sprint</p>
+                <p style="color: #28a745; font-size: 0.9rem;">↗ +15% from last sprint</p>
+            </div>
+        </div>
 
-  <section class="cli">
-    <h2>CLI Command</h2>
-    <input id="cli-input" type="text" placeholder="e.g., list" />
-    <button id="cli-run">Run</button>
-    <pre id="cli-output"></pre>
-    <h3>History</h3>
-    <ul id="cli-history"></ul>
-  </section>
-
-  <div id="task-modal" class="modal hidden">
-    <form id="task-form" class="modal-content">
-      <h3 id="modal-title">Create Task</h3>
-      <label>Title
-        <input type="text" name="title" required>
-      </label>
-      <label>Description
-        <textarea name="description" required></textarea>
-      </label>
-      <label>Agent
-        <select name="agent">
-          <option value="">Select agent</option>
-          <option>Agent A</option>
-          <option>Agent B</option>
-        </select>
-      </label>
-      <label>Epic
-        <select name="epic">
-          <option value="">Select epic</option>
-          <option>Frontend</option>
-          <option>Backend</option>
-          <option>DevOps</option>
-        </select>
-      </label>
-      <label>Priority
-        <select name="priority">
-          <option value="low">Low</option>
-          <option value="medium" selected>Medium</option>
-          <option value="high">High</option>
-        </select>
-      </label>
-      <label>Status
-        <select name="status">
-          <option value="pending">Backlog</option>
-          <option value="in-progress">In Progress</option>
-          <option value="review">Review</option>
-          <option value="done">Done</option>
-        </select>
-      </label>
-      <div class="form-actions">
-        <button type="submit">Save</button>
-        <button type="reset" id="task-reset">Reset</button>
-        <button type="button" id="task-cancel">Cancel</button>
-      </div>
-    </form>
-  </div>
-
-  <div id="help-overlay" class="hidden help-overlay" tabindex="-1">
-    <div class="help-content">
-      <h3>Keyboard Shortcuts</h3>
-      <ul>
-        <li><strong>N</strong>: New task</li>
-        <li><strong>D</strong>: Toggle theme</li>
-        <li><strong>/</strong>: Search tasks</li>
-        <li><strong>?</strong>: Show this help</li>
-      </ul>
+        <div class="main-content">
+            <div class="task-board">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>📊 Development Pipeline</h2>
+                    <div>
+                        <a href="#" id="create-task-link" class="btn">+ New Task</a>
+                    </div>
+                </div>
+                <div class="filter">
+                    <input id="task-filter" type="text" placeholder="Search tasks...">
+                    <select id="agent-filter"><option value="">All agents</option></select>
+                    <select id="epic-filter"><option value="">All epics</option></select>
+                    <select id="priority-filter">
+                        <option value="">All priorities</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <button id="save-filter" type="button">Save Filter</button>
+                    <select id="saved-filters"><option value="">Saved filters</option></select>
+                    <div class="quick-filters">
+                        <button data-priority="high" type="button">High</button>
+                        <button data-priority="medium" type="button">Medium</button>
+                        <button data-priority="low" type="button">Low</button>
+                    </div>
+                </div>
+                <div class="board board-columns">
+                    <div class="column" data-status="pending">
+                        <h4>📝 Backlog</h4>
+                    </div>
+                    <div class="column" data-status="in-progress">
+                        <h4>🔄 In Progress</h4>
+                    </div>
+                    <div class="column" data-status="review">
+                        <h4>🔍 Review</h4>
+                    </div>
+                    <div class="column" data-status="done">
+                        <h4>✅ Done</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar">
+                <div class="card">
+                    <h3>📈 Sprint Metrics</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">24</div>
+                            <div class="stat-label">Tasks</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">89%</div>
+                            <div class="stat-label">Quality</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">6</div>
+                            <div class="stat-label">Agents</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">3.2</div>
+                            <div class="stat-label">Velocity</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🤖 AI Team Status</h3>
+                    <div class="team-member">
+                        <div class="agent-avatar">FE</div>
+                        <div style="margin-left: 10px;">
+                            <div style="font-weight: 600;">Frontend Agent</div>
+                            <div style="color: #666; font-size: 0.9rem;">React Components</div>
+                        </div>
+                        <div class="member-status status-active"></div>
+                    </div>
+                    <div class="team-member">
+                        <div class="agent-avatar">BE</div>
+                        <div style="margin-left: 10px;">
+                            <div style="font-weight: 600;">Backend Agent</div>
+                            <div style="color: #666; font-size: 0.9rem;">API Development</div>
+                        </div>
+                        <div class="member-status status-busy"></div>
+                    </div>
+                    <div class="team-member">
+                        <div class="agent-avatar">ML</div>
+                        <div style="margin-left: 10px;">
+                            <div style="font-weight: 600;">ML Agent</div>
+                            <div style="color: #666; font-size: 0.9rem;">Model Training</div>
+                        </div>
+                        <div class="member-status status-active"></div>
+                    </div>
+                    <div class="team-member">
+                        <div class="agent-avatar">QA</div>
+                        <div style="margin-left: 10px;">
+                            <div style="font-weight: 600;">QA Agent</div>
+                            <div style="color: #666; font-size: 0.9rem;">Testing</div>
+                        </div>
+                        <div class="member-status status-offline"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>⚡ Quick Actions</h3>
+                    <button class="btn" style="width: 100%; margin: 5px 0;" onclick="alert('Generate tasks from PRD')">Generate Tasks from PRD</button>
+                    <button class="btn" style="width: 100%; margin: 5px 0;" onclick="alert('Plan next sprint')">Plan Next Sprint</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin: 5px 0;" onclick="alert('Generate report')">Generate Report</button>
+                </div>
+            </div>
+        </div>
+        <div class="ai-agents" style="margin-top: 30px;">
+            <h3>🤖 AI Development Team</h3>
+            <div class="agent-grid">
+                <div class="agent-card">
+                    <div class="agent-icon">FE</div>
+                    <h4>Frontend Agent</h4>
+                    <p style="color: #666; font-size: 0.9rem;">React, Vue, Angular specialist</p>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-icon">BE</div>
+                    <h4>Backend Agent</h4>
+                    <p style="color: #666; font-size: 0.9rem;">API, Database, Server logic</p>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-icon">ML</div>
+                    <h4>ML Agent</h4>
+                    <p style="color: #666; font-size: 0.9rem;">Machine Learning, AI models</p>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-icon">QA</div>
+                    <h4>QA Agent</h4>
+                    <p style="color: #666; font-size: 0.9rem;">Testing, Quality assurance</p>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-icon">DO</div>
+                    <h4>DevOps Agent</h4>
+                    <p style="color: #666; font-size: 0.9rem;">CI/CD, Infrastructure</p>
+                </div>
+                <div class="agent-card">
+                    <div class="agent-icon">SA</div>
+                    <h4>Solutions Architect</h4>
+                    <p style="color: #666; font-size: 0.9rem;">System design, Architecture</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
+    <div id="task-modal" class="modal hidden">
+        <form id="task-form" class="modal-content">
+            <h3 id="modal-title">Create Task</h3>
+            <label>Title
+                <input type="text" name="title" required>
+            </label>
+            <label>Description
+                <textarea name="description" required></textarea>
+            </label>
+            <label>Agent
+                <select name="agent">
+                    <option value="">Select agent</option>
+                    <option>Agent A</option>
+                    <option>Agent B</option>
+                </select>
+            </label>
+            <label>Epic
+                <select name="epic">
+                    <option value="">Select epic</option>
+                    <option>Frontend</option>
+                    <option>Backend</option>
+                    <option>DevOps</option>
+                </select>
+            </label>
+            <label>Priority
+                <select name="priority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </label>
+            <label>Status
+                <select name="status">
+                    <option value="pending">Backlog</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="review">Review</option>
+                    <option value="done">Done</option>
+                </select>
+            </label>
+            <div class="form-actions">
+                <button type="submit">Save</button>
+                <button type="reset" id="task-reset">Reset</button>
+                <button type="button" id="task-cancel">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
     const toggle = document.getElementById('theme-toggle');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const stored = localStorage.getItem('theme');
@@ -152,13 +241,13 @@
     document.body.setAttribute('data-theme', current);
     toggle.textContent = current === 'dark' ? '☀️' : '🌙';
     toggle.addEventListener('click', () => {
-      const theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      document.body.setAttribute('data-theme', theme);
-      localStorage.setItem('theme', theme);
-      toggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+        const theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        toggle.textContent = theme === 'dark' ? '☀️' : '🌙';
     });
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="app.js"></script>
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
