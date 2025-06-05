@@ -70,3 +70,22 @@ ui/node_modules/
 
 # Virtual environment
 .venv
+venv
+
+# Added by Task Master AI
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+# OS specific
+# Task files
+tasks.json
+tasks/ 
+
+prompts
+
+project_docs
