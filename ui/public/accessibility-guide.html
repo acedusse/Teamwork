@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessibility Guide - Task Master</title>
+  <meta name="description" content="Comprehensive accessibility guide for Task Master application including keyboard shortcuts, navigation patterns, and assistive technology support.">
+  
+  <style>
+    /* Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #ffffff;
+      font-size: 16px;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    /* Typography */
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+    
+    h2 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 3rem 0 1.5rem 0;
+      line-height: 1.3;
+      border-bottom: 3px solid #3b82f6;
+      padding-bottom: 0.5rem;
+    }
+    
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin: 2rem 0 1rem 0;
+      line-height: 1.3;
+    }
+    
+    h4 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #4a5568;
+      margin: 1.5rem 0 0.75rem 0;
+      line-height: 1.4;
+    }
+    
+    p {
+      margin-bottom: 1rem;
+      color: #4a4a4a;
+      line-height: 1.7;
+    }
+    
+    /* Links */
+    a {
+      color: #3b82f6;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    
+    a:hover, a:focus {
+      color: #1d4ed8;
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+    
+    /* Lists */
+    ul, ol {
+      margin-bottom: 1rem;
+      padding-left: 2rem;
+    }
+    
+    li {
+      margin-bottom: 0.5rem;
+      color: #4a4a4a;
+      line-height: 1.6;
+    }
+    
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    /* Code and Keyboard Keys */
+    code {
+      background: #f3f4f6;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+      font-size: 0.9em;
+      color: #1a1a1a;
+    }
+    
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      padding: 4px 8px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border: 1px solid #e5e7eb;
+      border-bottom: 2px solid #d1d5db;
+      border-radius: 4px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      white-space: nowrap;
+    }
+    
+    .key-combo {
+      white-space: nowrap;
+    }
+    
+    .key-separator {
+      margin: 0 4px;
+      color: #6b6b6b;
+      font-weight: 500;
+    }
+    
+    /* Sections */
+    .section {
+      margin-bottom: 3rem;
+    }
+    
+    .intro {
+      background: #eff6ff;
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid #dbeafe;
+      margin-bottom: 3rem;
+    }
+    
+    .intro h1 {
+      color: #1e40af;
+      margin-bottom: 1rem;
+    }
+    
+    .intro p {
+      color: #1e3a8a;
+      font-size: 1.1rem;
+      margin-bottom: 0;
+    }
+    
+    /* Accessibility Features Cards */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+    
+    .feature-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+    }
+    
+    .feature-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    .feature-card h4 {
+      color: #3b82f6;
+      margin-top: 0;
+    }
+    
+    /* Compliance Badges */
+    .compliance-badges {
+      display: flex;
+      gap: 1rem;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 16px;
+      background: #059669;
+      color: #ffffff;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    
+    .badge:hover, .badge:focus {
+      background: #047857;
+      color: #ffffff;
+    }
+    
+    .badge-wcag {
+      background: #7c3aed;
+    }
+    
+    .badge-wcag:hover, .badge-wcag:focus {
+      background: #6d28d9;
+    }
+    
+    .badge-section508 {
+      background: #dc2626;
+    }
+    
+    .badge-section508:hover, .badge-section508:focus {
+      background: #b91c1c;
+    }
+    
+    /* Skip Links */
+    .skip-links {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: #1a1a1a;
+      color: #ffffff;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 0 0 4px 0;
+      z-index: 1000;
+    }
+    
+    .skip-links:focus {
+      top: 0;
+      outline: 2px solid #3b82f6;
+    }
+    
+    /* Table of Contents */
+    .toc {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 2rem;
+      margin: 2rem 0;
+    }
+    
+    .toc h3 {
+      margin-top: 0;
+      color: #1a1a1a;
+    }
+    
+    .toc ul {
+      margin-bottom: 0;
+    }
+    
+    .toc a {
+      text-decoration: none;
+      color: #3b82f6;
+    }
+    
+    .toc a:hover, .toc a:focus {
+      text-decoration: underline;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px 16px;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+      
+      .feature-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      
+      .compliance-badges {
+        justify-content: center;
+      }
+      
+      table {
+        font-size: 0.9rem;
+      }
+      
+      th, td {
+        padding: 8px 12px;
+      }
+    }
+    
+    /* Dark Mode Support */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #111827;
+        color: #f9fafb;
+      }
+      
+      h1, h2, h3, h4 {
+        color: #f9fafb;
+      }
+      
+      h2 {
+        border-bottom-color: #3b82f6;
+      }
+      
+      p, li {
+        color: #d1d5db;
+      }
+      
+      .intro {
+        background: #1e3a8a;
+        border-color: #1e40af;
+      }
+      
+      .intro h1, .intro p {
+        color: #dbeafe;
+      }
+      
+      .feature-card {
+        background: #1f2937;
+        border-color: #374151;
+      }
+      
+      .toc {
+        background: #1f2937;
+        border-color: #374151;
+      }
+      
+      table {
+        background: #1f2937;
+        border-color: #374151;
+      }
+      
+      th {
+        background: #111827;
+        color: #f9fafb;
+      }
+      
+      th, td {
+        border-color: #374151;
+      }
+      
+      code {
+        background: #374151;
+        color: #f9fafb;
+      }
+      
+      kbd {
+        background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+        border-color: #4b5563;
+        border-bottom-color: #6b7280;
+        color: #f9fafb;
+      }
+    }
+    
+    /* High Contrast Mode */
+    @media (prefers-contrast: high) {
+      body {
+        background: #ffffff;
+        color: #000000;
+      }
+      
+      h1, h2, h3, h4 {
+        color: #000000;
+      }
+      
+      a {
+        color: #0000ff;
+        text-decoration: underline;
+        text-decoration-thickness: 2px;
+      }
+      
+      .feature-card {
+        border: 2px solid #000000;
+      }
+      
+      .badge {
+        border: 2px solid #000000;
+      }
+      
+      kbd {
+        border: 2px solid #000000;
+        background: #ffffff;
+        color: #000000;
+      }
+    }
+    
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      .feature-card {
+        transition: none;
+      }
+      
+      .feature-card:hover {
+        transform: none;
+      }
+    }
+    
+    /* Print Styles */
+    @media print {
+      body {
+        background: #ffffff;
+        color: #000000;
+      }
+      
+      .skip-links {
+        display: none;
+      }
+      
+      .feature-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #000000;
+      }
+      
+      a {
+        color: #000000;
+        text-decoration: underline;
+      }
+      
+      kbd {
+        background: #ffffff;
+        border: 1px solid #000000;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-links">Skip to main content</a>
+  
+  <div class="container">
+    <header class="intro">
+      <h1>Task Master Accessibility Guide</h1>
+      <p>Comprehensive guide to accessibility features, keyboard shortcuts, and assistive technology support in Task Master.</p>
+    </header>
+
+    <div class="compliance-badges">
+      <span class="badge badge-wcag">WCAG 2.1 AA Compliant</span>
+      <span class="badge badge-section508">Section 508 Compatible</span>
+      <span class="badge">Keyboard Accessible</span>
+      <span class="badge">Screen Reader Friendly</span>
+    </div>
+
+    <nav class="toc" role="navigation" aria-labelledby="toc-heading">
+      <h3 id="toc-heading">Table of Contents</h3>
+      <ul>
+        <li><a href="#overview">Overview</a></li>
+        <li><a href="#keyboard-navigation">Keyboard Navigation</a></li>
+        <li><a href="#shortcuts">Keyboard Shortcuts</a></li>
+        <li><a href="#screen-readers">Screen Reader Support</a></li>
+        <li><a href="#visual-accessibility">Visual Accessibility</a></li>
+        <li><a href="#assistive-tech">Assistive Technology</a></li>
+        <li><a href="#compliance">Standards Compliance</a></li>
+        <li><a href="#support">Getting Support</a></li>
+      </ul>
+    </nav>
+
+    <main id="main-content">
+      <section id="overview" class="section">
+        <h2>Overview</h2>
+        <p>Task Master is designed to be fully accessible to users of all abilities. We follow the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards and ensure compatibility with assistive technologies including screen readers, keyboard navigation, and voice control software.</p>
+        
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h4>Full Keyboard Access</h4>
+            <p>Every feature and function in Task Master can be accessed using only the keyboard. We provide logical tab order, focus indicators, and comprehensive keyboard shortcuts.</p>
+          </div>
+          
+          <div class="feature-card">
+            <h4>Screen Reader Compatible</h4>
+            <p>All content is properly structured with semantic HTML, ARIA labels, and descriptive text to ensure compatibility with screen readers like JAWS, NVDA, and VoiceOver.</p>
+          </div>
+          
+          <div class="feature-card">
+            <h4>Visual Accessibility</h4>
+            <p>High contrast ratios, customizable themes, scalable text, and color-independent information ensure the interface is usable for users with visual impairments.</p>
+          </div>
+          
+          <div class="feature-card">
+            <h4>Motor Accessibility</h4>
+            <p>Large clickable areas, adjustable interaction timeouts, and alternative input methods accommodate users with motor impairments.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="keyboard-navigation" class="section">
+        <h2>Keyboard Navigation</h2>
+        <p>Task Master supports comprehensive keyboard navigation throughout the application:</p>
+        
+        <h3>Basic Navigation</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>Tab</kbd></td>
+              <td>Move to the next interactive element</td>
+            </tr>
+            <tr>
+              <td><kbd>Shift</kbd><span class="key-separator">+</span><kbd>Tab</kbd></td>
+              <td>Move to the previous interactive element</td>
+            </tr>
+            <tr>
+              <td><kbd>Enter</kbd></td>
+              <td>Activate buttons, links, and form controls</td>
+            </tr>
+            <tr>
+              <td><kbd>Space</kbd></td>
+              <td>Activate buttons and toggle checkboxes</td>
+            </tr>
+            <tr>
+              <td><kbd>Escape</kbd></td>
+              <td>Close dialogs, menus, and cancel operations</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Arrow Key Navigation</h3>
+        <p>In lists, grids, and menus, use arrow keys for navigation:</p>
+        <ul>
+          <li><kbd>↑</kbd> <kbd>↓</kbd> - Navigate up and down in lists</li>
+          <li><kbd>←</kbd> <kbd>→</kbd> - Navigate left and right in horizontal layouts</li>
+          <li><kbd>Home</kbd> - Jump to the first item</li>
+          <li><kbd>End</kbd> - Jump to the last item</li>
+        </ul>
+
+        <h3>Focus Management</h3>
+        <p>Task Master maintains proper focus management:</p>
+        <ul>
+          <li>Visible focus indicators on all interactive elements</li>
+          <li>Focus trapping in modal dialogs</li>
+          <li>Logical tab order throughout the application</li>
+          <li>Focus restoration when closing dialogs</li>
+        </ul>
+      </section>
+
+      <section id="shortcuts" class="section">
+        <h2>Keyboard Shortcuts</h2>
+        <p>Task Master provides extensive keyboard shortcuts for efficient navigation and task management. Press <kbd>?</kbd> at any time to open the keyboard shortcuts help dialog.</p>
+
+        <h3>Navigation Shortcuts</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Shortcut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>1</kbd></td>
+              <td>Go to Dashboard</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>2</kbd></td>
+              <td>Go to Tasks</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>3</kbd></td>
+              <td>Go to Team</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>4</kbd></td>
+              <td>Go to Calendar</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>5</kbd></td>
+              <td>Go to Reports</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>6</kbd></td>
+              <td>Go to Settings</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Task Management Shortcuts</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Shortcut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>N</kbd></td>
+              <td>Create new task</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>E</kbd></td>
+              <td>Edit selected task</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>D</kbd></td>
+              <td>Duplicate selected task</td>
+            </tr>
+            <tr>
+              <td><kbd>Delete</kbd></td>
+              <td>Delete selected task</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>S</kbd></td>
+              <td>Save current task</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Search and Filter Shortcuts</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Shortcut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>F</kbd></td>
+              <td>Focus search input</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>K</kbd></td>
+              <td>Open command palette</td>
+            </tr>
+            <tr>
+              <td><kbd>Escape</kbd></td>
+              <td>Clear search or close filters</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Accessibility Shortcuts</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Shortcut</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><kbd>?</kbd></td>
+              <td>Show keyboard shortcuts help</td>
+            </tr>
+            <tr>
+              <td><kbd>Alt</kbd><span class="key-separator">+</span><kbd>1</kbd></td>
+              <td>Skip to main content</td>
+            </tr>
+            <tr>
+              <td><kbd>Alt</kbd><span class="key-separator">+</span><kbd>2</kbd></td>
+              <td>Skip to navigation</td>
+            </tr>
+            <tr>
+              <td><kbd>Alt</kbd><span class="key-separator">+</span><kbd>3</kbd></td>
+              <td>Skip to search</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>Alt</kbd><span class="key-separator">+</span><kbd>H</kbd></td>
+              <td>Toggle high contrast mode</td>
+            </tr>
+            <tr>
+              <td><kbd>Ctrl</kbd><span class="key-separator">+</span><kbd>Alt</kbd><span class="key-separator">+</span><kbd>R</kbd></td>
+              <td>Toggle reduced motion</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p><strong>Note:</strong> On Mac, use <kbd>Cmd</kbd> instead of <kbd>Ctrl</kbd> for most shortcuts.</p>
+      </section>
+
+      <section id="screen-readers" class="section">
+        <h2>Screen Reader Support</h2>
+        <p>Task Master is fully compatible with popular screen readers and provides comprehensive accessibility markup:</p>
+
+        <h3>Supported Screen Readers</h3>
+        <ul>
+          <li><strong>JAWS</strong> (Windows) - Fully tested and supported</li>
+          <li><strong>NVDA</strong> (Windows) - Fully tested and supported</li>
+          <li><strong>VoiceOver</strong> (macOS/iOS) - Fully tested and supported</li>
+          <li><strong>TalkBack</strong> (Android) - Supported</li>
+          <li><strong>Dragon NaturallySpeaking</strong> - Voice navigation supported</li>
+        </ul>
+
+        <h3>ARIA Implementation</h3>
+        <p>We use comprehensive ARIA (Accessible Rich Internet Applications) markup:</p>
+        <ul>
+          <li><strong>Landmarks</strong> - Proper page structure with main, navigation, and complementary regions</li>
+          <li><strong>Live Regions</strong> - Dynamic content updates are announced to screen readers</li>
+          <li><strong>Labels and Descriptions</strong> - All interactive elements have descriptive labels</li>
+          <li><strong>States and Properties</strong> - Current state of controls (expanded, selected, checked) is communicated</li>
+          <li><strong>Roles</strong> - Complex widgets have appropriate roles (button, menu, dialog, etc.)</li>
+        </ul>
+
+        <h3>Content Structure</h3>
+        <ul>
+          <li>Semantic HTML elements for proper document structure</li>
+          <li>Descriptive headings in logical hierarchy (H1-H6)</li>
+          <li>Alternative text for all images and icons</li>
+          <li>Table headers and captions for data tables</li>
+          <li>Form labels properly associated with inputs</li>
+        </ul>
+      </section>
+
+      <section id="visual-accessibility" class="section">
+        <h2>Visual Accessibility</h2>
+        <p>Task Master meets and exceeds WCAG 2.1 AA visual accessibility requirements:</p>
+
+        <h3>Color and Contrast</h3>
+        <ul>
+          <li><strong>High Contrast Ratios</strong> - All text meets WCAG AA standards (4.5:1 for normal text, 3:1 for large text)</li>
+          <li><strong>Color Independence</strong> - Information is not conveyed by color alone</li>
+          <li><strong>Alternative Visual Cues</strong> - Icons, patterns, and text labels supplement color coding</li>
+          <li><strong>High Contrast Mode</strong> - Enhanced contrast for users with low vision</li>
+        </ul>
+
+        <h3>Typography and Scaling</h3>
+        <ul>
+          <li><strong>Scalable Text</strong> - Text can be enlarged up to 200% without loss of functionality</li>
+          <li><strong>Readable Fonts</strong> - Clear, legible typefaces optimized for screen reading</li>
+          <li><strong>Adequate Spacing</strong> - Sufficient line height and letter spacing for readability</li>
+          <li><strong>Responsive Design</strong> - Layout adapts to different screen sizes and zoom levels</li>
+        </ul>
+
+        <h3>Focus and Navigation</h3>
+        <ul>
+          <li><strong>Visible Focus Indicators</strong> - Clear visual indication of keyboard focus</li>
+          <li><strong>Consistent Navigation</strong> - Predictable layout and navigation patterns</li>
+          <li><strong>Skip Links</strong> - Shortcuts to bypass repetitive navigation</li>
+          <li><strong>Logical Tab Order</strong> - Intuitive keyboard navigation sequence</li>
+        </ul>
+
+        <h3>Motion and Animation</h3>
+        <ul>
+          <li><strong>Reduced Motion Support</strong> - Respects user preference for reduced motion</li>
+          <li><strong>No Auto-Play</strong> - Animations do not start automatically</li>
+          <li><strong>User Control</strong> - Users can pause or disable animations</li>
+        </ul>
+      </section>
+
+      <section id="assistive-tech" class="section">
+        <h2>Assistive Technology</h2>
+        <p>Task Master works with a wide range of assistive technologies:</p>
+
+        <h3>Input Methods</h3>
+        <ul>
+          <li><strong>Voice Control</strong> - Compatible with Dragon NaturallySpeaking and Voice Control</li>
+          <li><strong>Switch Navigation</strong> - Supports single-switch and multi-switch input devices</li>
+          <li><strong>Eye Tracking</strong> - Compatible with eye-tracking software</li>
+          <li><strong>Alternative Keyboards</strong> - Works with on-screen keyboards and alternative input devices</li>
+        </ul>
+
+        <h3>Visual Assistance</h3>
+        <ul>
+          <li><strong>Screen Magnification</strong> - Compatible with ZoomText and built-in magnifiers</li>
+          <li><strong>High Contrast Software</strong> - Works with system-level contrast enhancement</li>
+          <li><strong>Color Filters</strong> - Supports colorblind assistance tools</li>
+        </ul>
+
+        <h3>Cognitive Assistance</h3>
+        <ul>
+          <li><strong>Read&Write</strong> - Compatible with literacy support software</li>
+          <li><strong>Mind Mapping Tools</strong> - Integrates with visual organization software</li>
+          <li><strong>Translation Tools</strong> - Works with language translation services</li>
+        </ul>
+      </section>
+
+      <section id="compliance" class="section">
+        <h2>Standards Compliance</h2>
+        <p>Task Master adheres to international accessibility standards:</p>
+
+        <h3>WCAG 2.1 Level AA</h3>
+        <p>We meet all Level A and AA success criteria of the Web Content Accessibility Guidelines 2.1, including:</p>
+        <ul>
+          <li>Perceivable content for all users</li>
+          <li>Operable interface elements</li>
+          <li>Understandable information and UI</li>
+          <li>Robust content that works with assistive technologies</li>
+        </ul>
+
+        <h3>Section 508</h3>
+        <p>Task Master complies with Section 508 of the Rehabilitation Act, ensuring accessibility for federal agencies and organizations.</p>
+
+        <h3>ADA Compliance</h3>
+        <p>Our application meets Americans with Disabilities Act (ADA) requirements for digital accessibility.</p>
+
+        <h3>EN 301 549</h3>
+        <p>Task Master conforms to the European standard for digital accessibility.</p>
+      </section>
+
+      <section id="support" class="section">
+        <h2>Getting Support</h2>
+        <p>We're committed to providing excellent accessibility support:</p>
+
+        <h3>Accessibility Help</h3>
+        <ul>
+          <li><strong>In-App Help</strong> - Press <kbd>?</kbd> to access keyboard shortcuts and help</li>
+          <li><strong>Documentation</strong> - Comprehensive guides and tutorials</li>
+          <li><strong>Video Tutorials</strong> - Accessible video content with captions and transcripts</li>
+        </ul>
+
+        <h3>Technical Support</h3>
+        <ul>
+          <li><strong>Email Support</strong> - accessibility@taskmaster.com</li>
+          <li><strong>Live Chat</strong> - Available during business hours</li>
+          <li><strong>Phone Support</strong> - Dedicated accessibility support line</li>
+        </ul>
+
+        <h3>Feedback and Improvements</h3>
+        <ul>
+          <li><strong>Accessibility Feedback</strong> - Report accessibility issues or suggestions</li>
+          <li><strong>User Testing</strong> - Participate in accessibility testing sessions</li>
+          <li><strong>Community Forum</strong> - Connect with other users and share tips</li>
+        </ul>
+
+        <h3>Training and Resources</h3>
+        <ul>
+          <li><strong>Accessibility Training</strong> - Learn to use Task Master with assistive technology</li>
+          <li><strong>Best Practices Guide</strong> - Tips for efficient accessible workflow</li>
+          <li><strong>Regular Updates</strong> - Stay informed about new accessibility features</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid #e5e7eb; text-align: center; color: #6b6b6b;">
+      <p>This accessibility guide is regularly updated to reflect the latest features and improvements. Last updated: <time datetime="2024-01-01">January 2024</time></p>
+      <p>For questions or feedback about accessibility, contact us at <a href="mailto:accessibility@taskmaster.com">accessibility@taskmaster.com</a></p>
+    </footer>
+  </div>
+</body>
+</html>

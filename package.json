@@ -26,7 +26,7 @@
 		"format": "biome format . --write",
 		"express-server": "node server/index.js",
 		"build": "node scripts/build.js",
-		"start": "NODE_ENV=production node server/index.js"
+		"start": "cross-env NODE_ENV=production node server/index.js"
 	},
 	"keywords": [
 		"claude",
@@ -64,25 +64,28 @@
 		"cors": "^2.8.5",
 		"csurf": "^1.11.0",
 		"dotenv": "^16.3.1",
+		"ejs": "^3.1.9",
 		"express": "^4.21.2",
 		"express-rate-limit": "^7.5.0",
 		"fastmcp": "^1.20.5",
 		"figlet": "^1.8.0",
+		"file-type": "^21.0.0",
 		"fuse.js": "^7.1.0",
 		"gradient-string": "^3.0.0",
 		"helmet": "^8.1.0",
 		"inquirer": "^12.5.0",
 		"jsonwebtoken": "^9.0.2",
 		"lru-cache": "^10.2.0",
+		"multer": "^2.0.1",
+		"node-cron": "^3.0.3",
 		"ollama-ai-provider": "^1.2.0",
 		"openai": "^4.89.0",
 		"ora": "^8.2.0",
+		"pdfkit": "^0.15.1",
+		"task-master-ai": "^0.16.2",
 		"uuid": "^11.1.0",
 		"ws": "^8.18.2",
-		"zod": "^3.23.8",
-		"pdfkit": "^0.15.1",
-		"ejs": "^3.1.9",
-		"node-cron": "^3.0.3"
+		"zod": "^3.23.8"
 	},
 	"engines": {
 		"node": ">=18.0.0"
@@ -115,16 +118,18 @@
 		"@changesets/changelog-github": "^0.5.1",
 		"@changesets/cli": "^2.28.1",
 		"@types/jest": "^29.5.14",
+		"axe-core": "^4.8.1",
+		"cross-env": "^7.0.3",
 		"execa": "^8.0.1",
 		"ink": "^5.0.1",
 		"jest": "^29.7.0",
-		"jest-environment-node": "^29.7.0",
 		"jest-environment-jsdom": "^29.7.0",
+		"jest-environment-node": "^29.7.0",
 		"mock-fs": "^5.5.0",
 		"prettier": "^3.5.3",
 		"react": "^18.3.1",
+		"rollup-plugin-visualizer": "^6.0.3",
 		"supertest": "^7.1.0",
-		"tsx": "^4.16.2",
-		"axe-core": "^4.8.1"
+		"tsx": "^4.16.2"
 	}
 }

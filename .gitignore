@@ -89,3 +89,12 @@ tasks/
 prompts
 
 project_docs
+
+mcp_json
+
+# Task Master AI
+.taskmaster
+#.cursor
+.github
+.roo
+.vscode

@@ -119,4 +119,58 @@ router.delete('/:id', (req, res, next) => {
 	}
 });
 
+// GET /stats - Task statistics for dashboard
+router.get('/stats', (req, res, next) => {
+    try {
+        const tasks = loadTasks();
+        const total = tasks.length;
+        const completed = tasks.filter(t => t.status === 'done').length;
+        const pending = tasks.filter(t => t.status !== 'done').length;
+        res.json({ total, completed, pending });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// GET /activities - Recent task activities for dashboard
+router.get('/activities', (req, res, next) => {
+    try {
+        const tasks = loadTasks();
+        let activities = [];
+        for (const t of tasks) {
+            if (t.createdAt) {
+                activities.push({
+                    type: 'created',
+                    taskId: t.id,
+                    title: t.title,
+                    date: t.createdAt
+                });
+            }
+            if (t.completedAt) {
+                activities.push({
+                    type: 'completed',
+                    taskId: t.id,
+                    title: t.title,
+                    date: t.completedAt
+                });
+            }
+            if (t.updatedAt) {
+                activities.push({
+                    type: 'updated',
+                    taskId: t.id,
+                    title: t.title,
+                    date: t.updatedAt
+                });
+            }
+        }
+        // Sort by date descending
+        activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+        // Limit to 20 most recent
+        activities = activities.slice(0, 20);
+        res.json({ activities });
+    } catch (err) {
+        next(err);
+    }
+});
+
 export default router;

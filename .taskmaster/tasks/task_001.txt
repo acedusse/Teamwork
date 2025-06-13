@@ -1,16 +1,11 @@
 # Task ID: 1
-# Title: Implement Task Data Structure
+# Title: Setup React Project Foundation with Material-UI
 # Status: done
 # Dependencies: None
 # Priority: high
-# Description: Design and implement the core tasks.json structure that will serve as the single source of truth for the system.
+# Description: Initialize React 18+ project with Material-UI, custom earth-tone theming, and development tooling
 # Details:
-Create the foundational data structure including:
-- JSON schema for tasks.json
-- Task model with all required fields (id, title, description, status, dependencies, priority, details, testStrategy, subtasks)
-- Validation functions for the task model
-- Basic file system operations for reading/writing tasks.json
-- Error handling for file operations
+Create new React project using Create React App or Vite. Install Material-UI (@mui/material, @mui/icons-material), React Router, and development dependencies (ESLint, Jest). Configure custom earth-tone theme using Material-UI's createTheme with primary colors in earth tones (browns, greens, warm grays). Set up project structure with components/, pages/, hooks/, and utils/ directories. Configure ESLint rules and Jest testing framework. Create basic App.js with Material-UI ThemeProvider wrapper.
 
 # Test Strategy:
-Verify that the tasks.json structure can be created, read, and validated. Test with sample data to ensure all fields are properly handled and that validation correctly identifies invalid structures.
+Verify project builds successfully, Material-UI theme applies correctly, and all development tools (linting, testing) work properly. Test theme consistency across basic components.
