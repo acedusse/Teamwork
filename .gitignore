@@ -90,11 +90,12 @@ prompts
 
 project_docs
 
-mcp_json
+#mcp_json
 
 # Task Master AI
 .taskmaster
-#.cursor
+.cursor
 .github
 .roo
 .vscode
+.windsurf*

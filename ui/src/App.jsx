@@ -241,8 +241,9 @@ function AppContent() {
 
   // Task modal handlers
   const handleOpenCreateTask = () => {
-    // Navigate to task creation page instead of opening modal
-    navigate('/tasks/new');
+    // Open the task modal for creation instead of navigating to a separate page
+    setEditingTask(null); // Ensure we're in create mode
+    setTaskModalOpen(true);
   };
 
   const handleOpenEditTask = (task) => {

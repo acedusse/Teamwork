@@ -16,7 +16,7 @@ export function loadConfig() {
   }
   const env = result.data;
   return {
-    port: env.PORT ? parseInt(env.PORT, 10) : 3000,
+    port: env.PORT ? parseInt(env.PORT, 10) : 3500,
     corsOrigin: env.CORS_ORIGIN || '*',
     logLevel: env.LOG_LEVEL || 'info'
   };

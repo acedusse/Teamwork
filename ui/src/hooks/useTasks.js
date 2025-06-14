@@ -31,6 +31,15 @@ export const useTasks = () => {
     }
   });
 
+  // Get daily statistics (for charts)
+  const dailyStatsQuery = useQuery({
+    queryKey: ['dailyTaskStats'],
+    queryFn: () => taskService.getDailyStatistics(),
+    onError: (error) => {
+      console.error('Error fetching daily statistics:', error);
+    }
+  });
+
   // Create task mutation
   const createTaskMutation = useMutation({
     mutationFn: taskService.createTask,
@@ -77,11 +86,14 @@ export const useTasks = () => {
     error: tasksQuery.error,
     stats: statsQuery.data,
     activities: activitiesQuery.data || [],
+    dailyStats: dailyStatsQuery.data,
+    lastUpdated: dailyStatsQuery.dataUpdatedAt,
     
     // Query objects (for components that need more control)
     tasksQuery,
     statsQuery,
     activitiesQuery,
+    dailyStatsQuery,
     
     // Mutation functions
     createTask: createTaskMutation.mutate,
@@ -103,6 +115,7 @@ export const useTasks = () => {
       tasksQuery.refetch();
       statsQuery.refetch();
       activitiesQuery.refetch();
+      dailyStatsQuery.refetch();
     }
   };
 }; 

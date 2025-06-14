@@ -42,4 +42,15 @@ export const taskService = {
     const response = await apiClient.get('/tasks/activities');
     return response.data;
   },
+
+  // Get daily task statistics
+  getDailyStatistics: async (startDate, endDate) => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    
+    const url = `/tasks/analytics/statistics${params.toString() ? `?${params.toString()}` : ''}`;
+    const response = await apiClient.get(url);
+    return response.data;
+  },
 }; 

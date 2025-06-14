@@ -1,0 +1,121 @@
+@startuml Teamwork System Sequence Diagram
+!theme plain
+title Teamwork Task Management System - Key Interactions
+
+actor User as U
+participant "React UI" as UI
+participant "API Client" as API
+participant "Express Server" as Server
+participant "Route Handlers" as Routes
+participant "WebSocket" as WS
+participant "CLI Scripts" as CLI
+participant "Task Manager" as TM
+participant "AI Services" as AI
+participant "File System" as FS
+
+== System Initialization ==
+U -> UI: Access Application
+UI -> API: Initialize API Client
+API -> Server: Health Check Request
+Server -> Routes: Route Registration
+Server -> WS: Initialize WebSocket Server
+Server --> UI: Server Ready
+
+== PRD Upload and Processing ==
+U -> UI: Upload PRD File
+UI -> API: POST /api/prd/upload
+API -> Server: Forward Upload Request
+Server -> Routes: prd.js handler
+Routes -> FS: Save uploaded file
+Routes -> CLI: Execute PRD parsing
+CLI -> TM: Parse PRD content
+TM -> AI: Generate task breakdown
+AI --> TM: Return structured tasks
+TM -> FS: Save tasks.json
+TM --> Routes: Processing complete
+Routes -> WS: Broadcast update
+WS --> UI: Real-time notification
+Routes --> API: Upload success response
+API --> UI: Display success message
+UI --> U: Show processing results
+
+== Task Management Operations ==
+U -> UI: View Task Board
+UI -> API: GET /api/tasks
+API -> Server: Request tasks
+Server -> Routes: tasks.js handler
+Routes -> FS: Load tasks.json
+FS --> Routes: Return task data
+Routes --> API: Task list response
+API --> UI: Display tasks
+UI --> U: Render task board
+
+U -> UI: Update Task Status
+UI -> API: PUT /api/tasks/:id
+API -> Server: Update request
+Server -> Routes: tasks.js handler
+Routes -> FS: Update tasks.json
+Routes -> WS: Broadcast change
+WS --> UI: Real-time update
+Routes --> API: Update confirmation
+API --> UI: Refresh task display
+UI --> U: Show updated status
+
+== Sprint Planning ==
+U -> UI: Create Sprint
+UI -> API: POST /api/sprints
+API -> Server: Sprint creation
+Server -> Routes: sprints.js handler
+Routes -> TM: Validate dependencies
+TM -> FS: Check task relationships
+FS --> TM: Dependency data
+TM --> Routes: Validation result
+Routes -> FS: Save sprint data
+Routes -> WS: Broadcast sprint creation
+WS --> UI: Update sprint board
+Routes --> API: Sprint created response
+API --> UI: Display new sprint
+UI --> U: Show sprint details
+
+== CLI Task Operations ==
+U -> CLI: Execute task-master command
+CLI -> TM: Process command
+TM -> FS: Read/Write task data
+alt Task Generation
+    TM -> AI: Request task analysis
+    AI --> TM: Return task suggestions
+end
+TM -> FS: Update task files
+FS --> TM: Confirm changes
+TM --> CLI: Command result
+CLI --> U: Display output
+
+== Real-time Updates ==
+Routes -> WS: Task/Sprint changes
+WS -> UI: Broadcast updates
+UI -> UI: Update component state
+UI --> U: Reflect changes immediately
+
+== Error Handling ==
+alt API Error
+    API -> UI: Error response
+    UI -> UI: Display error message
+    UI --> U: Show user-friendly error
+end
+
+alt Server Error
+    Server -> Routes: Error occurred
+    Routes -> Server: Error handler middleware
+    Server --> API: Error response
+    API --> UI: Handle error
+    UI --> U: Display error state
+end
+
+== Performance Monitoring ==
+Server -> Server: Metrics middleware
+Server -> FS: Log performance data
+Routes -> WS: Performance updates
+WS --> UI: Real-time metrics
+UI --> U: Display dashboard stats
+
+@enduml

@@ -7,7 +7,32 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/eyaltoledano?style=flat)](https://x.com/eyaltoledano)
 [![Twitter Follow](https://img.shields.io/twitter/follow/RalphEcom?style=flat)](https://x.com/RalphEcom)
 
-A task management system for AI-driven development with Claude, designed to work seamlessly with Cursor AI.
+A task management system for AI-driven development with Claude, designed to work seamlessly with Cursor AI. **Now with a comprehensive UI interface replacing the CLI experience!**
+
+## Project Vision
+
+Teamwork reimagines software development by providing a complete visual representation of the entire development cycle, from PRD to production. Our vision:
+
+- **Visual Task Management**: Transform abstract task lists into intuitive visual workflows
+- **Complete Development Visualization**: See the entire software development cycle in one unified interface
+- **AI Agent Orchestration**: Control development through AI agents that handle implementation tasks
+- **Product Owner-Centric**: Position the user as the Product Owner, focusing on vision and requirements while AI handles execution
+- **Human-AI Collaboration**: Create a seamless workflow between human product vision and AI implementation capabilities
+
+## Project Status: Transitioning from CLI to UI
+
+Teamwork is currently transitioning from a CLI-based tool to a full UI application with these key features:
+
+- **Complete UI interface** replacing all CLI commands with intuitive visual interactions
+- **Express server backend** handling all API requests and operations
+- **Modern frontend** built with React and Material-UI with custom theming
+- **WCAG 2.1 AA compliant** design with an earth-tone color palette
+- **Optimized for desktop use** with comprehensive workflows for PRD upload, task management, and sprint creation
+
+The transition maintains all the power of CLI commands while providing a visual, intuitive interface designed for three user personas:
+- Senior Developers (Alex)
+- DevOps Engineers (Samira)
+- Junior Developers (Jordan)
 
 ## Requirements
 
@@ -182,6 +207,30 @@ task-master next
 # Generate task files
 task-master generate
 ```
+
+## Implementation Roadmap
+
+The UI transition is being implemented on a two-week timeline with the following priorities:
+
+1. **Core Functionality**: Converting all CLI commands to equivalent UI functionality
+2. **User Experience**: Implementing interfaces for PRD upload, task/backlog generation, and sprint creation
+3. **Visual Design**: Applying the custom Material-UI theme with earth tones and ensuring accessibility compliance
+4. **Integration**: Connecting the Express backend with the React frontend
+
+### Future Roadmap
+
+Our long-term vision includes:
+
+1. **Complete Visualization Layer**: Interactive graphs and dashboards representing the entire software development process
+2. **AI Agent Framework**: Infrastructure for AI agents to autonomously implement tasks based on Product Owner guidance
+3. **Human-in-the-loop Workflows**: Streamlined processes for human review, feedback, and direction of AI-generated implementations
+4. **Product Owner Dashboard**: Specialized views and controls for the Product Owner to guide development direction
+5. **Decision Support System**: AI-powered insights and recommendations for product development decisions
+6. **Full Development Lifecycle Integration**: Extending beyond task management to include planning, testing, and deployment phases
+7. **MCP Server Integration**: Support for Model Context Protocol servers to enhance AI capabilities
+8. **A2A and AG2U Protocol Support**: Implementation of Agent-to-Agent and Agent-to-User protocol standards for improved communication
+9. **Hybrid LLM Architecture**: Integration with both Ollama and Huggingface to combine paid cloud LLMs with locally-run open-source models
+10. **AI Budget Optimization**: Smart routing of requests between paid and local LLMs based on task complexity and resource requirements
 
 ## Documentation
 
