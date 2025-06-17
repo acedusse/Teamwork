@@ -16,6 +16,7 @@ import { readJSON, writeJSON, log as consoleLog, truncate } from '../utils.js';
 import { generateObjectService } from '../ai-services-unified.js';
 import { getDefaultPriority } from '../config-manager.js';
 import generateTaskFiles from './generate-task-files.js';
+import { logTaskCreated } from '../../../server/utils/activityLogger.js';
 
 // Define Zod schema for the expected AI output object
 const AiTaskDataSchema = z.object({
@@ -1031,6 +1032,15 @@ async function addTask(
 		report('DEBUG: Writing tasks.json...', 'debug');
 		// Write the updated tasks to the file
 		writeJSON(tasksPath, data);
+		
+		// Log task creation activity
+		try {
+			const userId = session?.env?.USER_ID || context?.userId || 'cli_user';
+			logTaskCreated(newTask, userId);
+			report('DEBUG: Task creation activity logged.', 'debug');
+		} catch (logError) {
+			report(`Warning: Failed to log task creation activity: ${logError.message}`, 'warn');
+		}
 		report('DEBUG: tasks.json written.', 'debug');
 
 		// Generate markdown task files

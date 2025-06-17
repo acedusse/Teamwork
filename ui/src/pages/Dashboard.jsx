@@ -1,6 +1,5 @@
-import { Box, Container, Grid, Paper, Typography, useTheme, useMediaQuery, CircularProgress, Alert, IconButton, Tooltip } from '@mui/material';
-import { Refresh as RefreshIcon } from '@mui/icons-material';
-import { useEffect, useCallback } from 'react';
+import { Box, Container, Grid, Paper, Typography, useTheme, useMediaQuery, CircularProgress, Alert } from '@mui/material';
+import { useEffect } from 'react';
 import TaskStatusCard from '../components/dashboard/TaskStatusCard';
 import RecentActivityCard from '../components/dashboard/RecentActivityCard';
 import TaskOverviewChart from '../components/dashboard/TaskOverviewChart';
@@ -12,7 +11,7 @@ export default function Dashboard() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-  const { stats, activities, dailyStats, dailyStatsQuery, isLoading, error, refetch, lastUpdated } = useTasks();
+  const { stats, activities, dailyStats, currentStats, dailyStatsQuery, currentStatsQuery, isLoading, error, refetch } = useTasks();
 
   // Auto-refresh functionality - refresh data every 5 minutes
   useEffect(() => {
@@ -21,11 +20,6 @@ export default function Dashboard() {
     }, 5 * 60 * 1000); // 5 minutes
 
     return () => clearInterval(interval);
-  }, [refetch]);
-
-  // Manual refresh handler
-  const handleRefresh = useCallback(() => {
-    refetch();
   }, [refetch]);
 
   // Fallbacks if stats are not loaded yet
@@ -37,18 +31,7 @@ export default function Dashboard() {
   if (error) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert 
-          severity="error"
-          action={
-            <IconButton
-              color="inherit"
-              size="small"
-              onClick={handleRefresh}
-            >
-              <RefreshIcon />
-            </IconButton>
-          }
-        >
+        <Alert severity="error">
           Error loading dashboard data: {error.message}
         </Alert>
       </Box>
@@ -77,24 +60,10 @@ export default function Dashboard() {
       }}
     >
       <Container maxWidth="xl">
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box sx={{ mb: 3 }}>
           <Typography variant="h4" component="h1">
             Dashboard
           </Typography>
-          <Tooltip title="Refresh all dashboard data">
-            <IconButton 
-              onClick={handleRefresh}
-              disabled={isLoading}
-              sx={{ 
-                color: theme.palette.primary.main,
-                '&:hover': {
-                  backgroundColor: theme.palette.primary.main + '10'
-                }
-              }}
-            >
-              <RefreshIcon />
-            </IconButton>
-          </Tooltip>
         </Box>
         
         <Grid container spacing={3}>
@@ -149,42 +118,16 @@ export default function Dashboard() {
                 boxShadow: theme.shadows[1]
               }}
             >
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography variant="h6">
-                  Task Overview
-                </Typography>
-                <Tooltip title="Refresh chart data">
-                  <IconButton 
-                    onClick={handleRefresh}
-                    disabled={dailyStatsQuery.isLoading}
-                    size="small"
-                    sx={{ 
-                      color: theme.palette.primary.main,
-                      '&:hover': {
-                        backgroundColor: theme.palette.primary.main + '10'
-                      }
-                    }}
-                  >
-                    <RefreshIcon />
-                  </IconButton>
-                </Tooltip>
-              </Box>
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                Task Overview
+              </Typography>
               <Box sx={{ flexGrow: 1 }}>
                 <TaskOverviewChart 
-                  dailyStats={dailyStats}
-                  isLoading={dailyStatsQuery.isLoading}
-                  error={dailyStatsQuery.error}
+                  dailyStats={currentStats}
+                  isLoading={currentStatsQuery.isLoading}
+                  error={currentStatsQuery.error}
                 />
               </Box>
-              {lastUpdated && (
-                <Typography 
-                  variant="caption" 
-                  color="text.secondary" 
-                  sx={{ mt: 1, textAlign: 'right' }}
-                >
-                  Last updated: {new Date(lastUpdated).toLocaleTimeString()}
-                </Typography>
-              )}
             </Paper>
           </Grid>
 

@@ -1,0 +1,207 @@
+// =============================================================================
+// GRID - Layout SCSS
+// =============================================================================
+// CSS Grid layout patterns extracted from ai_dev_planning_workflow.html
+// Grid utilities and common grid layouts
+
+// -----------------------------------------------------------------------------
+// BASE GRID CLASSES
+// -----------------------------------------------------------------------------
+.d-grid {
+  display: grid;
+}
+
+.d-inline-grid {
+  display: inline-grid;
+}
+
+// -----------------------------------------------------------------------------
+// GRID TEMPLATE COLUMNS
+// -----------------------------------------------------------------------------
+.grid-cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.grid-cols-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.grid-cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.grid-cols-4 {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.grid-cols-5 {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+}
+
+.grid-cols-6 {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+// -----------------------------------------------------------------------------
+// AUTO-FIT GRIDS (from HTML patterns)
+// -----------------------------------------------------------------------------
+.grid-auto-fit-200 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $gap-md;
+}
+
+.grid-auto-fit-250 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: $gap-md;
+}
+
+.grid-auto-fit-300 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: $gap-md;
+}
+
+// -----------------------------------------------------------------------------
+// SPECIFIC GRID PATTERNS (from HTML)
+// -----------------------------------------------------------------------------
+.grid-two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $gap-lg;
+  
+  @include media-down(md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grid-two-column-30 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  
+  @include media-down(md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grid-two-column-20 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 20px 0;
+  
+  @include media-down(md) {
+    grid-template-columns: 1fr;
+    gap: $gap-sm;
+    margin: $margin-md 0;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// GRID GAP UTILITIES
+// -----------------------------------------------------------------------------
+.grid-gap-xs {
+  gap: $gap-xs;
+}
+
+.grid-gap-sm {
+  gap: $gap-sm;
+}
+
+.grid-gap-md {
+  gap: $gap-md;
+}
+
+.grid-gap-lg {
+  gap: $gap-lg;
+}
+
+.grid-gap-xl {
+  gap: $gap-xl;
+}
+
+// Specific gap sizes from HTML
+.grid-gap-15 {
+  gap: 15px;
+}
+
+.grid-gap-20 {
+  gap: 20px;
+}
+
+.grid-gap-30 {
+  gap: 30px;
+}
+
+// -----------------------------------------------------------------------------
+// GRID ITEM UTILITIES
+// -----------------------------------------------------------------------------
+.grid-col-span-1 {
+  grid-column: span 1;
+}
+
+.grid-col-span-2 {
+  grid-column: span 2;
+}
+
+.grid-col-span-3 {
+  grid-column: span 3;
+}
+
+.grid-col-span-4 {
+  grid-column: span 4;
+}
+
+.grid-col-span-full {
+  grid-column: 1 / -1;
+}
+
+// -----------------------------------------------------------------------------
+// GRID ROW UTILITIES
+// -----------------------------------------------------------------------------
+.grid-row-span-1 {
+  grid-row: span 1;
+}
+
+.grid-row-span-2 {
+  grid-row: span 2;
+}
+
+.grid-row-span-3 {
+  grid-row: span 3;
+}
+
+.grid-row-span-full {
+  grid-row: 1 / -1;
+}
+
+// -----------------------------------------------------------------------------
+// RESPONSIVE GRID UTILITIES
+// -----------------------------------------------------------------------------
+@include media-down(lg) {
+  .grid-cols-lg-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .grid-cols-lg-1 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@include media-down(md) {
+  .grid-cols-md-1 {
+    grid-template-columns: 1fr;
+  }
+  
+  .grid-gap-md-sm {
+    gap: $gap-sm;
+  }
+}
+
+@include media-down(sm) {
+  .grid-cols-sm-1 {
+    grid-template-columns: 1fr;
+  }
+} 

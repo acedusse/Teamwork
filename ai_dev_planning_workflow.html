@@ -1,0 +1,3641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrumban AI Development Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .flow-metrics {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .metric-card {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 10px 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Collaborative Planning */
+        .workflow-progress {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .phase-tracker {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .phase-tracker::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #e9ecef;
+            z-index: 1;
+        }
+
+        .phase-step {
+            background: white;
+            border: 3px solid #e9ecef;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .phase-step.completed {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-color: #28a745;
+            color: white;
+        }
+
+        .phase-step.current {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .phase-step.upcoming {
+            background: #f8f9fa;
+            border-color: #dee2e6;
+            color: #6c757d;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+        }
+
+        .phase-label {
+            position: absolute;
+            top: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            text-align: center;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .brainstorm-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .session-setup {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stakeholders-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stakeholder-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
+        }
+
+        .stakeholder-card.business-analyst {
+            border-left-color: #28a745;
+        }
+
+        .stakeholder-card.tech-lead {
+            border-left-color: #ffc107;
+        }
+
+        .stakeholder-card.ux-designer {
+            border-left-color: #e83e8c;
+        }
+
+        .stakeholder-card.product-owner {
+            border-left-color: #667eea;
+        }
+
+        .stakeholder-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .stakeholder-info h4 {
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .stakeholder-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            margin-left: auto;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-online {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .status-busy {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .ideation-board {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .board-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .sticky-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            min-height: 400px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .sticky-note {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            cursor: grab;
+            transition: transform 0.2s ease;
+            border-left: 4px solid #ffc107;
+        }
+
+        .sticky-note:hover {
+            transform: scale(1.02);
+        }
+
+        .sticky-note.user-story {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+
+        .sticky-note.feature {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .sticky-note.business-goal {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .sticky-content {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .sticky-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .vote-count {
+            background: #667eea;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
+
+        .research-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .research-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .research-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #f8f9fa;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .research-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .research-content {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        .document-generator {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .document-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .doc-progress {
+            margin: 20px 0;
+        }
+
+        .doc-sections {
+            list-style: none;
+            margin: 15px 0;
+        }
+
+        .doc-sections li {
+            padding: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .section-status {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .section-complete {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .section-in-progress {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .section-pending {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-group input,
+        .input-group select {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Sprint Planning */
+        .sprint-planning-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .sprint-header-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .sprint-config {
+            margin-top: 20px;
+        }
+
+        .config-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .config-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .config-item label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .sprint-goal {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sprint-goal label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .planning-workspace {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .story-selection {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .selection-stats {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .selected-count {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .story-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .story-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .story-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .story-item.selected {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #667eea;
+        }
+
+        .story-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .story-checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .story-item:not(.selected) .story-checkbox {
+            background: #e9ecef;
+            color: #666;
+        }
+
+        .story-info {
+            flex: 1;
+        }
+
+        .story-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .story-description {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .story-points {
+            background: #667eea;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .story-meta {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .story-epic {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .story-priority {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .story-priority.priority-high {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .story-priority.priority-medium {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .story-priority.priority-low {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .dependency-indicator {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .dependency-indicator:hover {
+            transform: scale(1.1);
+        }
+
+        .dependency-indicator.ready {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .dependency-indicator.blocked {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .dependency-indicator:not(.ready):not(.blocked) {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+        }
+
+        .planning-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .capacity-planning,
+        .dependency-view,
+        .sprint-actions {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .capacity-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .capacity-total,
+        .capacity-committed,
+        .capacity-remaining {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .capacity-total {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .capacity-committed {
+            background: rgba(255, 193, 7, 0.1);
+        }
+
+        .capacity-remaining {
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .capacity-number {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .capacity-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .agent-capacity-list {
+            margin-top: 20px;
+        }
+
+        .agent-capacity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .agent-details {
+            flex: 1;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .capacity-bar {
+            position: relative;
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .capacity-bar-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .capacity-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .dependency-summary {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .dep-stat {
+            text-align: center;
+        }
+
+        .dep-count {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            margin: 0 auto 5px;
+        }
+
+        .dep-count.ready {
+            background: #28a745;
+        }
+
+        .dep-count.warning {
+            background: #ffc107;
+        }
+
+        .dep-count.blocked {
+            background: #dc3545;
+        }
+
+        .dep-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .critical-path {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .path-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #dc3545;
+        }
+
+        .path-duration {
+            background: #dc3545;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .path-items {
+            font-size: 0.9rem;
+        }
+
+        .path-item {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .path-risk {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .dependency-list {
+            margin-top: 20px;
+        }
+
+        .dependency-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+
+        .dependency-item.blocked {
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .dependency-item.warning {
+            background: rgba(255, 193, 7, 0.1);
+        }
+
+        .dependency-item.ready {
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .dep-icon {
+            font-size: 1.2rem;
+        }
+
+        .dep-info {
+            flex: 1;
+        }
+
+        .dep-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 3px;
+        }
+
+        .dep-details {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .commitment-summary {
+            margin: 20px 0;
+        }
+
+        .commitment-health {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .health-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .health-indicator.good {
+            color: #28a745;
+        }
+
+        .health-indicator.warning {
+            color: #ffc107;
+        }
+
+        .health-indicator.risk {
+            color: #dc3545;
+        }
+
+        .health-icon {
+            font-size: 1.2rem;
+        }
+
+        .health-text {
+            font-weight: 600;
+        }
+
+        .health-details {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .health-details div {
+            margin-bottom: 3px;
+        }
+
+        .action-buttons {
+            margin-top: 20px;
+        }
+
+        /* Dependency Management Modal */
+        .dependency-modal {
+            max-width: 900px;
+        }
+
+        .dependency-graph {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .task-card.has-dependencies {
+            border-right: 4px solid #ffc107;
+        }
+
+        .task-card.blocked-by-dependency {
+            border-right: 4px solid #dc3545;
+        }
+
+        .dependency-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ffc107;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+        }
+
+        .dependency-badge.blocked {
+            background: #dc3545;
+        }
+
+        .dependency-badge.ready {
+            background: #28a745;
+        }
+        .bucket-planning {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .bucket-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .bucket {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            border-top: 4px solid;
+        }
+
+        .bucket.year {
+            border-top-color: #dc3545;
+        }
+
+        .bucket.quarter {
+            border-top-color: #ffc107;
+        }
+
+        .bucket.month {
+            border-top-color: #28a745;
+        }
+
+        .bucket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .bucket-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .bucket-count {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .bucket-item {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 3px solid #667eea;
+            cursor: grab;
+            transition: transform 0.2s ease;
+        }
+
+        .bucket-item:hover {
+            transform: translateX(5px);
+        }
+
+        .bucket-item.dragging {
+            opacity: 0.5;
+        }
+
+        /* Scrumban Board */
+        .scrumban-board {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .board-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .board-filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .board-filters input,
+        .board-filters select {
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .wip-toggle {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .wip-toggle.enforced {
+            background: #dc3545;
+        }
+
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+            min-height: 600px;
+        }
+
+        .column {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 15px;
+            position: relative;
+        }
+
+        .column.over-limit {
+            background: rgba(220, 53, 69, 0.1);
+            border: 2px solid #dc3545;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .column-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .wip-limit {
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .wip-limit.exceeded {
+            background: #dc3545;
+            animation: pulse-red 1s infinite;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .column-metrics {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid;
+            cursor: grab;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-card.priority-high {
+            border-left-color: #dc3545;
+        }
+
+        .task-card.priority-medium {
+            border-left-color: #ffc107;
+        }
+
+        .task-card.priority-low {
+            border-left-color: #28a745;
+        }
+
+        .task-card.blocked {
+            background: rgba(220, 53, 69, 0.1);
+            border: 2px dashed #dc3545;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .task-id {
+            font-size: 0.8rem;
+            color: #666;
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .task-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .task-assignee {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .agent-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .task-timing {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .cycle-time {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        .pull-signal {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 20px;
+            height: 20px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse-green 2s infinite;
+            cursor: pointer;
+        }
+
+        @keyframes pulse-green {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        .blocked-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #dc3545;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+        }
+
+        /* Sprint Integration */
+        .sprint-info {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .sprint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sprint-progress {
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .sprint-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .sprint-metric {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .metric-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .metric-trend {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .trend-up {
+            color: #28a745;
+        }
+
+        .trend-down {
+            color: #dc3545;
+        }
+
+        /* AI Collaboration Panel */
+        .ai-collaboration {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .agents-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .agent-card {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .agent-info {
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .agent-status {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .agent-capacity {
+            margin-left: auto;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+        }
+
+        .agent-workload {
+            width: 60px;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .workload-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        /* Flow Optimization */
+        .flow-optimization {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .bottleneck-alert {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            color: #dc3545;
+            margin-bottom: 5px;
+        }
+
+        .optimization-suggestions {
+            list-style: none;
+            margin: 15px 0;
+        }
+
+        .optimization-suggestions li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+            color: #666;
+        }
+
+        .optimization-suggestions li:last-child {
+            border-bottom: none;
+        }
+
+        /* Common Styles */
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s ease;
+            margin: 5px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .bucket-container,
+            .ai-collaboration,
+            .planning-workspace,
+            .brainstorm-container,
+            .document-generator {
+                grid-template-columns: 1fr;
+            }
+            
+            .kanban-board {
+                grid-template-columns: 1fr;
+            }
+            
+            .sprint-metrics {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .flow-metrics {
+                position: relative;
+                margin-top: 20px;
+            }
+            
+            .config-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .capacity-summary {
+                grid-template-columns: 1fr;
+            }
+            
+            .dependency-summary {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .phase-tracker {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .phase-tracker::before {
+                display: none;
+            }
+            
+            .sticky-board {
+                grid-template-columns: 1fr;
+            }
+            
+            .research-tabs {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .board-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Scrumban AI Development Dashboard</h1>
+            <p>Collaborative Planning • Pull-Based Flow • Continuous Optimization</p>
+            
+            <div class="flow-metrics">
+                <div class="metric-card">
+                    <div class="metric-value">2.3d</div>
+                    <div class="metric-label">Avg Cycle Time</div>
+                </div>
+
+        <!-- Sprint Planning Tab -->
+        <div id="sprint-content" class="tab-content">
+            <div class="sprint-planning-container">
+                <div class="sprint-header-section">
+                    <div class="sprint-setup">
+                        <h2>📋 Sprint Planning</h2>
+                        <div class="sprint-config">
+                            <div class="config-row">
+                                <div class="config-item">
+                                    <label>Sprint Name:</label>
+                                    <input type="text" value="Sprint 3.3" style="padding: 8px; border: 2px solid #e9ecef; border-radius: 8px;">
+                                </div>
+                                <div class="config-item">
+                                    <label>Duration:</label>
+                                    <select style="padding: 8px; border: 2px solid #e9ecef; border-radius: 8px;">
+                                        <option>2 weeks</option>
+                                        <option>1 week</option>
+                                        <option>3 weeks</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label>Start Date:</label>
+                                    <input type="date" value="2024-12-31" style="padding: 8px; border: 2px solid #e9ecef; border-radius: 8px;">
+                                </div>
+                            </div>
+                            
+                            <div class="sprint-goal">
+                                <label>Sprint Goal:</label>
+                                <textarea placeholder="Enter the sprint goal and key objectives..." style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; height: 80px; resize: vertical;">Complete core authentication system and establish ML training pipeline foundation</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="planning-workspace">
+                    <!-- Left Panel: Story Selection -->
+                    <div class="story-selection">
+                        <div class="section-header">
+                            <h3>📚 Ready Stories (3-Month Bucket)</h3>
+                            <div class="selection-stats">
+                                <span>12 stories available</span>
+                                <span>•</span>
+                                <span class="selected-count">5 selected (38 SP)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="story-list">
+                            <div class="story-item selected" onclick="toggleStorySelection(this)">
+                                <div class="story-header">
+                                    <div class="story-checkbox">✓</div>
+                                    <div class="story-info">
+                                        <div class="story-title">User Authentication System</div>
+                                        <div class="story-description">JWT-based auth with role management and session handling</div>
+                                    </div>
+                                    <div class="story-points">8 SP</div>
+                                </div>
+                                <div class="story-meta">
+                                    <span class="story-epic">Epic: Security</span>
+                                    <span class="story-priority priority-high">High Priority</span>
+                                    <span class="dependency-indicator" onclick="showDependencies(this)">🔗 2 deps</span>
+                                </div>
+                            </div>
+                            
+                            <div class="story-item selected" onclick="toggleStorySelection(this)">
+                                <div class="story-header">
+                                    <div class="story-checkbox">✓</div>
+                                    <div class="story-info">
+                                        <div class="story-title">Task Management UI</div>
+                                        <div class="story-description">Kanban board with drag-and-drop functionality</div>
+                                    </div>
+                                    <div class="story-points">5 SP</div>
+                                </div>
+                                <div class="story-meta">
+                                    <span class="story-epic">Epic: Frontend</span>
+                                    <span class="story-priority priority-medium">Medium Priority</span>
+                                    <span class="dependency-indicator" onclick="showDependencies(this)">🔗 1 dep</span>
+                                </div>
+                            </div>
+                            
+                            <div class="story-item selected" onclick="toggleStorySelection(this)">
+                                <div class="story-header">
+                                    <div class="story-checkbox">✓</div>
+                                    <div class="story-info">
+                                        <div class="story-title">AI Agent Communication</div>
+                                        <div class="story-description">Inter-agent messaging and coordination protocols</div>
+                                    </div>
+                                    <div class="story-points">13 SP</div>
+                                </div>
+                                <div class="story-meta">
+                                    <span class="story-epic">Epic: Core AI</span>
+                                    <span class="story-priority priority-high">High Priority</span>
+                                    <span class="dependency-indicator blocked" onclick="showDependencies(this)">⚠️ 3 deps</span>
+                                </div>
+                            </div>
+                            
+                            <div class="story-item selected" onclick="toggleStorySelection(this)">
+                                <div class="story-header">
+                                    <div class="story-checkbox">✓</div>
+                                    <div class="story-info">
+                                        <div class="story-title">Database Schema Design</div>
+                                        <div class="story-description">Optimized data models for scalability and performance</div>
+                                    </div>
+                                    <div class="story-points">5 SP</div>
+                                </div>
+                                <div class="story-meta">
+                                    <span class="story-epic">Epic: Data</span>
+                                    <span class="story-priority priority-medium">Medium Priority</span>
+                                    <span class="dependency-indicator ready" onclick="showDependencies(this)">✅ Ready</span>
+                                </div>
+                            </div>
+                            
+                            <div class="story-item selected" onclick="toggleStorySelection(this)">
+                                <div class="story-header">
+                                    <div class="story-checkbox">✓</div>
+                                    <div class="story-info">
+                                        <div class="story-title">Basic Reporting Features</div>
+                                        <div class="story-description">Progress tracking and team metrics dashboard</div>
+                                    </div>
+                                    <div class="story-points">8 SP</div>
+                                </div>
+                                <div class="story-meta">
+                                    <span class="story-epic">Epic: Analytics</span>
+                                    <span class="story-priority priority-low">Low Priority</span>
+                                    <span class="dependency-indicator" onclick="showDependencies(this)">🔗 4 deps</span>
+                                </div>
+                            </div>
+                            
+                            <div class="story-item" onclick="toggleStorySelection(this)">
+                                <div class="story-header">
+                                    <div class="story-checkbox">☐</div>
+                                    <div class="story-info">
+                                        <div class="story-title">Performance Monitoring</div>
+                                        <div class="story-description">Real-time system performance tracking and alerts</div>
+                                    </div>
+                                    <div class="story-points">3 SP</div>
+                                </div>
+                                <div class="story-meta">
+                                    <span class="story-epic">Epic: Infrastructure</span>
+                                    <span class="story-priority priority-medium">Medium Priority</span>
+                                    <span class="dependency-indicator ready" onclick="showDependencies(this)">✅ Ready</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Capacity & Dependencies -->
+                    <div class="planning-sidebar">
+                        <!-- Capacity Planning -->
+                        <div class="capacity-planning">
+                            <h3>👥 AI Agent Capacity</h3>
+                            <div class="capacity-summary">
+                                <div class="capacity-total">
+                                    <span class="capacity-number">78</span>
+                                    <span class="capacity-label">Total SP Capacity</span>
+                                </div>
+                                <div class="capacity-committed">
+                                    <span class="capacity-number">38</span>
+                                    <span class="capacity-label">Currently Selected</span>
+                                </div>
+                                <div class="capacity-remaining">
+                                    <span class="capacity-number">40</span>
+                                    <span class="capacity-label">Remaining</span>
+                                </div>
+                            </div>
+                            
+                            <div class="agent-capacity-list">
+                                <div class="agent-capacity-item">
+                                    <div class="agent-avatar">FE</div>
+                                    <div class="agent-details">
+                                        <div class="agent-name">Frontend Agent</div>
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill" style="width: 60%"></div>
+                                            <span class="capacity-text">12/20 SP</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="agent-capacity-item">
+                                    <div class="agent-avatar">BE</div>
+                                    <div class="agent-details">
+                                        <div class="agent-name">Backend Agent</div>
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill" style="width: 80%"></div>
+                                            <span class="capacity-text">16/20 SP</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="agent-capacity-item">
+                                    <div class="agent-avatar">ML</div>
+                                    <div class="agent-details">
+                                        <div class="agent-name">ML Agent</div>
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill" style="width: 30%"></div>
+                                            <span class="capacity-text">6/20 SP</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="agent-capacity-item">
+                                    <div class="agent-avatar">QA</div>
+                                    <div class="agent-details">
+                                        <div class="agent-name">QA Agent</div>
+                                        <div class="capacity-bar">
+                                            <div class="capacity-bar-fill" style="width: 20%"></div>
+                                            <span class="capacity-text">4/18 SP</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dependency Visualization -->
+                        <div class="dependency-view">
+                            <h3>🔗 Dependencies & Risks</h3>
+                            
+                            <div class="dependency-summary">
+                                <div class="dep-stat">
+                                    <div class="dep-count ready">3</div>
+                                    <div class="dep-label">Ready</div>
+                                </div>
+                                <div class="dep-stat">
+                                    <div class="dep-count warning">6</div>
+                                    <div class="dep-label">At Risk</div>
+                                </div>
+                                <div class="dep-stat">
+                                    <div class="dep-count blocked">2</div>
+                                    <div class="dep-label">Blocked</div>
+                                </div>
+                            </div>
+                            
+                            <div class="critical-path">
+                                <div class="path-header">
+                                    <span>🎯 Critical Path</span>
+                                    <span class="path-duration">18 days</span>
+                                </div>
+                                <div class="path-items">
+                                    <div class="path-item">Database Schema → Authentication → Task UI</div>
+                                    <div class="path-risk">⚠️ AI Communication blocking 3 stories</div>
+                                </div>
+                            </div>
+                            
+                            <div class="dependency-list">
+                                <div class="dependency-item blocked">
+                                    <div class="dep-icon">⚠️</div>
+                                    <div class="dep-info">
+                                        <div class="dep-title">External API Access</div>
+                                        <div class="dep-details">Blocks: AI Communication, Reporting</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="dependency-item warning">
+                                    <div class="dep-icon">🔶</div>
+                                    <div class="dep-info">
+                                        <div class="dep-title">Database Migration</div>
+                                        <div class="dep-details">Risk: May delay Authentication</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="dependency-item ready">
+                                    <div class="dep-icon">✅</div>
+                                    <div class="dep-info">
+                                        <div class="dep-title">UI Framework Setup</div>
+                                        <div class="dep-details">Ready: Enables Task UI work</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-secondary" style="width: 100%; margin-top: 15px;" onclick="openDependencyManager()">🔧 Manage Dependencies</button>
+                        </div>
+
+                        <!-- Sprint Actions -->
+                        <div class="sprint-actions">
+                            <h3>🎯 Sprint Commitment</h3>
+                            
+                            <div class="commitment-summary">
+                                <div class="commitment-health">
+                                    <div class="health-indicator good">
+                                        <span class="health-icon">✅</span>
+                                        <span class="health-text">Good Commitment</span>
+                                    </div>
+                                    <div class="health-details">
+                                        <div>• Capacity: 49% utilized</div>
+                                        <div>• Risk: 2 blocked dependencies</div>
+                                        <div>• Goal alignment: 95%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button class="btn" style="width: 100%;" onclick="commitSprint()">🚀 Commit Sprint</button>
+                                <button class="btn btn-warning" style="width: 100%; margin-top: 10px;" onclick="runSprintSimulation()">🎲 Run Simulation</button>
+                                <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="saveSprintDraft()">💾 Save Draft</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <div class="metric-card">
+                    <div class="metric-value">4.1d</div>
+                    <div class="metric-label">Lead Time</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">12</div>
+                    <div class="metric-label">Throughput/Week</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">85%</div>
+                    <div class="metric-label">Flow Efficiency</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('collaborative')">🧠 Collaborative Planning</div>
+            <div class="nav-tab" onclick="switchTab('planning')">🎯 Bucket Planning</div>
+            <div class="nav-tab" onclick="switchTab('sprint')">📋 Sprint Planning</div>
+            <div class="nav-tab" onclick="switchTab('board')">🚀 Scrumban Board</div>
+            <div class="nav-tab" onclick="switchTab('optimization')">📈 Flow Optimization</div>
+            <div class="nav-tab" onclick="switchTab('retrospective')">🔄 Continuous Improvement</div>
+        </div>
+
+        <!-- Collaborative Planning Tab -->
+        <div id="collaborative-content" class="tab-content active">
+            <!-- Workflow Progress Tracker -->
+            <div class="workflow-progress">
+                <h2>📋 Planning Workflow Progress</h2>
+                <div class="phase-tracker">
+                    <div class="phase-step completed" onclick="setCurrentPhase(1)">
+                        <span>1</span>
+                        <div class="phase-label">Discovery &<br>Vision</div>
+                    </div>
+                    <div class="phase-step completed" onclick="setCurrentPhase(2)">
+                        <span>2</span>
+                        <div class="phase-label">Stakeholder<br>Alignment</div>
+                    </div>
+                    <div class="phase-step current" onclick="setCurrentPhase(3)">
+                        <span>3</span>
+                        <div class="phase-label">Feature<br>Exploration</div>
+                    </div>
+                    <div class="phase-step upcoming" onclick="setCurrentPhase(4)">
+                        <span>4</span>
+                        <div class="phase-label">User Story<br>Development</div>
+                    </div>
+                    <div class="phase-step upcoming" onclick="setCurrentPhase(5)">
+                        <span>5</span>
+                        <div class="phase-label">Business Case<br>Development</div>
+                    </div>
+                    <div class="phase-step upcoming" onclick="setCurrentPhase(6)">
+                        <span>6</span>
+                        <div class="phase-label">Technical<br>Requirements</div>
+                    </div>
+                    <div class="phase-step upcoming" onclick="setCurrentPhase(7)">
+                        <span>7</span>
+                        <div class="phase-label">Validation &<br>Finalization</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <div>
+                        <strong>Current Phase:</strong> Feature Exploration
+                        <br><small>Collaborative brainstorming to identify and prioritize features</small>
+                    </div>
+                    <div>
+                        <button class="btn btn-success" onclick="completePhase()">Complete Phase</button>
+                        <button class="btn btn-secondary" onclick="exportProgress()">Export Progress</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brainstorming Session Setup -->
+            <div class="brainstorm-container">
+                <div class="session-setup">
+                    <h3>🎯 Session Setup</h3>
+                    <div class="input-group">
+                        <input type="text" placeholder="Session name" value="Feature Brainstorming - Q2 2025">
+                        <select>
+                            <option>90 minutes</option>
+                            <option>60 minutes</option>
+                            <option>120 minutes</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 600;">Session Focus:</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="research-tab active">Core Features</button>
+                            <button class="research-tab">User Experience</button>
+                            <button class="research-tab">Technical Constraints</button>
+                            <button class="research-tab">Business Goals</button>
+                        </div>
+                    </div>
+                    
+                    <div class="board-controls">
+                        <button class="btn" onclick="startSession()">🚀 Start Session</button>
+                        <button class="btn btn-secondary" onclick="inviteAIAgents()">🤖 Invite AI Agents</button>
+                        <button class="btn btn-warning" onclick="loadTemplate()">📋 Load Template</button>
+                    </div>
+                </div>
+
+                <div class="stakeholders-panel">
+                    <h3>🤖 AI Session Participants</h3>
+                    
+                    <div class="stakeholder-card business-analyst">
+                        <div class="stakeholder-avatar">BA</div>
+                        <div class="stakeholder-info">
+                            <h4>Business Analysis Agent</h4>
+                            <p>Market research & requirements analysis</p>
+                        </div>
+                        <div class="status-indicator status-online">Active</div>
+                    </div>
+                    
+                    <div class="stakeholder-card tech-lead">
+                        <div class="stakeholder-avatar">TA</div>
+                        <div class="stakeholder-info">
+                            <h4>Technical Architecture Agent</h4>
+                            <p>System design & feasibility assessment</p>
+                        </div>
+                        <div class="status-indicator status-online">Active</div>
+                    </div>
+                    
+                    <div class="stakeholder-card ux-designer">
+                        <div class="stakeholder-avatar">UX</div>
+                        <div class="stakeholder-info">
+                            <h4>UX Research Agent</h4>
+                            <p>User experience & design thinking</p>
+                        </div>
+                        <div class="status-indicator status-online">Active</div>
+                    </div>
+                    
+                    <div class="stakeholder-card product-owner">
+                        <div class="stakeholder-avatar">PM</div>
+                        <div class="stakeholder-info">
+                            <h4>Product Strategy Agent</h4>
+                            <p>Product vision & market positioning</p>
+                        </div>
+                        <div class="status-indicator status-busy">Processing</div>
+                    </div>
+                    
+                    <button class="btn" style="width: 100%; margin-top: 15px;" onclick="inviteAIAgent()">🤖 Add AI Agent</button>
+                </div>
+            </div>
+
+            <!-- Interactive Ideation Board -->
+            <div class="ideation-board">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2>💡 Collaborative Ideation Board</h2>
+                    <div>
+                        <span style="color: #666;">4 AI agents active</span>
+                        <button class="btn btn-secondary" onclick="enableVoting()">🗳️ Enable Agent Voting</button>
+                    </div>
+                </div>
+                
+                <div class="board-controls">
+                    <button class="btn" onclick="addSticky('feature')">+ Feature Idea</button>
+                    <button class="btn" onclick="addSticky('user-story')">+ User Story</button>
+                    <button class="btn" onclick="addSticky('business-goal')">+ Business Goal</button>
+                    <button class="btn btn-secondary" onclick="groupStickies()">🗂️ Group Ideas</button>
+                    <button class="btn btn-secondary" onclick="exportBoard()">📤 Export Board</button>
+                </div>
+                
+                <div class="sticky-board" id="ideationBoard">
+                    <div class="sticky-note feature">
+                        <div class="sticky-content">
+                            <strong>AI-Powered Code Generation</strong><br>
+                            Automatically generate boilerplate code based on user specifications
+                        </div>
+                        <div class="sticky-meta">
+                            <span>by Product Strategy Agent</span>
+                            <div class="vote-count">7</div>
+                        </div>
+                    </div>
+                    
+                    <div class="sticky-note user-story">
+                        <div class="sticky-content">
+                            <strong>As a developer</strong><br>
+                            I want to upload project requirements and get generated code templates so that I can start development faster
+                        </div>
+                        <div class="sticky-meta">
+                            <span>by Business Analysis Agent</span>
+                            <div class="vote-count">5</div>
+                        </div>
+                    </div>
+                    
+                    <div class="sticky-note business-goal">
+                        <div class="sticky-content">
+                            <strong>Reduce Time-to-Market</strong><br>
+                            Decrease development time by 40% through automation and AI assistance
+                        </div>
+                        <div class="sticky-meta">
+                            <span>by UX Research Agent</span>
+                            <div class="vote-count">9</div>
+                        </div>
+                    </div>
+                    
+                    <div class="sticky-note feature">
+                        <div class="sticky-content">
+                            <strong>Real-time Collaboration</strong><br>
+                            Multiple developers can work on the same codebase simultaneously with conflict resolution
+                        </div>
+                        <div class="sticky-meta">
+                            <span>by Technical Architecture Agent</span>
+                            <div class="vote-count">6</div>
+                        </div>
+                    </div>
+                    
+                    <div class="sticky-note user-story">
+                        <div class="sticky-content">
+                            <strong>As a project manager</strong><br>
+                            I want to see real-time progress of all team members so I can track project status effectively
+                        </div>
+                        <div class="sticky-meta">
+                            <span>by Product Strategy Agent</span>
+                            <div class="vote-count">4</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Research & Documentation Panel -->
+            <div class="research-panel">
+                <h3>🔍 Research & Documentation Hub</h3>
+                <div class="research-tabs">
+                    <div class="research-tab active" onclick="switchResearchTab('market')">Market Research</div>
+                    <div class="research-tab" onclick="switchResearchTab('competitive')">Competitive Analysis</div>
+                    <div class="research-tab" onclick="switchResearchTab('technical')">Technical Research</div>
+                    <div class="research-tab" onclick="switchResearchTab('user')">User Research</div>
+                </div>
+                
+                <div class="research-content" id="researchContent">
+                    <h4>📊 Market Research Findings</h4>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li>AI development tools market expected to grow 24% annually</li>
+                        <li>70% of developers report spending too much time on repetitive tasks</li>
+                        <li>Collaborative development tools show 35% adoption increase in 2024</li>
+                        <li>Enterprise focus on reducing development costs by 30%</li>
+                    </ul>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn" onclick="addResearchItem()">+ Add Finding</button>
+                        <button class="btn btn-secondary" onclick="importResearch()">📁 Import Research</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Generation Progress -->
+            <div class="document-generator">
+                <div class="document-card">
+                    <h3>📋 Product Requirements Document (PRD)</h3>
+                    <div class="doc-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 45%"></div>
+                        </div>
+                        <small>45% Complete</small>
+                    </div>
+                    
+                    <ul class="doc-sections">
+                        <li>
+                            Executive Summary
+                            <span class="section-status section-complete">Complete</span>
+                        </li>
+                        <li>
+                            Product Overview
+                            <span class="section-status section-complete">Complete</span>
+                        </li>
+                        <li>
+                            User Stories & Features
+                            <span class="section-status section-in-progress">In Progress</span>
+                        </li>
+                        <li>
+                            Technical Requirements
+                            <span class="section-status section-pending">Pending</span>
+                        </li>
+                        <li>
+                            Success Metrics
+                            <span class="section-status section-pending">Pending</span>
+                        </li>
+                    </ul>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn" onclick="generatePRD()">🤖 Auto-Generate</button>
+                        <button class="btn btn-secondary" onclick="reviewPRD()">👀 Review Draft</button>
+                    </div>
+                </div>
+                
+                <div class="document-card">
+                    <h3>💼 Business Requirements Document (BRD)</h3>
+                    <div class="doc-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 25%"></div>
+                        </div>
+                        <small>25% Complete</small>
+                    </div>
+                    
+                    <ul class="doc-sections">
+                        <li>
+                            Business Objectives
+                            <span class="section-status section-complete">Complete</span>
+                        </li>
+                        <li>
+                            Stakeholder Analysis
+                            <span class="section-status section-in-progress">In Progress</span>
+                        </li>
+                        <li>
+                            Cost-Benefit Analysis
+                            <span class="section-status section-pending">Pending</span>
+                        </li>
+                        <li>
+                            Risk Assessment
+                            <span class="section-status section-pending">Pending</span>
+                        </li>
+                        <li>
+                            Implementation Timeline
+                            <span class="section-status section-pending">Pending</span>
+                        </li>
+                    </ul>
+                    
+                    <div style="margin-top: 20px;">
+                        <button class="btn" onclick="generateBRD()">🤖 Auto-Generate</button>
+                        <button class="btn btn-secondary" onclick="reviewBRD()">👀 Review Draft</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phase Actions -->
+            <div class="card">
+                <h3>🎯 Phase Actions</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <button class="btn" onclick="scheduleSession()">📅 Schedule Session</button>
+                    <button class="btn" onclick="facilitateWorkshop()">🎪 Facilitate Workshop</button>
+                    <button class="btn" onclick="consolidateFindings()">📝 Consolidate Findings</button>
+                    <button class="btn" onclick="validateRequirements()">✅ Validate Requirements</button>
+                    <button class="btn btn-secondary" onclick="exportArtifacts()">📤 Export All Artifacts</button>
+                    <button class="btn btn-secondary" onclick="shareWithTeam()">👥 Share with Team</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bucket Planning Tab -->
+        <div id="planning-content" class="tab-content">
+            <div class="bucket-planning">
+                <h2>🗓️ Bucket-Size Planning</h2>
+                <p style="color: #666; margin-bottom: 20px;">Organize work into time horizons. Items move from long-term to short-term buckets as they become more concrete.</p>
+                
+                <div class="bucket-container">
+                    <div class="bucket year">
+                        <div class="bucket-header">
+                            <div class="bucket-title">📅 1-Year Bucket</div>
+                            <div class="bucket-count">5 items</div>
+                        </div>
+                        <div class="bucket-item">
+                            <strong>AI-Powered Development Platform</strong><br>
+                            <small>Complete platform for AI-assisted software development</small>
+                        </div>
+                        <div class="bucket-item">
+                            <strong>Enterprise Security Framework</strong><br>
+                            <small>Comprehensive security and compliance system</small>
+                        </div>
+                        <div class="bucket-item">
+                            <strong>Multi-Cloud Deployment</strong><br>
+                            <small>Support for AWS, Azure, and GCP deployments</small>
+                        </div>
+                        <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="addBucketItem('year')">+ Add Vision Item</button>
+                    </div>
+
+                    <div class="bucket quarter">
+                        <div class="bucket-header">
+                            <div class="bucket-title">📆 6-Month Bucket</div>
+                            <div class="bucket-count">8 items</div>
+                        </div>
+                        <div class="bucket-item">
+                            <strong>Core AI Agents System</strong><br>
+                            <small>Implement specialized AI agents for development tasks</small>
+                        </div>
+                        <div class="bucket-item">
+                            <strong>Real-time Collaboration</strong><br>
+                            <small>Live editing and synchronized development environment</small>
+                        </div>
+                        <div class="bucket-item">
+                            <strong>Advanced Analytics Dashboard</strong><br>
+                            <small>Comprehensive metrics and reporting system</small>
+                        </div>
+                        <div class="bucket-item">
+                            <strong>API Gateway & Microservices</strong><br>
+                            <small>Scalable backend architecture</small>
+                        </div>
+                        <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="addBucketItem('quarter')">+ Add Initiative</button>
+                    </div>
+
+                    <div class="bucket month">
+                        <div class="bucket-header">
+                            <div class="bucket-title">📋 3-Month Bucket</div>
+                            <div class="bucket-count">12 items</div>
+                        </div>
+                        <div class="bucket-item">
+                            <strong>User Authentication System</strong><br>
+                            <small>JWT-based auth with role management</small>
+                        </div>
+                        <div class="bucket-item">
+                            <strong>Task Management UI</strong><br>
+                            <small>Kanban board with drag-and-drop functionality</small>
+                        </div>
+                        <div class="bucket-item">
+                            <strong>AI Agent Communication</strong><br>
+                            <small>Inter-agent messaging and coordination</small>
+                        </div>
+                        <div class="bucket-item">
+                            <strong>Database Schema Design</strong><br>
+                            <small>Optimized data models for scalability</small>
+                        </div>
+                        <div class="bucket-item">
+                            <strong>Basic Reporting Features</strong><br>
+                            <small>Progress tracking and team metrics</small>
+                        </div>
+                        <button class="btn" style="width: 100%; margin-top: 10px;" onclick="promoteToSprint()">↗ Promote to Sprint</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Collaboration Panel -->
+            <div class="ai-collaboration">
+                <div class="agents-panel">
+                    <h3>🤖 AI Agents Capacity</h3>
+                    
+                    <div class="agent-card">
+                        <div class="agent-avatar">FE</div>
+                        <div class="agent-info">
+                            <div class="agent-name">Frontend Agent</div>
+                            <div class="agent-status">Available for pull</div>
+                            <div class="agent-workload">
+                                <div class="workload-fill" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div class="agent-capacity">3/5 WIP</div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <div class="agent-avatar">BE</div>
+                        <div class="agent-info">
+                            <div class="agent-name">Backend Agent</div>
+                            <div class="agent-status">At capacity</div>
+                            <div class="agent-workload">
+                                <div class="workload-fill" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="agent-capacity">5/5 WIP</div>
+                    </div>
+                    
+                    <div class="agent-card">
+                        <div class="agent-avatar">ML</div>
+                        <div class="agent-info">
+                            <div class="agent-name">ML Agent</div>
+                            <div class="agent-status">Ready to pull</div>
+                            <div class="agent-workload">
+                                <div class="workload-fill" style="width: 40%"></div>
+                            </div>
+                        </div>
+                        <div class="agent-capacity">2/5 WIP</div>
+                    </div>
+                    
+                    <button class="btn" style="width: 100%; margin-top: 15px;" onclick="addAIAgent()">🤖 Add AI Agent</button>
+                </div>
+
+                <div class="agents-panel">
+                    <h3>📊 Sprint Integration</h3>
+                    <div class="sprint-info">
+                        <div class="sprint-header">
+                            <div>
+                                <strong>Sprint 3.2</strong>
+                                <div style="color: #666; font-size: 0.9rem;">Dec 16 - Dec 30, 2024</div>
+                            </div>
+                            <button class="btn btn-warning" onclick="planNextSprint()">Plan Next Sprint</button>
+                        </div>
+                        
+                        <div class="sprint-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 68%"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #666;">
+                                <span>68% Complete</span>
+                                <span>5 days remaining</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-success" style="width: 100%; margin-top: 10px;" onclick="holdRetrospective()">🔄 Sprint Retrospective</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-top: 5px;" onclick="generateSprintReport()">📋 Sprint Report</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scrumban Board Tab -->
+        <div id="board-content" class="tab-content">
+            <div class="scrumban-board">
+                <div class="board-controls">
+                    <div>
+                        <h2>🚀 Scrumban Flow Board</h2>
+                        <p style="color: #666; margin: 0;">Pull-based workflow with WIP limits and flow optimization</p>
+                    </div>
+                    
+                    <div class="board-filters">
+                        <input type="text" placeholder="Search tasks..." style="width: 200px;">
+                        <select>
+                            <option>All Agents</option>
+                            <option>Frontend Agent</option>
+                            <option>Backend Agent</option>
+                            <option>ML Agent</option>
+                        </select>
+                        <button class="wip-toggle enforced" onclick="toggleWIPEnforcement()">
+                            🔒 WIP Limits ON
+                        </button>
+                        <button class="btn" onclick="openTaskModal()">+ Pull New Task</button>
+                    </div>
+                </div>
+                
+                <div class="kanban-board">
+                    <!-- Backlog Column -->
+                    <div class="column">
+                        <div class="column-header">
+                            <div class="column-title">📋 Backlog</div>
+                            <div style="font-size: 0.8rem; color: #666;">Ready to pull</div>
+                        </div>
+                        <div class="column-metrics">Priority ordered • 8 items</div>
+                        
+                        <div class="task-card priority-high has-dependencies">
+                            <div class="task-header">
+                                <div class="task-id">TASK-001</div>
+                                <div class="pull-signal" onclick="pullTask(this)" title="Ready to pull"></div>
+                                <div class="dependency-badge ready">🔗 2</div>
+                            </div>
+                            <div class="task-title">Implement ML Training Pipeline</div>
+                            <div class="task-assignee">
+                                <div class="agent-avatar">ML</div>
+                                <span>Available to pull</span>
+                            </div>
+                            <div class="task-meta">
+                                <span>Epic: Core AI</span>
+                                <span>8 SP</span>
+                            </div>
+                            <div class="task-timing">
+                                <small style="color: #28a745;">✅ All dependencies resolved</small>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card priority-medium blocked-by-dependency">
+                            <div class="task-header">
+                                <div class="task-id">TASK-002</div>
+                                <div class="dependency-badge blocked">⚠️ 1</div>
+                            </div>
+                            <div class="task-title">User Authentication API</div>
+                            <div class="task-assignee">
+                                <div class="agent-avatar">BE</div>
+                                <span>Waiting for capacity</span>
+                            </div>
+                            <div class="task-meta">
+                                <span>Epic: Security</span>
+                                <span>5 SP</span>
+                            </div>
+                            <div class="task-timing">
+                                <small style="color: #dc3545;">⚠️ Blocked by: Database Schema</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analysis Column -->
+                    <div class="column">
+                        <div class="column-header">
+                            <div class="column-title">🔍 Analysis</div>
+                            <div class="wip-limit">2/3</div>
+                        </div>
+                        <div class="column-metrics">Avg: 1.2d • Current: 2 items</div>
+                        
+                        <div class="task-card priority-high">
+                            <div class="task-header">
+                                <div class="task-id">TASK-003</div>
+                            </div>
+                            <div class="task-title">Database Schema Design</div>
+                            <div class="task-assignee">
+                                <div class="agent-avatar">BA</div>
+                                <span>Business Analysis Agent</span>
+                            </div>
+                            <div class="task-timing">
+                                <span class="cycle-time">Day 2</span>
+                            </div>
+                            <div class="task-meta">
+                                <span>Epic: Data</span>
+                                <span>3 SP</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Development Column -->
+                    <div class="column over-limit">
+                        <div class="column-header">
+                            <div class="column-title">⚡ Development</div>
+                            <div class="wip-limit exceeded">4/3</div>
+                        </div>
+                        <div class="column-metrics">Avg: 3.1d • ⚠️ Over limit!</div>
+                        
+                        <div class="task-card priority-high">
+                            <div class="task-header">
+                                <div class="task-id">TASK-004</div>
+                            </div>
+                            <div class="task-title">React Dashboard Components</div>
+                            <div class="task-assignee">
+                                <div class="agent-avatar">FE</div>
+                                <span>Frontend Agent</span>
+                            </div>
+                            <div class="task-timing">
+                                <span class="cycle-time">Day 4</span>
+                            </div>
+                            <div class="task-meta">
+                                <span>Epic: Frontend</span>
+                                <span>5 SP</span>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card priority-medium blocked">
+                            <div class="task-header">
+                                <div class="task-id">TASK-005</div>
+                                <div class="blocked-indicator">BLOCKED</div>
+                            </div>
+                            <div class="task-title">API Gateway Implementation</div>
+                            <div class="task-assignee">
+                                <div class="agent-avatar">BE</div>
+                                <span>Backend Agent</span>
+                            </div>
+                            <div class="task-timing">
+                                <span class="cycle-time">Day 6</span>
+                            </div>
+                            <div class="task-meta">
+                                <span>Epic: Infrastructure</span>
+                                <span>8 SP</span>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card priority-low">
+                            <div class="task-header">
+                                <div class="task-id">TASK-006</div>
+                            </div>
+                            <div class="task-title">Model Training Scripts</div>
+                            <div class="task-assignee">
+                                <div class="agent-avatar">ML</div>
+                                <span>ML Agent</span>
+                            </div>
+                            <div class="task-timing">
+                                <span class="cycle-time">Day 2</span>
+                            </div>
+                            <div class="task-meta">
+                                <span>Epic: Core AI</span>
+                                <span>3 SP</span>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card priority-medium">
+                            <div class="task-header">
+                                <div class="task-id">TASK-007</div>
+                            </div>
+                            <div class="task-title">Unit Test Coverage</div>
+                            <div class="task-assignee">
+                                <div class="agent-avatar">QA</div>
+                                <span>QA Agent</span>
+                            </div>
+                            <div class="task-timing">
+                                <span class="cycle-time">Day 1</span>
+                            </div>
+                            <div class="task-meta">
+                                <span>Epic: Quality</span>
+                                <span>2 SP</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Code Review Column -->
+                    <div class="column">
+                        <div class="column-header">
+                            <div class="column-title">👀 Code Review</div>
+                            <div class="wip-limit">1/2</div>
+                        </div>
+                        <div class="column-metrics">Avg: 0.8d • Current: 1 item</div>
+                        
+                        <div class="task-card priority-medium">
+                            <div class="task-header">
+                                <div class="task-id">TASK-008</div>
+                            </div>
+                            <div class="task-title">Authentication Service</div>
+                            <div class="task-assignee">
+                                <div class="agent-avatar">SA</div>
+                                <span>Solutions Architect</span>
+                            </div>
+                            <div class="task-timing">
+                                <span class="cycle-time">Day 1</span>
+                            </div>
+                            <div class="task-meta">
+                                <span>Epic: Security</span>
+                                <span>5 SP</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testing Column -->
+                    <div class="column">
+                        <div class="column-header">
+                            <div class="column-title">🧪 Testing</div>
+                            <div class="wip-limit">2/3</div>
+                        </div>
+                        <div class="column-metrics">Avg: 1.5d • Current: 2 items</div>
+                        
+                        <div class="task-card priority-high">
+                            <div class="task-header">
+                                <div class="task-id">TASK-009</div>
+                            </div>
+                            <div class="task-title">Integration Test Suite</div>
+                            <div class="task-assignee">
+                                <div class="agent-avatar">QA</div>
+                                <span>QA Agent</span>
+                            </div>
+                            <div class="task-timing">
+                                <span class="cycle-time">Day 2</span>
+                            </div>
+                            <div class="task-meta">
+                                <span>Epic: Quality</span>
+                                <span>3 SP</span>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card priority-medium">
+                            <div class="task-header">
+                                <div class="task-id">TASK-010</div>
+                            </div>
+                            <div class="task-title">Performance Testing</div>
+                            <div class="task-assignee">
+                                <div class="agent-avatar">QA</div>
+                                <span>QA Agent</span>
+                            </div>
+                            <div class="task-timing">
+                                <span class="cycle-time">Day 1</span>
+                            </div>
+                            <div class="task-meta">
+                                <span>Epic: Performance</span>
+                                <span>2 SP</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Done Column -->
+                    <div class="column">
+                        <div class="column-header">
+                            <div class="column-title">✅ Done</div>
+                            <div style="font-size: 0.8rem; color: #28a745;">This Sprint</div>
+                        </div>
+                        <div class="column-metrics">Completed: 18 items • 42 SP</div>
+                        
+                        <div class="task-card priority-high">
+                            <div class="task-header">
+                                <div class="task-id">TASK-011</div>
+                            </div>
+                            <div class="task-title">Project Architecture</div>
+                            <div class="task-assignee">
+                                <div class="agent-avatar">SA</div>
+                                <span>Solutions Architect</span>
+                            </div>
+                            <div class="task-timing">
+                                <span class="cycle-time">Completed: 3.2d</span>
+                            </div>
+                            <div class="task-meta">
+                                <span>Epic: Setup</span>
+                                <span>8 SP</span>
+                            </div>
+                        </div>
+                        
+                        <div class="task-card priority-medium">
+                            <div class="task-header">
+                                <div class="task-id">TASK-012</div>
+                            </div>
+                            <div class="task-title">DevOps Pipeline</div>
+                            <div class="task-assignee">
+                                <div class="agent-avatar">DO</div>
+                                <span>DevOps Agent</span>
+                            </div>
+                            <div class="task-timing">
+                                <span class="cycle-time">Completed: 2.8d</span>
+                            </div>
+                            <div class="task-meta">
+                                <span>Epic: Infrastructure</span>
+                                <span>5 SP</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sprint Metrics -->
+            <div class="sprint-info">
+                <div class="sprint-header">
+                    <h3>📊 Sprint Metrics</h3>
+                    <div>
+                        <button class="btn btn-secondary" onclick="viewBurndown()">📈 Burndown Chart</button>
+                        <button class="btn btn-secondary" onclick="viewCumulativeFlow()">📊 Cumulative Flow</button>
+                    </div>
+                </div>
+                
+                <div class="sprint-metrics">
+                    <div class="sprint-metric">
+                        <div class="metric-number">67</div>
+                        <div class="metric-label">Story Points Completed</div>
+                        <div class="metric-trend trend-up">↗ +12% vs last sprint</div>
+                    </div>
+                    
+                    <div class="sprint-metric">
+                        <div class="metric-number">2.1</div>
+                        <div class="metric-label">Avg Cycle Time (days)</div>
+                        <div class="metric-trend trend-down">↘ -0.4d improvement</div>
+                    </div>
+                    
+                    <div class="sprint-metric">
+                        <div class="metric-number">89%</div>
+                        <div class="metric-label">Sprint Goal Achievement</div>
+                        <div class="metric-trend trend-up">↗ On track</div>
+                    </div>
+                    
+                    <div class="sprint-metric">
+                        <div class="metric-number">1</div>
+                        <div class="metric-label">Blocked Items</div>
+                        <div class="metric-trend trend-down">⚠️ Needs attention</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flow Optimization Tab -->
+        <div id="optimization-content" class="tab-content">
+            <div class="flow-optimization">
+                <h2>📈 Flow Optimization Dashboard</h2>
+                
+                <div class="bottleneck-alert">
+                    <div class="alert-title">🚨 Bottleneck Detected: Development Column</div>
+                    <div>Development column is over WIP limit (4/3). This is causing delays and reducing flow efficiency.</div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                    <div>
+                        <h3>🎯 Optimization Suggestions</h3>
+                        <ul class="optimization-suggestions">
+                            <li>🔄 Move TASK-005 (blocked) to separate blocked column</li>
+                            <li>👥 Consider adding another developer to reduce WIP limit pressure</li>
+                            <li>⚡ Break down large tasks (8 SP) into smaller chunks</li>
+                            <li>🔍 Review code review process - items waiting too long</li>
+                            <li>📋 Implement daily WIP limit check-ins</li>
+                        </ul>
+                        
+                        <button class="btn" onclick="applyOptimizations()">✨ Apply Suggestions</button>
+                        <button class="btn btn-secondary" onclick="scheduleOptimizationReview()">📅 Schedule Review</button>
+                    </div>
+                    
+                    <div>
+                        <h3>📊 Flow Metrics Trends</h3>
+                        <div style="background: #f8f9fa; border-radius: 10px; height: 200px; display: flex; align-items: center; justify-content: center; color: #666; margin-bottom: 20px;">
+                            Cumulative Flow Diagram
+                            <br><small>Shows work distribution across columns over time</small>
+                        </div>
+                        
+                        <div style="display: flex; gap: 15px;">
+                            <div style="text-align: center; flex: 1;">
+                                <div style="font-size: 1.2rem; font-weight: bold; color: #dc3545;">↗ +0.3d</div>
+                                <div style="font-size: 0.9rem; color: #666;">Cycle Time Change</div>
+                            </div>
+                            <div style="text-align: center; flex: 1;">
+                                <div style="font-size: 1.2rem; font-weight: bold; color: #28a745;">↗ +15%</div>
+                                <div style="font-size: 0.9rem; color: #666;">Throughput Change</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Retrospective Tab -->
+        <div id="retrospective-content" class="tab-content">
+            <div class="flow-optimization">
+                <h2>🔄 Continuous Improvement</h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <h3>✅ What's Working Well</h3>
+                        <ul class="optimization-suggestions">
+                            <li>🤖 AI agents are effectively self-organizing and pulling work</li>
+                            <li>📈 Flow metrics visibility is helping identify bottlenecks quickly</li>
+                            <li>🔄 Bucket planning is keeping long-term vision aligned</li>
+                            <li>⚡ WIP limits are preventing context switching</li>
+                        </ul>
+                        
+                        <h3 style="margin-top: 30px;">🔧 Improvements to Try</h3>
+                        <ul class="optimization-suggestions">
+                            <li>🚫 Implement dedicated blocked item column</li>
+                            <li>📊 Add cycle time SLA alerts (> 5 days)</li>
+                            <li>👥 Cross-train agents to reduce specialization bottlenecks</li>
+                            <li>🔄 Experiment with smaller WIP limits</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3>📋 Action Items</h3>
+                        <div style="background: #f8f9fa; border-radius: 10px; padding: 20px;">
+                            <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 8px; border-left: 4px solid #667eea;">
+                                <strong>Create Blocked Column</strong><br>
+                                <small>Owner: Product Owner • Due: Next Sprint</small>
+                            </div>
+                            <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 8px; border-left: 4px solid #ffc107;">
+                                <strong>Reduce Development WIP Limit</strong><br>
+                                <small>Owner: Team • Trial: 2 weeks</small>
+                            </div>
+                            <div style="padding: 10px; background: white; border-radius: 8px; border-left: 4px solid #28a745;">
+                                <strong>Automate Flow Metrics</strong><br>
+                                <small>Owner: DevOps Agent • Due: End of sprint</small>
+                            </div>
+                        </div>
+                        
+                        <button class="btn" style="width: 100%; margin-top: 20px;" onclick="exportRetrospective()">📤 Export Retrospective</button>
+                        <button class="btn btn-success" style="width: 100%; margin-top: 10px;" onclick="scheduleNextRetro()">📅 Schedule Next Retro</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Agent Selection Modal -->
+    <div id="agentModal" class="modal">
+        <div class="modal-content">
+            <h3>🤖 Add AI Agent to Session</h3>
+            <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 10px;">Select AI Agent Type:</label>
+                <select id="agentType" style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 8px;">
+                    <option value="business-analyst">Business Analysis Agent - Market research & requirements</option>
+                    <option value="technical-architect">Technical Architecture Agent - System design & feasibility</option>
+                    <option value="ux-researcher">UX Research Agent - User experience & design thinking</option>
+                    <option value="product-strategist">Product Strategy Agent - Vision & market positioning</option>
+                    <option value="data-scientist">Data Science Agent - Analytics & ML insights</option>
+                    <option value="security-expert">Security Analysis Agent - Security & compliance</option>
+                    <option value="devops-specialist">DevOps Agent - Infrastructure & deployment</option>
+                    <option value="qa-specialist">QA Agent - Testing strategies & quality assurance</option>
+                    <option value="market-researcher">Market Research Agent - Competitive analysis</option>
+                    <option value="compliance-officer">Compliance Agent - Regulatory & legal considerations</option>
+                </select>
+            </div>
+            <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 10px;">Agent Focus Area:</label>
+                <select id="agentFocus" style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 8px;">
+                    <option value="feature-exploration">Feature Exploration</option>
+                    <option value="user-experience">User Experience Design</option>
+                    <option value="technical-feasibility">Technical Feasibility</option>
+                    <option value="business-strategy">Business Strategy</option>
+                    <option value="risk-assessment">Risk Assessment</option>
+                    <option value="competitive-analysis">Competitive Analysis</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
+                <button class="btn" onclick="addAIAgent()">Add Agent</button>
+                <button class="btn btn-secondary" onclick="closeAgentModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session Modal -->
+    <div id="sessionModal" class="modal">
+        <div class="modal-content">
+            <h3>🎯 New AI Brainstorming Session</h3>
+            <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 10px;">Session Name:</label>
+                <input type="text" style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 8px;" placeholder="Enter session name">
+            </div>
+            <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 10px;">Focus Area:</label>
+                <select style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 8px;">
+                    <option>Feature Exploration</option>
+                    <option>User Experience Design</option>
+                    <option>Technical Architecture</option>
+                    <option>Business Strategy</option>
+                </select>
+            </div>
+            <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 10px;">AI Agent Configuration:</label>
+                <select multiple style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 8px; height: 100px;">
+                    <option selected>Business Analysis Agent</option>
+                    <option selected>Technical Architecture Agent</option>
+                    <option selected>UX Research Agent</option>
+                    <option selected>Product Strategy Agent</option>
+                    <option>Data Science Agent</option>
+                    <option>Security Analysis Agent</option>
+                </select>
+                <small style="color: #666;">Hold Ctrl/Cmd to select multiple agents</small>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
+                <button class="btn" onclick="createSession()">Create Session</button>
+                <button class="btn btn-secondary" onclick="closeSessionModal()">Cancel</button>
+            </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <h3>🎯 Pull New Task</h3>
+            <p style="color: #666; margin-bottom: 20px;">Select a task from the backlog to pull into your workflow</p>
+            
+            <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 10px;">Available Tasks:</label>
+                <select style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 8px;">
+                    <option>TASK-001: Implement ML Training Pipeline (8 SP)</option>
+                    <option>TASK-002: User Authentication API (5 SP)</option>
+                    <option>TASK-013: Database Optimization (3 SP)</option>
+                </select>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 10px;">Assign to Agent:</label>
+                <select style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 8px;">
+                    <option>Frontend Agent (3/5 WIP - Available)</option>
+                    <option>ML Agent (2/5 WIP - Available)</option>
+                    <option disabled>Backend Agent (5/5 WIP - At Capacity)</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
+                <button class="btn" onclick="pullTaskFromBacklog()">⬇ Pull Task</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dependency Management Modal -->
+    <div id="dependencyModal" class="modal">
+        <div class="modal-content dependency-modal">
+            <h3>🔗 Dependency Management</h3>
+            <p style="color: #666; margin-bottom: 20px;">Visualize and manage task dependencies across the project</p>
+            
+            <div class="dependency-graph">
+                <div style="text-align: center;">
+                    <div style="font-size: 1.5rem; margin-bottom: 10px;">🕸️</div>
+                    <div>Interactive Dependency Graph</div>
+                    <small>Shows task relationships, critical paths, and bottlenecks</small>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                <div>
+                    <h4>🚨 Critical Dependencies</h4>
+                    <div style="background: #f8f9fa; border-radius: 10px; padding: 15px;">
+                        <div style="margin-bottom: 10px; padding: 10px; background: rgba(220, 53, 69, 0.1); border-radius: 8px;">
+                            <strong>External API Access</strong><br>
+                            <small>Blocks: AI Communication, Reporting</small>
+                        </div>
+                        <div style="margin-bottom: 10px; padding: 10px; background: rgba(255, 193, 7, 0.1); border-radius: 8px;">
+                            <strong>Database Migration</strong><br>
+                            <small>Risk: May delay Authentication</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4>📋 Quick Actions</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn btn-secondary">🔍 Analyze Critical Path</button>
+                        <button class="btn btn-secondary">⚠️ Check Circular Dependencies</button>
+                        <button class="btn btn-secondary">📊 Generate Dependency Report</button>
+                        <button class="btn btn-secondary">🔄 Auto-Resolve Conflicts</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 30px;">
+                <button class="btn" onclick="saveDependencies()">💾 Save Changes</button>
+                <button class="btn btn-secondary" onclick="closeDependencyModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'planning';
+        let wipLimitsEnforced = true;
+
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab content
+            const tabContent = document.getElementById(tabName + '-content');
+            if (tabContent) {
+                tabContent.classList.add('active');
+            }
+            
+            // Add active class to clicked tab
+            const targetTab = Array.from(document.querySelectorAll('.nav-tab')).find(tab => {
+                const tabText = tab.textContent.toLowerCase();
+                return tabText.includes(tabName === 'board' ? 'scrumban' : 
+                       tabName === 'sprint' ? 'sprint planning' :
+                       tabName === 'collaborative' ? 'collaborative planning' : tabName);
+            });
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+
+            currentTab = tabName;
+        }
+
+        // Collaborative Planning Functions
+        let currentPhase = 3;
+        let currentResearchTab = 'market';
+
+        function setCurrentPhase(phase) {
+            currentPhase = phase;
+            updatePhaseTracker();
+        }
+
+        function updatePhaseTracker() {
+            const steps = document.querySelectorAll('.phase-step');
+            steps.forEach((step, index) => {
+                step.classList.remove('completed', 'current', 'upcoming');
+                if (index + 1 < currentPhase) {
+                    step.classList.add('completed');
+                } else if (index + 1 === currentPhase) {
+                    step.classList.add('current');
+                } else {
+                    step.classList.add('upcoming');
+                }
+            });
+        }
+
+        function completePhase() {
+            if (currentPhase < 7) {
+                currentPhase++;
+                updatePhaseTracker();
+                alert(`Phase ${currentPhase - 1} completed! Moving to Phase ${currentPhase}.`);
+                
+                // Auto-transition to next planning stage when appropriate
+                if (currentPhase === 6) {
+                    if (confirm('🎯 Ready to move to Bucket Planning?\n\nYour requirements are ready to be organized into time horizons.')) {
+                        switchTab('planning');
+                    }
+                }
+            } else {
+                alert('🎉 All planning phases completed! Ready to begin bucket planning and sprint organization.');
+                if (confirm('🚀 Move to Bucket Planning?')) {
+                    switchTab('planning');
+                }
+            }
+        }
+
+        function exportProgress() {
+            alert('📊 Workflow progress exported as timeline visualization and status report.');
+        }
+
+        function startSession() {
+            alert('🚀 AI-powered brainstorming session started! All AI agents are now active and contributing ideas.');
+        }
+
+        function inviteAIAgents() {
+            document.getElementById('agentModal').style.display = 'block';
+        }
+
+        function loadTemplate() {
+            alert('📋 Loading AI agent collaboration template with specialized prompts for each agent type.');
+        }
+
+        function inviteAIAgent() {
+            document.getElementById('agentModal').style.display = 'block';
+        }
+
+        function addAIAgent() {
+            const agentType = document.getElementById('agentType').value;
+            const agentFocus = document.getElementById('agentFocus').value;
+            const agentName = document.getElementById('agentType').selectedOptions[0].text.split(' - ')[0];
+            
+            alert(`🤖 ${agentName} added to session!\nFocus: ${agentFocus}\nThe agent will now contribute specialized insights during brainstorming.`);
+            closeAgentModal();
+        }
+
+        function closeAgentModal() {
+            document.getElementById('agentModal').style.display = 'none';
+        }
+
+        function enableVoting() {
+            alert('🗳️ AI agent voting enabled! Each agent will evaluate and vote on ideas based on their expertise. Results will be automatically weighted and tallied.');
+        }
+
+        function groupStickies() {
+            alert('🗂️ AI clustering activated! Machine learning algorithms will group related ideas and identify patterns across agent contributions.');
+        }
+
+        function exportBoard() {
+            alert('📤 Ideation board with AI agent contributions exported as comprehensive report including agent rationales and voting patterns.');
+        }
+
+        function addSticky(type) {
+            const board = document.getElementById('ideationBoard');
+            const agentNames = [
+                'Business Analysis Agent',
+                'Technical Architecture Agent', 
+                'UX Research Agent',
+                'Product Strategy Agent',
+                'Data Science Agent'
+            ];
+            
+            const content = prompt(`Enter your ${type.replace('-', ' ')}:`);
+            if (content) {
+                const randomAgent = agentNames[Math.floor(Math.random() * agentNames.length)];
+                const randomVotes = Math.floor(Math.random() * 10) + 1;
+                
+                const sticky = document.createElement('div');
+                sticky.className = `sticky-note ${type}`;
+                sticky.innerHTML = `
+                    <div class="sticky-content">
+                        <strong>${type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ')}</strong><br>
+                        ${content}
+                    </div>
+                    <div class="sticky-meta">
+                        <span>by ${randomAgent}</span>
+                        <div class="vote-count">${randomVotes}</div>
+                    </div>
+                `;
+                board.appendChild(sticky);
+                
+                // Simulate AI agent response
+                setTimeout(() => {
+                    alert(`🤖 ${randomAgent} has analyzed your input and suggests considering: "${type === 'feature' ? 'technical feasibility and user impact' : type === 'user-story' ? 'acceptance criteria and edge cases' : 'measurable KPIs and timeline'}" for this ${type.replace('-', ' ')}.`);
+                }, 1500);
+            }
+        }
+
+        function switchResearchTab(tab) {
+            currentResearchTab = tab;
+            
+            // Update tab styling
+            document.querySelectorAll('.research-tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update content
+            const content = document.getElementById('researchContent');
+            const contentMap = {
+                market: `
+                    <h4>📊 Market Research Findings</h4>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li>AI development tools market expected to grow 24% annually</li>
+                        <li>70% of developers report spending too much time on repetitive tasks</li>
+                        <li>Collaborative development tools show 35% adoption increase in 2024</li>
+                        <li>Enterprise focus on reducing development costs by 30%</li>
+                    </ul>
+                `,
+                competitive: `
+                    <h4>🏆 Competitive Analysis</h4>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li><strong>GitHub Copilot:</strong> Leading AI code completion, 40M+ users</li>
+                        <li><strong>Replit:</strong> Collaborative IDE with AI features, growing rapidly</li>
+                        <li><strong>Tabnine:</strong> AI code completion, enterprise focus</li>
+                        <li><strong>CodeWhisperer:</strong> Amazon's AI coding assistant, AWS integration</li>
+                    </ul>
+                `,
+                technical: `
+                    <h4>🔧 Technical Research</h4>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li>Large Language Models (LLMs) show 85% accuracy in code generation</li>
+                        <li>Real-time collaboration requires WebSocket optimization</li>
+                        <li>Cloud-native architecture necessary for scalability</li>
+                        <li>Integration APIs needed for popular IDEs and tools</li>
+                    </ul>
+                `,
+                user: `
+                    <h4>👥 User Research Insights</h4>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li>85% of developers prefer integrated AI tools over standalone solutions</li>
+                        <li>Speed and accuracy are the top priorities for AI assistance</li>
+                        <li>Teams want seamless collaboration without context switching</li>
+                        <li>Security and code quality concerns are primary adoption barriers</li>
+                    </ul>
+                `
+            };
+            
+            content.innerHTML = contentMap[tab] + `
+                <div style="margin-top: 20px;">
+                    <button class="btn" onclick="addResearchItem()">+ Add Finding</button>
+                    <button class="btn btn-secondary" onclick="importResearch()">📁 Import Research</button>
+                </div>
+            `;
+        }
+
+        function addResearchItem() {
+            const finding = prompt('Enter new research finding:');
+            if (finding) {
+                alert(`Research finding added: "${finding}"`);
+            }
+        }
+
+        function importResearch() {
+            alert('📁 Research import dialog opened. You can upload documents, reports, and surveys.');
+        }
+
+        function generatePRD() {
+            alert('🤖 AI PRD Generator activated! Analyzing session data to create comprehensive PRD...');
+        }
+
+        function reviewPRD() {
+            alert('👀 Opening PRD draft for review. Collaborative editing mode enabled.');
+        }
+
+        function generateBRD() {
+            alert('🤖 AI BRD Generator activated! Creating business case from gathered requirements...');
+        }
+
+        function reviewBRD() {
+            alert('👀 Opening BRD draft for stakeholder review and approval.');
+        }
+
+        function scheduleSession() {
+            document.getElementById('sessionModal').style.display = 'block';
+        }
+
+        function facilitateWorkshop() {
+            alert('🎪 Workshop facilitation mode activated! Guided prompts and timers will help structure the session.');
+        }
+
+        function consolidateFindings() {
+            alert('📝 Consolidating all brainstorming findings into structured requirements...');
+        }
+
+        function validateRequirements() {
+            alert('✅ Requirements validation started. Checking for completeness and consistency...');
+        }
+
+        function exportArtifacts() {
+            alert('📤 Exporting all planning artifacts: session notes, research, PRD, BRD, and roadmap.');
+        }
+
+        function shareWithTeam() {
+            alert('👥 Sharing planning results with development team. Notifications sent to all team members.');
+        }
+
+        function createSession() {
+            alert('✅ AI-powered brainstorming session created successfully! Selected AI agents have been activated and are ready to contribute their specialized expertise.');
+            closeModal();
+        }
+
+        // Sprint Planning Functions
+        function toggleStorySelection(element) {
+            element.classList.toggle('selected');
+            const checkbox = element.querySelector('.story-checkbox');
+            const isSelected = element.classList.contains('selected');
+            
+            checkbox.textContent = isSelected ? '✓' : '☐';
+            
+            // Update selection count
+            updateSelectionStats();
+        }
+
+        function updateSelectionStats() {
+            const selectedStories = document.querySelectorAll('.story-item.selected');
+            const totalPoints = Array.from(selectedStories).reduce((sum, story) => {
+                const points = parseInt(story.querySelector('.story-points').textContent);
+                return sum + points;
+            }, 0);
+            
+            const countElement = document.querySelector('.selected-count');
+            if (countElement) {
+                countElement.textContent = `${selectedStories.length} selected (${totalPoints} SP)`;
+            }
+            
+            // Update capacity bars
+            updateCapacityBars(totalPoints);
+        }
+
+        function updateCapacityBars(selectedPoints) {
+            const committedElement = document.querySelector('.capacity-committed .capacity-number');
+            const remainingElement = document.querySelector('.capacity-remaining .capacity-number');
+            const totalCapacity = 78;
+            
+            if (committedElement) {
+                committedElement.textContent = selectedPoints;
+            }
+            if (remainingElement) {
+                remainingElement.textContent = totalCapacity - selectedPoints;
+            }
+        }
+
+        function showDependencies(element) {
+            const storyItem = element.closest('.story-item');
+            const storyTitle = storyItem.querySelector('.story-title').textContent;
+            
+            alert(`🔗 Dependencies for "${storyTitle}":\n\n` +
+                  `Dependencies:\n` +
+                  `• Database Schema Design (Ready)\n` +
+                  `• UI Framework Setup (Complete)\n` +
+                  `• External API Access (Blocked)\n\n` +
+                  `Dependents:\n` +
+                  `• Task Management UI\n` +
+                  `• Reporting Dashboard\n\n` +
+                  `Use the Dependency Manager for detailed view and management.`);
+        }
+
+        function commitSprint() {
+            const selectedStories = document.querySelectorAll('.story-item.selected').length;
+            const totalPoints = Array.from(document.querySelectorAll('.story-item.selected')).reduce((sum, story) => {
+                const points = parseInt(story.querySelector('.story-points').textContent);
+                return sum + points;
+            }, 0);
+            
+            if (selectedStories === 0) {
+                alert('❌ Cannot commit sprint! Please select at least one story.');
+                return;
+            }
+            
+            const blockedDeps = document.querySelectorAll('.dependency-item.blocked').length;
+            if (blockedDeps > 0) {
+                if (!confirm(`⚠️ Warning: ${blockedDeps} blocked dependencies detected!\n\nThis may impact sprint delivery. Continue with commitment?`)) {
+                    return;
+                }
+            }
+            
+            alert(`🚀 Sprint 3.3 committed successfully!\n\n` +
+                  `📋 ${selectedStories} stories (${totalPoints} SP)\n` +
+                  `👥 6 AI agents assigned\n` +
+                  `📅 Start: Dec 31, 2024\n` +
+                  `🎯 Goal: Complete core authentication system and establish ML training pipeline foundation\n\n` +
+                  `Sprint backlog created and ready for development workflow!`);
+        }
+
+        function runSprintSimulation() {
+            alert('🎲 Running Monte Carlo simulation...\n\n' +
+                  'Based on historical velocity and current dependencies:\n\n' +
+                  '✅ 85% chance of completing core stories\n' +
+                  '⚠️ 60% chance of completing all selected stories\n' +
+                  '📊 Expected completion: 36-42 story points\n' +
+                  '🚨 Risk: External API dependency may cause 2-day delay\n\n' +
+                  'Recommendation: Consider reducing scope by 8 SP or addressing blocked dependencies.');
+        }
+
+        function saveSprintDraft() {
+            alert('💾 Sprint draft saved!\n\nYou can continue planning later or share with stakeholders for review.');
+        }
+
+        function openDependencyManager() {
+            // In a real implementation, this would open a detailed dependency management interface
+            alert('🔧 Dependency Manager\n\n' +
+                  'Features available:\n' +
+                  '• Visual dependency graph\n' +
+                  '• Critical path analysis\n' +
+                  '• Dependency risk assessment\n' +
+                  '• Cross-team coordination\n' +
+                  '• Automated conflict detection\n\n' +
+                  'This would open a detailed interface for managing all project dependencies.');
+        }
+
+        function toggleWIPEnforcement() {
+            const toggle = document.querySelector('.wip-toggle');
+            wipLimitsEnforced = !wipLimitsEnforced;
+            
+            if (wipLimitsEnforced) {
+                toggle.textContent = '🔒 WIP Limits ON';
+                toggle.classList.add('enforced');
+                alert('✅ WIP limits enforced! Tasks cannot exceed column limits.');
+            } else {
+                toggle.textContent = '🔓 WIP Limits OFF';
+                toggle.classList.remove('enforced');
+                alert('⚠️ WIP limits disabled. Flow optimization may be affected.');
+            }
+        }
+
+        function pullTask(element) {
+            const taskCard = element.closest('.task-card');
+            const taskTitle = taskCard.querySelector('.task-title').textContent;
+            
+            if (wipLimitsEnforced) {
+                // Check if Analysis column has capacity
+                const analysisColumn = document.querySelectorAll('.column')[1];
+                const currentTasks = analysisColumn.querySelectorAll('.task-card').length;
+                const limit = 3; // Analysis column limit
+                
+                if (currentTasks >= limit) {
+                    alert('❌ Cannot pull task! Analysis column is at WIP limit (3/3). Please complete a task first.');
+                    return;
+                }
+            }
+            
+            alert(`✅ "${taskTitle}" pulled into Analysis! Agent can now begin work.`);
+            // In a real implementation, this would move the task to the Analysis column
+        }
+
+        function addBucketItem(bucket) {
+            const bucketNames = {
+                year: '1-Year Vision',
+                quarter: '6-Month Initiative', 
+                month: '3-Month Ready Item'
+            };
+            
+            const item = prompt(`Add new ${bucketNames[bucket]}:`);
+            if (item) {
+                alert(`📋 "${item}" added to ${bucketNames[bucket]} bucket!`);
+            }
+        }
+
+        function promoteToSprint() {
+            alert('↗ Selected items promoted to sprint backlog! They\'re now ready to be pulled into development workflow.');
+        }
+
+        function addAIAgent() {
+            alert('🤖 AI Agent selection panel opened! Choose from specialized agents: DevOps, Security, Performance, Documentation, etc.');
+        }
+
+        function planNextSprint() {
+            alert('📅 Sprint planning initiated! AI agents will collaborate to estimate and plan the next sprint based on bucket items and team capacity.');
+        }
+
+        function holdRetrospective() {
+            alert('🔄 Sprint retrospective session started! AI agents will analyze flow metrics and suggest process improvements.');
+        }
+
+        function generateSprintReport() {
+            alert('📋 Comprehensive sprint report generated with flow metrics, team performance, and improvement suggestions.');
+        }
+
+        function openTaskModal() {
+            document.getElementById('taskModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('taskModal').style.display = 'none';
+        }
+
+        function closeSessionModal() {
+            document.getElementById('sessionModal').style.display = 'none';
+        }
+
+        function closeDependencyModal() {
+            document.getElementById('dependencyModal').style.display = 'none';
+        }
+
+        function saveDependencies() {
+            alert('💾 Dependencies saved successfully! Critical path updated and team notifications sent.');
+            closeDependencyModal();
+        }
+
+        function openDependencyManager() {
+            document.getElementById('dependencyModal').style.display = 'block';
+        }
+
+        function pullTaskFromBacklog() {
+            alert('⬇ Task pulled successfully! Agent workload updated, WIP limits checked, and flow metrics tracked.');
+            closeModal();
+        }
+
+        function applyOptimizations() {
+            alert('✨ Flow optimizations applied! WIP limits adjusted, blocked items moved, and team capacity rebalanced.');
+        }
+
+        function scheduleOptimizationReview() {
+            alert('📅 Flow optimization review scheduled for next daily standup. AI agents will monitor metrics until then.');
+        }
+
+        function viewBurndown() {
+            alert('📈 Sprint burndown chart opened! Shows progress toward sprint goal with predictive completion date.');
+        }
+
+        function viewCumulativeFlow() {
+            alert('📊 Cumulative flow diagram opened! Visualizes work distribution and identifies flow bottlenecks over time.');
+        }
+
+        function exportRetrospective() {
+            alert('📤 Retrospective exported! Action items added to backlog, and insights shared with stakeholders.');
+        }
+
+        function scheduleNextRetro() {
+            alert('📅 Next retrospective scheduled! AI agents will continue monitoring flow metrics and prepare improvement suggestions.');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const taskModal = document.getElementById('taskModal');
+            const dependencyModal = document.getElementById('dependencyModal');
+            const agentModal = document.getElementById('agentModal');
+            const sessionModal = document.getElementById('sessionModal');
+            
+            if (event.target === taskModal) {
+                closeModal();
+            }
+            
+            if (event.target === dependencyModal) {
+                closeDependencyModal();
+            }
+            
+            if (event.target === agentModal) {
+                closeAgentModal();
+            }
+            
+            if (event.target === sessionModal) {
+                closeSessionModal();
+            }
+        }
+
+        // Initialize selection stats on load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSelectionStats();
+            updatePhaseTracker(); // Initialize phase tracker
+            console.log('🚀 Complete Scrumban AI Development Dashboard initialized!');
+            console.log('Full Workflow Features:');
+            console.log('- Collaborative planning with AI agent brainstorming');
+            console.log('- 7-phase workflow from discovery to validation');
+            console.log('- Interactive ideation board with research integration');
+            console.log('- Automated PRD/BRD generation');
+            console.log('- Bucket-size planning (1-year, 6-month, 3-month)');
+            console.log('- Sprint planning with capacity and dependency management');
+            console.log('- Pull-based workflow with WIP limits');
+            console.log('- Real-time flow metrics and optimization');
+            console.log('- AI agent collaboration and capacity management');
+            console.log('- Sprint integration with continuous flow');
+            console.log('- Continuous improvement and retrospectives');
+        });
+
+        // Simulate real-time metrics updates
+        setInterval(function() {
+            // Update flow metrics randomly
+            const metrics = document.querySelectorAll('.metric-value');
+            metrics.forEach(metric => {
+                if (Math.random() > 0.95) { // 5% chance to update
+                    const currentValue = parseFloat(metric.textContent);
+                    if (!isNaN(currentValue)) {
+                        const change = (Math.random() - 0.5) * 0.1;
+                        metric.textContent = (currentValue + change).toFixed(1) + (metric.textContent.includes('d') ? 'd' : metric.textContent.includes('%') ? '%' : '');
+                    }
+                }
+            });
+        }, 5000);
+
+        // Add missing function definitions
+        function applyOptimizations() {
+            alert('✨ Flow optimizations applied! WIP limits adjusted, blocked items moved, and team capacity rebalanced.');
+        }
+
+        function scheduleOptimizationReview() {
+            alert('📅 Flow optimization review scheduled for next daily standup. AI agents will monitor metrics until then.');
+        }
+
+        function viewBurndown() {
+            alert('📈 Sprint burndown chart opened! Shows progress toward sprint goal with predictive completion date.');
+        }
+
+        function viewCumulativeFlow() {
+            alert('📊 Cumulative flow diagram opened! Visualizes work distribution and identifies flow bottlenecks over time.');
+        }
+
+        // Make functions globally available
+        window.switchTab = switchTab;
+        window.toggleWIPEnforcement = toggleWIPEnforcement;
+        window.pullTask = pullTask;
+        window.addBucketItem = addBucketItem;
+        window.promoteToSprint = promoteToSprint;
+        window.addAIAgent = addAIAgent;
+        window.planNextSprint = planNextSprint;
+        window.holdRetrospective = holdRetrospective;
+        window.generateSprintReport = generateSprintReport;
+        window.openTaskModal = openTaskModal;
+        window.closeModal = closeModal;
+        window.closeSessionModal = closeSessionModal;
+        window.closeDependencyModal = closeDependencyModal;
+        window.closeAgentModal = closeAgentModal;
+        window.pullTaskFromBacklog = pullTaskFromBacklog;
+        window.applyOptimizations = applyOptimizations;
+        window.scheduleOptimizationReview = scheduleOptimizationReview;
+        window.viewBurndown = viewBurndown;
+        window.viewCumulativeFlow = viewCumulativeFlow;
+        window.exportRetrospective = exportRetrospective;
+        window.scheduleNextRetro = scheduleNextRetro;
+        window.toggleStorySelection = toggleStorySelection;
+        window.updateSelectionStats = updateSelectionStats;
+        window.showDependencies = showDependencies;
+        window.commitSprint = commitSprint;
+        window.runSprintSimulation = runSprintSimulation;
+        window.saveSprintDraft = saveSprintDraft;
+        window.openDependencyManager = openDependencyManager;
+        window.saveDependencies = saveDependencies;
+        
+        // Collaborative Planning functions
+        window.setCurrentPhase = setCurrentPhase;
+        window.completePhase = completePhase;
+        window.exportProgress = exportProgress;
+        window.startSession = startSession;
+        window.inviteAIAgents = inviteAIAgents;
+        window.loadTemplate = loadTemplate;
+        window.inviteAIAgent = inviteAIAgent;
+        window.enableVoting = enableVoting;
+        window.groupStickies = groupStickies;
+        window.exportBoard = exportBoard;
+        window.addSticky = addSticky;
+        window.switchResearchTab = switchResearchTab;
+        window.addResearchItem = addResearchItem;
+        window.importResearch = importResearch;
+        window.generatePRD = generatePRD;
+        window.reviewPRD = reviewPRD;
+        window.generateBRD = generateBRD;
+        window.reviewBRD = reviewBRD;
+        window.scheduleSession = scheduleSession;
+        window.facilitateWorkshop = facilitateWorkshop;
+        window.consolidateFindings = consolidateFindings;
+        window.validateRequirements = validateRequirements;
+        window.exportArtifacts = exportArtifacts;
+        window.shareWithTeam = shareWithTeam;
+        window.createSession = createSession;
+    </script>
+</body>
+</html>

@@ -12,6 +12,7 @@ import {
 	isValidTaskStatus,
 	TASK_STATUS_OPTIONS
 } from '../../../src/constants/task-status.js';
+import { logTaskStatusChanged } from '../../../server/utils/activityLogger.js';
 
 /**
  * Set the status of a task
@@ -53,15 +54,64 @@ async function setTaskStatus(tasksPath, taskIdInput, newStatus, options = {}) {
 		// Handle multiple task IDs (comma-separated)
 		const taskIds = taskIdInput.split(',').map((id) => id.trim());
 		const updatedTasks = [];
+		const statusChanges = []; // Track status changes for activity logging
 
 		// Update each task
 		for (const id of taskIds) {
+			// Capture old status before update
+			let oldStatus = 'pending';
+			let taskToUpdate = null;
+			
+			if (id.includes('.')) {
+				// Subtask
+				const [parentId, subtaskId] = id.split('.').map((id) => parseInt(id, 10));
+				const parentTask = data.tasks.find((t) => t.id === parentId);
+				if (parentTask && parentTask.subtasks) {
+					const subtask = parentTask.subtasks.find((st) => st.id === subtaskId);
+					if (subtask) {
+						oldStatus = subtask.status || 'pending';
+						taskToUpdate = subtask;
+					}
+				}
+			} else {
+				// Regular task
+				const taskId = parseInt(id, 10);
+				const task = data.tasks.find((t) => t.id === taskId);
+				if (task) {
+					oldStatus = task.status || 'pending';
+					taskToUpdate = task;
+				}
+			}
+			
 			await updateSingleTaskStatus(tasksPath, id, newStatus, data, !isMcpMode);
 			updatedTasks.push(id);
+			
+			// Store status change for logging
+			if (taskToUpdate && oldStatus !== newStatus) {
+				statusChanges.push({
+					task: taskToUpdate,
+					oldStatus,
+					newStatus,
+					taskId: id
+				});
+			}
 		}
 
 		// Write the updated tasks to the file
 		writeJSON(tasksPath, data);
+
+		// Log status change activities
+		try {
+			const userId = options?.session?.env?.USER_ID || options?.userId || 'cli_user';
+			statusChanges.forEach(change => {
+				logTaskStatusChanged(change.task, change.oldStatus, change.newStatus, userId);
+			});
+			if (statusChanges.length > 0) {
+				log('info', `Logged ${statusChanges.length} status change activities.`);
+			}
+		} catch (logError) {
+			log('warn', `Warning: Failed to log status change activities: ${logError.message}`);
+		}
 
 		// Validate dependencies after status update
 		log('info', 'Validating dependencies after status update...');

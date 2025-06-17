@@ -1,0 +1,59 @@
+{
+  "agents": [
+    {
+      "id": "jdoe123",
+      "name": "John Doe",
+      "email": "john.doe@teamwork.com",
+      "role": "Project Manager",
+      "department": "Management",
+      "avatar": "https://randomuser.me/api/portraits/men/41.jpg",
+      "skills": ["Leadership", "Scrum", "Project Planning", "Risk Management"],
+      "bio": "Experienced project manager with 8+ years in software development teams.",
+      "joined": "2023-04-15"
+    },
+    {
+      "id": "jsmith456",
+      "name": "Jane Smith",
+      "email": "jane.smith@teamwork.com",
+      "role": "Frontend Developer",
+      "department": "Engineering",
+      "avatar": "https://randomuser.me/api/portraits/women/22.jpg",
+      "skills": ["React", "TypeScript", "CSS", "UI/UX"],
+      "bio": "Frontend specialist focused on creating beautiful and functional user interfaces.",
+      "joined": "2023-06-01"
+    },
+    {
+      "id": "mjohnson789",
+      "name": "Mike Johnson",
+      "email": "mike.johnson@teamwork.com",
+      "role": "Backend Developer",
+      "department": "Engineering",
+      "avatar": "https://randomuser.me/api/portraits/men/32.jpg",
+      "skills": ["Node.js", "Express", "MongoDB", "API Design"],
+      "bio": "Backend developer with strong focus on scalable architecture and clean code.",
+      "joined": "2023-05-12"
+    },
+    {
+      "id": "agarcia101",
+      "name": "Ana Garcia",
+      "email": "ana.garcia@teamwork.com",
+      "role": "QA Engineer",
+      "department": "Quality Assurance",
+      "avatar": "https://randomuser.me/api/portraits/women/68.jpg",
+      "skills": ["Test Automation", "Selenium", "Jest", "Manual Testing"],
+      "bio": "Quality-focused engineer specializing in automated test frameworks.",
+      "joined": "2023-07-20"
+    },
+    {
+      "id": "rwilson202",
+      "name": "Robert Wilson",
+      "email": "robert.wilson@teamwork.com",
+      "role": "DevOps Engineer",
+      "department": "Operations",
+      "avatar": "https://randomuser.me/api/portraits/men/55.jpg",
+      "skills": ["Docker", "Kubernetes", "AWS", "CI/CD"],
+      "bio": "Infrastructure specialist with expertise in cloud deployment and automation.",
+      "joined": "2023-09-05"
+    }
+  ]
+}

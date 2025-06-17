@@ -18,6 +18,8 @@ async function updateSingleTaskStatus(
 	data,
 	showUi = true
 ) {
+
+
 	if (!isValidTaskStatus(newStatus)) {
 		throw new Error(
 			`Error: Invalid status value: ${newStatus}. Use one of: ${TASK_STATUS_OPTIONS.join(', ')}`
@@ -51,6 +53,18 @@ async function updateSingleTaskStatus(
 		// Update the subtask status
 		const oldStatus = subtask.status || 'pending';
 		subtask.status = newStatus;
+		
+		// Update timestamps for activity tracking
+		const now = new Date().toISOString();
+		subtask.updatedAt = now;
+		
+		// Set completedAt timestamp when marking as done
+		if (newStatus.toLowerCase() === 'done' || newStatus.toLowerCase() === 'completed') {
+			subtask.completedAt = now;
+		} else if (oldStatus === 'done' || oldStatus === 'completed') {
+			// Clear completedAt if moving away from done status
+			delete subtask.completedAt;
+		}
 
 		log(
 			'info',
@@ -99,6 +113,18 @@ async function updateSingleTaskStatus(
 		// Update the task status
 		const oldStatus = task.status || 'pending';
 		task.status = newStatus;
+		
+		// Update timestamps for activity tracking
+		const now = new Date().toISOString();
+		task.updatedAt = now;
+		
+		// Set completedAt timestamp when marking as done
+		if (newStatus.toLowerCase() === 'done' || newStatus.toLowerCase() === 'completed') {
+			task.completedAt = now;
+		} else if (oldStatus === 'done' || oldStatus === 'completed') {
+			// Clear completedAt if moving away from done status
+			delete task.completedAt;
+		}
 
 		log(
 			'info',
@@ -124,6 +150,11 @@ async function updateSingleTaskStatus(
 
 				pendingSubtasks.forEach((subtask) => {
 					subtask.status = newStatus;
+					// Update timestamps for subtasks too
+					subtask.updatedAt = now;
+					if (newStatus.toLowerCase() === 'done' || newStatus.toLowerCase() === 'completed') {
+						subtask.completedAt = now;
+					}
 				});
 			}
 		}

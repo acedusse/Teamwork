@@ -1,0 +1,97 @@
+// =============================================================================
+// CONTAINERS - Layout SCSS
+// =============================================================================
+// Container styles extracted from ai_dev_planning_workflow.html
+// Responsive containers and layout wrappers
+
+// -----------------------------------------------------------------------------
+// BASE CONTAINER
+// -----------------------------------------------------------------------------
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: $container-padding;
+  width: 100%;
+  
+  @include media-down(md) {
+    padding: $padding-sm;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// CONTAINER VARIANTS
+// -----------------------------------------------------------------------------
+.container-sm {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: $container-padding;
+}
+
+.container-md {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: $container-padding;
+}
+
+.container-lg {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $container-padding;
+}
+
+.container-xl {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: $container-padding;
+}
+
+// -----------------------------------------------------------------------------
+// FLUID CONTAINERS
+// -----------------------------------------------------------------------------
+.container-fluid {
+  width: 100%;
+  padding: $container-padding;
+  
+  @include media-down(md) {
+    padding: $padding-sm;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// SECTION CONTAINERS
+// -----------------------------------------------------------------------------
+.section {
+  padding: $section-spacing 0;
+  
+  &--sm {
+    padding: $spacing-4 0;
+  }
+  
+  &--lg {
+    padding: $spacing-12 0;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// CONTENT WRAPPERS
+// -----------------------------------------------------------------------------
+.content-wrapper {
+  @include overlay-background;
+  border-radius: 12px;
+  padding: $padding-lg;
+  margin-bottom: $margin-lg;
+  
+  @include media-down(md) {
+    padding: $padding-md;
+    margin-bottom: $margin-md;
+  }
+}
+
+.main-content {
+  min-height: 100vh;
+  padding: $padding-lg;
+  
+  @include media-down(md) {
+    padding: $padding-md;
+  }
+} 

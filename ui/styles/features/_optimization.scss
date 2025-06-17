@@ -1,0 +1,265 @@
+// =============================================================================
+// FLOW OPTIMIZATION FEATURE STYLES
+// =============================================================================
+// Extracted from ai_dev_planning_workflow.html
+
+.flow-optimization {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+// Metrics & Analytics
+.metrics-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  height: 100%;
+}
+
+.chart-container {
+  margin-top: 20px;
+  height: 300px;
+  position: relative;
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.chart-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #adb5bd;
+  font-style: italic;
+}
+
+// Bottleneck Analysis
+.bottleneck-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  height: 100%;
+}
+
+.bottleneck-stages {
+  margin-top: 20px;
+}
+
+.stage-item {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-left: 4px solid;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  &.critical {
+    border-left-color: #dc3545;
+  }
+
+  &.warning {
+    border-left-color: #ffc107;
+  }
+
+  &.normal {
+    border-left-color: #28a745;
+  }
+}
+
+.stage-info {
+  h4 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: #2c3e50;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+}
+
+.stage-metric {
+  background: #e9ecef;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+
+  &.critical {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+
+  &.warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+  }
+
+  &.normal {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+  }
+}
+
+// AI Suggestions
+.ai-suggestions {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  grid-column: span 2;
+}
+
+.suggestions-list {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.suggestion-card {
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 20px;
+  align-items: center;
+}
+
+.suggestion-icon {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.suggestion-content {
+  h4 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: #2c3e50;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: #6c757d;
+    line-height: 1.5;
+  }
+}
+
+.suggestion-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+// Continuous Improvement
+.retrospective-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.retro-column {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.retro-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 15px;
+
+  .icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+  }
+
+  &.positive .icon {
+    background: linear-gradient(135deg, #28a745, #20c997);
+  }
+
+  &.negative .icon {
+    background: linear-gradient(135deg, #dc3545, #e83e8c);
+  }
+}
+
+.retro-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.retro-note {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 0.9rem;
+  color: #2c3e50;
+  border-left: 4px solid;
+
+  &.positive {
+    border-left-color: #28a745;
+  }
+
+  &.negative {
+    border-left-color: #dc3545;
+  }
+}
+
+.note-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.note-author {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.author-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+}

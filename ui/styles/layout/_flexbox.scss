@@ -1,0 +1,205 @@
+// =============================================================================
+// FLEXBOX - Layout SCSS
+// =============================================================================
+// Flexbox layout patterns extracted from ai_dev_planning_workflow.html
+// Flex utilities and common layout patterns
+
+// -----------------------------------------------------------------------------
+// BASE FLEX CLASSES
+// -----------------------------------------------------------------------------
+.d-flex {
+  display: flex;
+}
+
+.d-inline-flex {
+  display: inline-flex;
+}
+
+// -----------------------------------------------------------------------------
+// FLEX DIRECTION
+// -----------------------------------------------------------------------------
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex-column-reverse {
+  flex-direction: column-reverse;
+}
+
+// -----------------------------------------------------------------------------
+// JUSTIFY CONTENT
+// -----------------------------------------------------------------------------
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+.justify-evenly {
+  justify-content: space-evenly;
+}
+
+// -----------------------------------------------------------------------------
+// ALIGN ITEMS
+// -----------------------------------------------------------------------------
+.align-start {
+  align-items: flex-start;
+}
+
+.align-end {
+  align-items: flex-end;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.align-baseline {
+  align-items: baseline;
+}
+
+.align-stretch {
+  align-items: stretch;
+}
+
+// -----------------------------------------------------------------------------
+// FLEX WRAP
+// -----------------------------------------------------------------------------
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
+
+.flex-wrap-reverse {
+  flex-wrap: wrap-reverse;
+}
+
+// -----------------------------------------------------------------------------
+// FLEX GROW/SHRINK
+// -----------------------------------------------------------------------------
+.flex-grow-0 {
+  flex-grow: 0;
+}
+
+.flex-grow-1 {
+  flex-grow: 1;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+.flex-shrink-1 {
+  flex-shrink: 1;
+}
+
+// -----------------------------------------------------------------------------
+// COMMON FLEX PATTERNS (from HTML)
+// -----------------------------------------------------------------------------
+.flex-between-center {
+  @include flex-between;
+}
+
+.flex-center {
+  @include flex-center;
+}
+
+.flex-column-gap {
+  @include flex-column;
+  gap: $gap-md;
+}
+
+.flex-end-gap {
+  display: flex;
+  justify-content: flex-end;
+  gap: $gap-sm;
+  margin-top: $margin-lg;
+}
+
+.flex-wrap-gap {
+  display: flex;
+  gap: $gap-sm;
+  flex-wrap: wrap;
+}
+
+// -----------------------------------------------------------------------------
+// GAP UTILITIES
+// -----------------------------------------------------------------------------
+.gap-xs {
+  gap: $gap-xs;
+}
+
+.gap-sm {
+  gap: $gap-sm;
+}
+
+.gap-md {
+  gap: $gap-md;
+}
+
+.gap-lg {
+  gap: $gap-lg;
+}
+
+.gap-xl {
+  gap: $gap-xl;
+}
+
+// Specific gap sizes from HTML
+.gap-10 {
+  gap: 10px;
+}
+
+.gap-15 {
+  gap: 15px;
+}
+
+.gap-20 {
+  gap: 20px;
+}
+
+.gap-30 {
+  gap: 30px;
+}
+
+// -----------------------------------------------------------------------------
+// RESPONSIVE FLEX UTILITIES
+// -----------------------------------------------------------------------------
+@include media-down(md) {
+  .flex-column-mobile {
+    flex-direction: column;
+  }
+  
+  .justify-center-mobile {
+    justify-content: center;
+  }
+  
+  .gap-sm-mobile {
+    gap: $gap-sm;
+  }
+} 

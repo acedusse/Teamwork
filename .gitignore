@@ -93,7 +93,7 @@ project_docs
 #mcp_json
 
 # Task Master AI
-.taskmaster
+# .taskmaster
 .cursor
 .github
 .roo

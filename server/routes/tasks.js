@@ -47,6 +47,65 @@ function saveTasks(tasks) {
 	writeJSON(TASKS_FILE, { ...data, tasks });
 }
 
+// PUT /tasks/:id/assign - Assign an agent to a specific task
+router.put('/:id/assign', (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { agentId } = req.body;
+        
+        if (!id || !agentId) {
+            return res.status(400).json({ error: 'Task ID and agent ID are required' });
+        }
+        
+        console.log(`[DEBUG] Assigning agent ${agentId} to task ${id}`);
+        
+        // Load tasks and find the target task
+        const tasks = loadTasks();
+        const taskIndex = tasks.findIndex(t => t.id.toString() === id.toString());
+        
+        if (taskIndex === -1) {
+            return res.status(404).json({ error: 'Task not found' });
+        }
+        
+        // Load agents to verify agent exists
+        const agents = loadAgents();
+        const agent = agents.find(a => a.id === agentId || a.name === agentId);
+        
+        if (!agent) {
+            return res.status(404).json({ error: 'Agent not found' });
+        }
+        
+        // Update the task with the assignee
+        tasks[taskIndex] = {
+            ...tasks[taskIndex],
+            assignee: agentId,  // Add explicit assignee field for future use
+            updatedAt: new Date().toISOString()
+        };
+        
+        // Save the updated tasks
+        saveTasks(tasks);
+        
+        // Record the assignment in history
+        recordAssignment(id, agentId);
+        
+        // Log the activity
+        logTaskUpdated(tasks[taskIndex], 'Assigned agent');
+        
+        // Broadcast the change via websocket
+        broadcast('task-updated', { task: tasks[taskIndex] });
+        
+        // Return success response
+        return res.json({
+            success: true,
+            task: tasks[taskIndex],
+            message: `Task ${id} assigned to ${agentId}`
+        });
+    } catch (error) {
+        console.error('[ERROR] Error assigning agent to task:', error);
+        return res.status(500).json({ error: 'Failed to assign agent to task' });
+    }
+});
+
 router.get('/', (req, res, next) => {
 	try {
 		const tasks = loadTasks();
@@ -466,6 +525,56 @@ router.get('/statistics/daily', (req, res, next) => {
                 endDate: end.toISOString().split('T')[0]
             },
             statistics: dailyStats
+        });
+        
+    } catch (err) {
+        next(err);
+    }
+});
+
+// GET /statistics/current - Current task status breakdown for overview chart
+router.get('/statistics/current', (req, res, next) => {
+    try {
+        const tasks = loadTasks();
+        
+        // Calculate current task status counts
+        const total = tasks.length;
+        const completed = tasks.filter(t => t.status === 'done').length;
+        const inProgress = tasks.filter(t => t.status === 'in-progress').length;
+        const pending = tasks.filter(t => t.status === 'pending' || (!t.status || t.status === '')).length;
+        const blocked = tasks.filter(t => t.status === 'blocked').length;
+        const deferred = tasks.filter(t => t.status === 'deferred').length;
+        
+        // Format as daily statistics for chart compatibility
+        // Use today's date as the single data point
+        const today = new Date().toISOString().split('T')[0];
+        
+        const statistics = [{
+            date: today,
+            completed: completed,
+            inProgress: inProgress,
+            pending: pending,
+            blocked: blocked,
+            deferred: deferred,
+            total: total
+        }];
+        
+        console.log(`[DEBUG] Current task breakdown: ${completed} completed, ${inProgress} in-progress, ${pending} pending, ${blocked} blocked, ${deferred} deferred (${total} total)`);
+        
+        res.json({
+            dateRange: {
+                startDate: today,
+                endDate: today
+            },
+            statistics: statistics,
+            summary: {
+                total,
+                completed,
+                inProgress,
+                pending,
+                blocked,
+                deferred
+            }
         });
         
     } catch (err) {

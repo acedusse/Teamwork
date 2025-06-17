@@ -1,0 +1,54 @@
+// =============================================================================
+// TYPOGRAPHY - SCSS Variables
+// =============================================================================
+// Extracted from ai_dev_planning_workflow.html
+// Font families, sizes, weights, and line heights
+
+// -----------------------------------------------------------------------------
+// FONT FAMILIES
+// -----------------------------------------------------------------------------
+$font-family-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+$font-family-base: $font-family-primary;
+
+// -----------------------------------------------------------------------------
+// FONT SIZES
+// -----------------------------------------------------------------------------
+// Base font size
+$font-size-base: 1rem; // 16px
+
+// Font size scale (extracted from inline styles)
+$font-size-xs: 0.75rem;   // 12px
+$font-size-sm: 0.875rem;  // 14px
+$font-size-md: 0.9rem;    // 14.4px
+$font-size-base: 1rem;    // 16px
+$font-size-lg: 1.125rem;  // 18px
+$font-size-xl: 1.2rem;    // 19.2px
+$font-size-2xl: 1.5rem;   // 24px
+$font-size-3xl: 2rem;     // 32px
+
+// Specific sizes found in the HTML
+$font-size-0-8: 0.8rem;   // 12.8px
+$font-size-0-9: 0.9rem;   // 14.4px
+$font-size-1-2: 1.2rem;   // 19.2px
+
+// -----------------------------------------------------------------------------
+// FONT WEIGHTS
+// -----------------------------------------------------------------------------
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// -----------------------------------------------------------------------------
+// LINE HEIGHTS
+// -----------------------------------------------------------------------------
+$line-height-base: 1.5;
+$line-height-sm: 1.25;
+$line-height-lg: 1.75;
+
+// -----------------------------------------------------------------------------
+// LETTER SPACING
+// -----------------------------------------------------------------------------
+$letter-spacing-tight: -0.025em;
+$letter-spacing-normal: 0;
+$letter-spacing-wide: 0.025em; 

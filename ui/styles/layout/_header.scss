@@ -1,0 +1,118 @@
+// =============================================================================
+// HEADER - Layout SCSS
+// =============================================================================
+// Header layout styles extracted from ai_dev_planning_workflow.html
+
+// -----------------------------------------------------------------------------
+// MAIN HEADER
+// -----------------------------------------------------------------------------
+.header {
+  @include overlay-background;
+  padding: $padding-lg;
+  border-radius: 12px;
+  margin-bottom: $margin-lg;
+  text-align: center;
+  
+  @include media-down(md) {
+    padding: $padding-md;
+    margin-bottom: $margin-md;
+  }
+  
+  &__title {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    @include text-gradient;
+    margin-bottom: $margin-sm;
+    
+    @include media-down(md) {
+      font-size: $font-size-2xl;
+    }
+  }
+  
+  &__subtitle {
+    color: $text-secondary;
+    margin-bottom: $margin-lg;
+    
+    @include media-down(md) {
+      margin-bottom: $margin-md;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// FLOW METRICS
+// -----------------------------------------------------------------------------
+.flow-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $gap-md;
+  margin-top: $margin-lg;
+  
+  @include media-down(md) {
+    grid-template-columns: 1fr;
+    gap: $gap-sm;
+    margin-top: $margin-md;
+  }
+  
+  &__item {
+    @include card-base;
+    text-align: center;
+    padding: $padding-md;
+    
+    &--success {
+      @include border-left-accent($success);
+    }
+    
+    &--warning {
+      @include border-left-accent($warning);
+    }
+    
+    &--info {
+      @include border-left-accent($primary-blue);
+    }
+  }
+  
+  &__value {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $text-dark;
+    margin-bottom: $margin-xs;
+  }
+  
+  &__label {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// HEADER ACTIONS
+// -----------------------------------------------------------------------------
+.header-actions {
+  @include flex-between;
+  margin-top: $margin-lg;
+  
+  @include media-down(md) {
+    flex-direction: column;
+    gap: $gap-sm;
+    align-items: stretch;
+  }
+  
+  &__left {
+    display: flex;
+    gap: $gap-sm;
+    
+    @include media-down(md) {
+      justify-content: center;
+    }
+  }
+  
+  &__right {
+    display: flex;
+    gap: $gap-sm;
+    
+    @include media-down(md) {
+      justify-content: center;
+    }
+  }
+} 

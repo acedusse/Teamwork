@@ -1,0 +1,158 @@
+// =============================================================================
+// RESPONSIVE UTILITIES
+// =============================================================================
+// Extracted from ai_dev_planning_workflow.html
+
+// Import variables
+@import '../variables/breakpoints';
+
+// Responsive visibility classes
+@mixin responsive-visibility($breakpoint) {
+  @if $breakpoint == 'xs' {
+    @media (max-width: #{$breakpoint-sm - 1px}) {
+      @content;
+    }
+  } @else if $breakpoint == 'sm' {
+    @media (min-width: #{$breakpoint-sm}) and (max-width: #{$breakpoint-md - 1px}) {
+      @content;
+    }
+  } @else if $breakpoint == 'md' {
+    @media (min-width: #{$breakpoint-md}) and (max-width: #{$breakpoint-lg - 1px}) {
+      @content;
+    }
+  } @else if $breakpoint == 'lg' {
+    @media (min-width: #{$breakpoint-lg}) and (max-width: #{$breakpoint-xl - 1px}) {
+      @content;
+    }
+  } @else if $breakpoint == 'xl' {
+    @media (min-width: #{$breakpoint-xl}) {
+      @content;
+    }
+  }
+}
+
+// Hide on specific breakpoints
+.d-none-xs {
+  @include responsive-visibility('xs') {
+    display: none !important;
+  }
+}
+
+.d-none-sm {
+  @include responsive-visibility('sm') {
+    display: none !important;
+  }
+}
+
+.d-none-md {
+  @include responsive-visibility('md') {
+    display: none !important;
+  }
+}
+
+.d-none-lg {
+  @include responsive-visibility('lg') {
+    display: none !important;
+  }
+}
+
+.d-none-xl {
+  @include responsive-visibility('xl') {
+    display: none !important;
+  }
+}
+
+// Show only on specific breakpoints
+.d-block-xs {
+  @include responsive-visibility('xs') {
+    display: block !important;
+  }
+}
+
+.d-block-sm {
+  @include responsive-visibility('sm') {
+    display: block !important;
+  }
+}
+
+.d-block-md {
+  @include responsive-visibility('md') {
+    display: block !important;
+  }
+}
+
+.d-block-lg {
+  @include responsive-visibility('lg') {
+    display: block !important;
+  }
+}
+
+.d-block-xl {
+  @include responsive-visibility('xl') {
+    display: block !important;
+  }
+}
+
+// Flex direction changes
+.flex-column-xs {
+  @include responsive-visibility('xs') {
+    flex-direction: column !important;
+  }
+}
+
+.flex-column-sm {
+  @include responsive-visibility('sm') {
+    flex-direction: column !important;
+  }
+}
+
+// Responsive grid adjustments
+.grid-1-col-xs {
+  @include responsive-visibility('xs') {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.grid-1-col-sm {
+  @include responsive-visibility('sm') {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+// Responsive spacing
+.mb-10-sm {
+  @include responsive-visibility('sm') {
+    margin-bottom: 10px !important;
+  }
+}
+
+.mb-20-sm {
+  @include responsive-visibility('sm') {
+    margin-bottom: 20px !important;
+  }
+}
+
+.p-10-sm {
+  @include responsive-visibility('sm') {
+    padding: 10px !important;
+  }
+}
+
+.p-20-sm {
+  @include responsive-visibility('sm') {
+    padding: 20px !important;
+  }
+}
+
+// Responsive text alignment
+.text-center-xs {
+  @include responsive-visibility('xs') {
+    text-align: center !important;
+  }
+}
+
+.text-center-sm {
+  @include responsive-visibility('sm') {
+    text-align: center !important;
+  }
+}

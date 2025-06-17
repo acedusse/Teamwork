@@ -53,4 +53,10 @@ export const taskService = {
     const response = await apiClient.get(url);
     return response.data;
   },
+
+  // Get current task status breakdown for overview chart
+  getCurrentStatistics: async () => {
+    const response = await apiClient.get('/tasks/statistics/current');
+    return response.data;
+  },
 }; 

@@ -1,0 +1,148 @@
+// =============================================================================
+// PROGRESS COMPONENTS
+// =============================================================================
+// Extracted from ai_dev_planning_workflow.html
+
+// Progress Bars
+.progress-bar {
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+// Phase Tracker
+.phase-tracker {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #e9ecef;
+    z-index: 1;
+  }
+}
+
+.phase-step {
+  background: white;
+  border: 3px solid #e9ecef;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &.completed {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border-color: #28a745;
+    color: white;
+  }
+
+  &.current {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-color: #667eea;
+    color: white;
+    animation: pulse 2s infinite;
+  }
+
+  &.upcoming {
+    background: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0); }
+}
+
+.phase-label {
+  position: absolute;
+  top: 75px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+// Capacity Circle
+.capacity-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #e9ecef;
+  position: relative;
+  margin: 0 auto 10px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    background: white;
+    border-radius: 50%;
+  }
+}
+
+.capacity-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(0deg, #28a745, #20c997);
+  border-bottom-left-radius: 60px;
+  border-bottom-right-radius: 60px;
+  transition: height 0.5s ease;
+}
+
+.capacity-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+// WIP Limits
+.wip-limit {
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+
+  &.exceeded {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+}

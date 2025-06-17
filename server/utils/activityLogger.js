@@ -242,6 +242,26 @@ export function logSubtaskStatusChanged(subtask, parentTaskId, oldStatus, newSta
 }
 
 /**
+ * Log a subtask deletion activity
+ * @param {Object} subtask - The deleted subtask
+ * @param {string} parentTaskId - ID of the parent task
+ * @param {string} userId - User who deleted the subtask
+ */
+export function logSubtaskDeleted(subtask, parentTaskId, userId = 'system') {
+  const entry = createActivityEntry(
+    ACTIVITY_TYPES.SUBTASK_DELETED,
+    {
+      subtaskId: subtask.id,
+      parentTaskId,
+      title: subtask.title,
+      status: subtask.status
+    },
+    userId
+  );
+  writeActivityEntry(entry);
+}
+
+/**
  * Log a dependency addition activity
  * @param {string} taskId - ID of the task that gained a dependency
  * @param {string} dependencyId - ID of the dependency task

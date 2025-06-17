@@ -1,0 +1,65 @@
+// =============================================================================
+// MAIN SCSS - Entry Point
+// =============================================================================
+// Main stylesheet that imports all SCSS modules
+// Extracted and organized from ai_dev_planning_workflow.html
+
+// -----------------------------------------------------------------------------
+// VARIABLES & MIXINS (Import Order Matters)
+// -----------------------------------------------------------------------------
+@import 'variables/colors';
+@import 'variables/typography';
+@import 'variables/spacing';
+@import 'variables/breakpoints';
+@import 'variables/z-index';
+@import 'variables/mixins';
+
+// -----------------------------------------------------------------------------
+// BASE STYLES
+// -----------------------------------------------------------------------------
+// CSS Reset and base styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: $font-family-base;
+  background: $gradient-primary;
+  color: $text-primary;
+  line-height: $line-height-base;
+  min-height: 100vh;
+}
+
+// -----------------------------------------------------------------------------
+// LAYOUT IMPORTS
+// -----------------------------------------------------------------------------
+@import 'layout/containers';
+@import 'layout/flexbox';
+@import 'layout/grid';
+@import 'layout/header';
+@import 'layout/navigation';
+
+// -----------------------------------------------------------------------------
+// COMPONENT IMPORTS
+// -----------------------------------------------------------------------------
+@import 'components/modals';
+@import 'components/buttons';
+@import 'components/forms';
+@import 'components/cards';
+@import 'components/progress';
+
+// -----------------------------------------------------------------------------
+// FEATURE IMPORTS
+// -----------------------------------------------------------------------------
+@import 'features/collaborative';
+@import 'features/sprint';
+@import 'features/board';
+@import 'features/optimization';
+
+// -----------------------------------------------------------------------------
+// UTILITY IMPORTS
+// -----------------------------------------------------------------------------
+@import 'utilities/helpers';
+@import 'utilities/responsive';

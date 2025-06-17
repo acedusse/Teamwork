@@ -6,6 +6,8 @@ import TopAppBar from './components/TopAppBar';
 import ErrorBoundary from './components/ErrorBoundary';
 import KeyboardShortcutHelp, { useKeyboardShortcutHelp } from './components/accessibility/KeyboardShortcutHelp';
 import keyboardShortcuts from './services/keyboardShortcuts';
+import CollaborativePlanningPage from './pages/CollaborativePlanningPage';
+import BucketPlanningPage from './pages/BucketPlanningPage';
 
 // Lazy load page components for code splitting
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -13,6 +15,7 @@ const TaskBoard = lazy(() => import('./pages/TaskBoard'));
 const TaskCreation = lazy(() => import('./pages/TaskCreation'));
 const SprintPlanning = lazy(() => import('./pages/SprintPlanning'));
 const Settings = lazy(() => import('./pages/Settings'));
+const ModalDemo = lazy(() => import('./pages/ModalDemo'));
 const PerformanceDashboard = lazy(() => import('./components/PerformanceDashboard'));
 
 // Lazy load large feature components
@@ -402,6 +405,23 @@ function AppContent() {
             element={
               <Suspense fallback={<FeatureLoadingSpinner feature="Performance Dashboard" />}>
                 <PerformanceDashboard />
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/demo/modals" 
+            element={
+              <Suspense fallback={<FeatureLoadingSpinner feature="Modal Demo" />}>
+                <ModalDemo />
+              </Suspense>
+            } 
+          />
+          <Route path="/collaborative-planning" element={<CollaborativePlanningPage />} />
+          <Route 
+            path="/bucket-planning" 
+            element={
+              <Suspense fallback={<FeatureLoadingSpinner feature="Bucket Planning" />}>
+                <BucketPlanningPage />
               </Suspense>
             } 
           />

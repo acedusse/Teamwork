@@ -1,0 +1,63 @@
+{
+  "id": 23,
+  "title": "Implement Sprint Planning API Endpoints for UI",
+  "description": "Create and enhance API endpoints to support the Sprint Planning UI functionality, including sprint creation, task assignment, and sprint management features.",
+  "details": "1. Create Sprint Management API Endpoints:\n   - Implement GET `/api/sprints` to list all sprints with filtering options\n   - Implement GET `/api/sprints/:id` to get details for a specific sprint\n   - Implement POST `/api/sprints` to create a new sprint\n   - Implement PUT `/api/sprints/:id` to update sprint details\n   - Implement DELETE `/api/sprints/:id` to remove a sprint\n   - Implement POST `/api/sprints/:id/start` and `/api/sprints/:id/complete` for sprint status changes\n\n2. Implement Sprint Task Assignment APIs:\n   - Create POST `/api/sprints/:id/tasks` endpoint to assign tasks to sprints\n   - Create DELETE `/api/sprints/:id/tasks/:taskId` to remove tasks from sprints\n   - Implement bulk assignment endpoint for multiple tasks\n   - Add validation to prevent assigning tasks with unmet dependencies\n\n3. Create Sprint Capacity Planning Endpoints:\n   - Implement GET `/api/sprints/:id/capacity` endpoint to calculate available team capacity\n   - Create POST `/api/sprints/:id/capacity` to update capacity settings\n   - Add logic to track and report capacity utilization\n\n4. Implement Sprint Timeline API Endpoints:\n   - Create GET `/api/sprints/:id/timeline` to provide sprint burndown data\n   - Implement real-time progress tracking endpoints\n   - Add daily statistics aggregation for timeline visualization\n\n5. Create data transformation layer:\n   - Develop utility functions to convert between CLI data structures and API responses\n   - Ensure backward compatibility with existing sprint data\n   - Create consistent response structures for all sprint endpoints\n\n6. Update Express server configuration:\n   - Register all new routes in the Express application\n   - Add authentication middleware for protected endpoints\n   - Implement proper error handling and validation\n   - Add rate limiting for API endpoints\n\n7. Implement WebSocket Integration:\n   - Add real-time updates for sprint changes\n   - Broadcast events when tasks are added/removed from sprints\n   - Notify clients when sprint status changes\n\n8. Create documentation for API endpoints:\n   - Document all endpoint parameters and response formats\n   - Add example requests and responses\n   - Include error scenarios and how they're handled",
+  "testStrategy": "1. Unit Tests:\n   - Test each API endpoint function in isolation\n   - Verify proper handling of valid and invalid inputs\n   - Test edge cases (empty sprints, maximum capacity, etc.)\n   - Mock dependencies to focus on endpoint behavior\n\n2. Integration Tests:\n   - Test the complete request-response cycle for each endpoint\n   - Verify database interactions work correctly\n   - Test the entire sprint creation and management flow\n   - Verify WebSocket notifications are sent correctly\n\n3. API Testing:\n   - Use tools like Postman or Supertest to verify API responses\n   - Test authentication and authorization\n   - Verify rate limiting functionality\n   - Test concurrent requests to detect race conditions\n\n4. UI Integration Testing:\n   - Test the sprint planning UI components with the new endpoints\n   - Verify that real-time updates appear correctly in the UI\n   - Test the complete user journey from sprint creation to completion\n\n5. Performance Testing:\n   - Test response times under load\n   - Verify efficient handling of large sprint datasets\n   - Test WebSocket performance with multiple concurrent clients",
+  "status": "pending",
+  "dependencies": [
+    7,
+    3
+  ],
+  "priority": "high",
+  "subtasks": [
+    {
+      "id": 1,
+      "title": "Create Core Sprint CRUD API Endpoints",
+      "description": "Implement basic REST endpoints for creating, reading, updating, and deleting sprints.",
+      "dependencies": [],
+      "details": "Create Express routes for sprint management, including proper JSON validation, error handling, and connection to existing sprint data structures.",
+      "status": "pending",
+      "testStrategy": "Write unit tests for each endpoint, test with valid and invalid inputs, verify proper status codes and response formats."
+    },
+    {
+      "id": 2,
+      "title": "Implement Sprint Task Assignment APIs",
+      "description": "Create endpoints for assigning tasks to sprints and removing tasks from sprints.",
+      "dependencies": [1],
+      "details": "Develop API endpoints to handle assigning and unassigning tasks from sprints, including validation logic to prevent dependency conflicts.",
+      "status": "pending",
+      "testStrategy": "Test assignment and removal with various task combinations, verify dependency checks work correctly, test bulk operations."
+    },
+    {
+      "id": 3,
+      "title": "Develop Sprint Capacity Planning Endpoints",
+      "description": "Create API endpoints for managing team capacity within sprints.",
+      "dependencies": [1],
+      "details": "Implement endpoints to calculate and update team capacity information, supporting the UI's capacity planning features.",
+      "status": "pending",
+      "testStrategy": "Test capacity calculations with various team configurations, verify capacity limits are enforced correctly."
+    },
+    {
+      "id": 4,
+      "title": "Create Sprint Timeline and Progress APIs",
+      "description": "Implement endpoints to track and report sprint progress and timeline data.",
+      "dependencies": [1],
+      "details": "Build API endpoints that provide burndown chart data, progress metrics, and other timeline information for sprint visualization.",
+      "status": "pending",
+      "testStrategy": "Test timeline data with various sprint configurations, verify calculations match expected progress values."
+    },
+    {
+      "id": 5,
+      "title": "Implement WebSocket Integration for Real-time Updates",
+      "description": "Add WebSocket support for real-time sprint updates in the UI.",
+      "dependencies": [1, 2, 3, 4],
+      "details": "Configure WebSocket server to broadcast changes to sprints, tasks, and capacity information in real-time.",
+      "status": "pending",
+      "testStrategy": "Test WebSocket connections, verify events are properly broadcast for different sprint operations."
+    }
+  ],
+  "createdAt": "2025-06-16T23:42:15.000Z",
+  "updatedAt": "2025-06-16T23:42:15.000Z",
+  "assignee": 1
+}

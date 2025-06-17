@@ -1,0 +1,64 @@
+// =============================================================================
+// SPACING - SCSS Variables
+// =============================================================================
+// Extracted from ai_dev_planning_workflow.html
+// Margins, padding, gaps, and layout spacing
+
+// -----------------------------------------------------------------------------
+// BASE SPACING SCALE
+// -----------------------------------------------------------------------------
+$spacing-0: 0;
+$spacing-1: 0.25rem;  // 4px
+$spacing-2: 0.5rem;   // 8px
+$spacing-3: 0.75rem;  // 12px
+$spacing-4: 1rem;     // 16px
+$spacing-5: 1.25rem;  // 20px
+$spacing-6: 1.5rem;   // 24px
+$spacing-8: 2rem;     // 32px
+$spacing-10: 2.5rem;  // 40px
+$spacing-12: 3rem;    // 48px
+$spacing-16: 4rem;    // 64px
+$spacing-20: 5rem;    // 80px
+
+// -----------------------------------------------------------------------------
+// SPECIFIC SPACING VALUES (from HTML)
+// -----------------------------------------------------------------------------
+$spacing-5px: 5px;
+$spacing-10px: 10px;
+$spacing-15px: 15px;
+$spacing-20px: 20px;
+$spacing-30px: 30px;
+
+// -----------------------------------------------------------------------------
+// COMPONENT SPACING
+// -----------------------------------------------------------------------------
+// Padding
+$padding-xs: $spacing-2;   // 8px
+$padding-sm: $spacing-3;   // 12px
+$padding-md: $spacing-4;   // 16px
+$padding-lg: $spacing-5;   // 20px
+$padding-xl: $spacing-6;   // 24px
+
+// Margins
+$margin-xs: $spacing-2;    // 8px
+$margin-sm: $spacing-3;    // 12px
+$margin-md: $spacing-4;    // 16px
+$margin-lg: $spacing-5;    // 20px
+$margin-xl: $spacing-6;    // 24px
+
+// -----------------------------------------------------------------------------
+// LAYOUT SPACING
+// -----------------------------------------------------------------------------
+$container-padding: $spacing-4;
+$section-spacing: $spacing-8;
+$card-padding: $spacing-5;
+$modal-padding: $spacing-6;
+
+// -----------------------------------------------------------------------------
+// GAPS
+// -----------------------------------------------------------------------------
+$gap-xs: $spacing-2;   // 8px
+$gap-sm: $spacing-3;   // 12px
+$gap-md: $spacing-4;   // 16px
+$gap-lg: $spacing-5;   // 20px
+$gap-xl: $spacing-6;   // 24px 

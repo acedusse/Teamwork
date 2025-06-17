@@ -3,6 +3,7 @@ import path from 'path';
 import { log, readJSON, writeJSON } from '../utils.js';
 import { isTaskDependentOn } from '../task-manager.js';
 import generateTaskFiles from './generate-task-files.js';
+import { logSubtaskCreated } from '../../../server/utils/activityLogger.js';
 
 /**
  * Add a subtask to a parent task
@@ -136,6 +137,16 @@ async function addSubtask(
 
 		// Write the updated tasks back to the file
 		writeJSON(tasksPath, data);
+
+		// Log subtask creation activity
+		try {
+			// Note: add-subtask doesn't have session context, so we use a default user
+			const userId = 'cli_user';
+			logSubtaskCreated(newSubtask, parentIdNum, userId);
+			log('info', `Logged subtask creation activity for ${parentIdNum}.${newSubtask.id}`);
+		} catch (logError) {
+			log('warn', `Warning: Failed to log subtask creation activity: ${logError.message}`);
+		}
 
 		// Generate task files if requested
 		if (generateFiles) {

@@ -15,6 +15,7 @@ import generateTasksRouter from './routes/generate-tasks.js';
 import statusRouter from './routes/status.js';
 import mcpRouter from './routes/mcp.js';
 import cliRouter from './routes/cli.js';
+import teamPerformanceRouter from './routes/team-performance.js';
 import sanitizeInputs from './middleware/sanitize.js';
 import errorHandler from './middleware/error-handler.js';
 import rateLimiter from './middleware/rate-limit.js';
@@ -34,7 +35,20 @@ if (isProd) {
 // Middleware
 
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
-app.use(helmet());
+app.use(helmet({
+	contentSecurityPolicy: {
+		directives: {
+			defaultSrc: ["'self'"],
+			scriptSrc: ["'self'", "'unsafe-inline'"],
+			styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+			fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+			imgSrc: ["'self'", 'data:'],
+			connectSrc: ["'self'"],
+			frameSrc: ["'none'"],
+			objectSrc: ["'none'"]
+		}
+	}
+}));
 app.use(cookieParser());
 app.use(express.json());
 app.use(metricsMiddleware);
@@ -52,10 +66,21 @@ const staticDir = isProd
 	? path.join(__dirname, '../dist/public')
 	: path.join(__dirname, '../ui/public');
 app.use(express.static(staticDir));
+
+// Direct route for planning-workflow.html
+app.get('/planning-workflow.html', (req, res) => {
+	res.sendFile(path.join(staticDir, 'planning-workflow.html'));
+});
+
+// Direct route for test.html
+app.get('/test.html', (req, res) => {
+	res.sendFile(path.join(staticDir, 'test.html'));
+});
 app.use('/api/tasks', tasksRouter);
 app.use('/api/prd', prdRouter);
 app.use('/api/generate-tasks', generateTasksRouter);
 app.use('/api/agents', agentsRouter);
+app.use('/api/team/performance', teamPerformanceRouter);
 
 app.use('/api/mcp', mcpRouter);
 app.use('/api/cli', cliRouter);

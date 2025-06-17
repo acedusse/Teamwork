@@ -15,6 +15,7 @@ import { generateTextService } from '../ai-services-unified.js';
 import { getDefaultSubtasks, getDebugFlag } from '../config-manager.js';
 import generateTaskFiles from './generate-task-files.js';
 import { COMPLEXITY_REPORT_FILE } from '../../../src/constants/paths.js';
+import { logSubtaskCreated } from '../../../server/utils/activityLogger.js';
 
 // --- Zod Schemas (Keep from previous step) ---
 const subtaskSchema = z
@@ -629,6 +630,17 @@ async function expandTask(
 
 		data.tasks[taskIndex] = task; // Assign the modified task back
 		writeJSON(tasksPath, data);
+
+		// Log subtask creation activities
+		try {
+			const userId = session?.env?.USER_ID || context?.userId || 'cli_user';
+			generatedSubtasks.forEach(subtask => {
+				logSubtaskCreated(subtask, task.id, userId);
+			});
+			logger.info(`Logged ${generatedSubtasks.length} subtask creation activities for task ${task.id}.`);
+		} catch (logError) {
+			logger.warn(`Warning: Failed to log subtask creation activities: ${logError.message}`);
+		}
 		await generateTaskFiles(tasksPath, path.dirname(tasksPath));
 
 		// Display AI Usage Summary for CLI

@@ -1,0 +1,157 @@
+// =============================================================================
+// NAVIGATION - Layout SCSS
+// =============================================================================
+// Navigation layout styles extracted from ai_dev_planning_workflow.html
+
+// -----------------------------------------------------------------------------
+// NAVIGATION TABS
+// -----------------------------------------------------------------------------
+.nav-tabs {
+  @include overlay-background;
+  border-radius: 12px;
+  padding: $padding-sm;
+  margin-bottom: $margin-lg;
+  display: flex;
+  gap: $gap-xs;
+  
+  @include media-down(md) {
+    flex-direction: column;
+    gap: $gap-sm;
+    margin-bottom: $margin-md;
+  }
+  
+  &__item {
+    flex: 1;
+  }
+}
+
+.nav-tab {
+  width: 100%;
+  padding: $padding-md;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: $text-secondary;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: $font-weight-medium;
+  text-align: center;
+  
+  &:hover {
+    background: $primary-bg;
+    color: $primary-blue;
+  }
+  
+  &--active {
+    @include gradient-primary;
+    color: $white;
+    
+    &:hover {
+      background: $gradient-primary;
+      color: $white;
+    }
+  }
+  
+  @include media-down(md) {
+    padding: $padding-sm;
+    font-size: $font-size-sm;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// TAB CONTENT
+// -----------------------------------------------------------------------------
+.tab-content {
+  @include overlay-background;
+  border-radius: 12px;
+  padding: $padding-lg;
+  min-height: 600px;
+  
+  @include media-down(md) {
+    padding: $padding-md;
+    min-height: 400px;
+  }
+  
+  &__pane {
+    display: none;
+    
+    &--active {
+      display: block;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// BREADCRUMB NAVIGATION
+// -----------------------------------------------------------------------------
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: $gap-xs;
+  margin-bottom: $margin-md;
+  
+  &__item {
+    color: $text-secondary;
+    text-decoration: none;
+    
+    &:hover {
+      color: $primary-blue;
+    }
+    
+    &--active {
+      color: $text-dark;
+      font-weight: $font-weight-medium;
+    }
+  }
+  
+  &__separator {
+    color: $text-muted;
+    margin: 0 $margin-xs;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// SIDEBAR NAVIGATION
+// -----------------------------------------------------------------------------
+.sidebar-nav {
+  background: $bg-white;
+  border-radius: 8px;
+  padding: $padding-md;
+  
+  &__title {
+    font-weight: $font-weight-bold;
+    color: $text-dark;
+    margin-bottom: $margin-md;
+    padding-bottom: $padding-xs;
+    border-bottom: 1px solid $gray-200;
+  }
+  
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  &__item {
+    margin-bottom: $margin-xs;
+  }
+  
+  &__link {
+    display: block;
+    padding: $padding-sm;
+    color: $text-secondary;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: $primary-bg;
+      color: $primary-blue;
+    }
+    
+    &--active {
+      background: $primary-blue;
+      color: $white;
+    }
+  }
+} 

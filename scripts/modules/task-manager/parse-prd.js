@@ -18,6 +18,7 @@ import { generateObjectService } from '../ai-services-unified.js';
 import { getDebugFlag } from '../config-manager.js';
 import generateTaskFiles from './generate-task-files.js';
 import { displayAiUsageSummary } from '../ui.js';
+import { logTaskCreated, logPrdParsed } from '../../../server/utils/activityLogger.js';
 
 // Define the Zod schema for a SINGLE task object
 const prdSingleTaskSchema = z.object({
@@ -320,6 +321,29 @@ Guidelines:
 			`Successfully ${append ? 'appended' : 'generated'} ${processedNewTasks.length} tasks in ${tasksPath}${research ? ' with research-backed analysis' : ''}`,
 			'success'
 		);
+
+		// Log task creation activities and PRD parsing
+		try {
+			const userId = session?.env?.USER_ID || options?.userId || 'cli_user';
+			
+			// Log each created task
+			processedNewTasks.forEach(task => {
+				logTaskCreated(task, userId);
+			});
+			
+			// Log PRD parsing activity
+			logPrdParsed({
+				sourceFile: prdPath,
+				tasksGenerated: processedNewTasks.length,
+				research: research,
+				append: append,
+				force: force
+			}, processedNewTasks.length, userId);
+			
+			report('DEBUG: Task creation and PRD parsing activities logged.', 'debug');
+		} catch (logError) {
+			report(`Warning: Failed to log PRD parsing activities: ${logError.message}`, 'warn');
+		}
 
 		// Generate markdown task files after writing tasks.json
 		await generateTaskFiles(tasksPath, path.dirname(tasksPath), { mcpLog });

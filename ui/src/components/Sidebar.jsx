@@ -10,9 +10,10 @@ import {
   Speed as PerformanceIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  GroupWork as GroupWorkIcon
 } from '@mui/icons-material';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useState } from 'react';
 import focusManager from '../services/focusManagement';
 import ariaManager from '../services/ariaManager';
@@ -33,6 +34,7 @@ const routePreloaders = {
   sprints: () => import('../pages/SprintPlanning'),
   dependencies: () => import('../components/DependencyGraph'),
   performance: () => import('../components/PerformanceDashboard'),
+  'bucket-planning': () => import('../pages/BucketPlanningPage'),
   settings: () => import('../pages/Settings')
 };
 
@@ -43,7 +45,14 @@ const menuItems = [
   { text: 'Sprint Planning', icon: <SprintIcon />, path: '/sprints', key: 'sprints' },
   { text: 'Dependencies', icon: <DependenciesIcon />, path: '/dependencies', key: 'dependencies' },
   { text: 'Performance', icon: <PerformanceIcon />, path: '/performance', key: 'performance' },
-  { text: 'Settings', icon: <SettingsIcon />, path: '/settings', key: 'settings' }
+  { text: 'Settings', icon: <SettingsIcon />, path: '/settings', key: 'settings' },
+  { text: 'Collaborative Planning', icon: <GroupWorkIcon />, path: '/collaborative-planning', key: 'collaborative-planning' },
+  { text: 'Bucket Planning', icon: <TaskBoardIcon />, path: '/bucket-planning', key: 'bucket-planning' }
+];
+
+// Demo/Development menu items (only shown in development)
+const demoMenuItems = [
+  { text: 'Modal Demo', icon: <PersonIcon />, path: '/demo/modals', key: 'modal-demo' }
 ];
 
 export default function Sidebar({ open, onClose }) {
@@ -194,6 +203,8 @@ export default function Sidebar({ open, onClose }) {
             >
               <ListItem
                 button
+                component={item.path ? Link : null}
+                to={item.path}
                 onClick={() => handleNavigation(item.path)}
                 onKeyDown={(event) => handleKeyDown(event, item.path)}
                 selected={isItemActive(item.path)}
@@ -244,6 +255,80 @@ export default function Sidebar({ open, onClose }) {
             </Tooltip>
           );
         })}
+        
+        {/* Demo/Development menu items - only show in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <>
+            <Divider sx={{ my: 1 }} role="separator" />
+            {!collapsed && (
+              <ListItem sx={{ py: 0.5 }}>
+                <ListItemText 
+                  primary="Development"
+                  primaryTypographyProps={{
+                    variant: 'caption',
+                    color: 'text.secondary',
+                    sx: { fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }
+                  }}
+                />
+              </ListItem>
+            )}
+            {demoMenuItems.map((item, index) => (
+              <Tooltip 
+                key={item.key}
+                title={collapsed ? item.text : ''}
+                placement="right"
+                aria-hidden={!collapsed}
+              >
+                <ListItem
+                  button
+                  onClick={() => handleNavigation(item.path)}
+                  onKeyDown={(event) => handleKeyDown(event, item.path)}
+                  selected={isItemActive(item.path)}
+                  role="menuitem"
+                  tabIndex={0}
+                  aria-current={isItemActive(item.path) ? 'page' : undefined}
+                  aria-label={`Navigate to ${item.text}`}
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: collapsed ? 'center' : 'initial',
+                    px: 2.5,
+                    '&.Mui-selected': {
+                      backgroundColor: theme.palette.secondary.light,
+                      '&:hover': {
+                        backgroundColor: theme.palette.secondary.light,
+                      },
+                    },
+                    '&:focus-visible': {
+                      backgroundColor: theme.palette.action.focus,
+                      outline: `2px solid ${theme.palette.secondary.main}`,
+                      outlineOffset: 2
+                    },
+                  }}
+                >
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: collapsed ? 'auto' : 3,
+                      justifyContent: 'center',
+                      color: isItemActive(item.path) ? theme.palette.secondary.main : 'inherit'
+                    }}
+                    aria-hidden="true"
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  {!collapsed && (
+                    <ListItemText 
+                      primary={item.text}
+                      primaryTypographyProps={{
+                        'aria-hidden': 'true'
+                      }}
+                    />
+                  )}
+                </ListItem>
+              </Tooltip>
+            ))}
+          </>
+        )}
       </List>
       <Box sx={{ flexGrow: 1 }} aria-hidden="true" />
       <Divider role="separator" />

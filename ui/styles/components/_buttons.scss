@@ -1,0 +1,203 @@
+// =============================================================================
+// BUTTONS - Component Styles
+// =============================================================================
+// Button components extracted from ai_dev_planning_workflow.html
+
+// -----------------------------------------------------------------------------
+// BASE BUTTON STYLES
+// -----------------------------------------------------------------------------
+.btn {
+  background: $gradient-primary;
+  color: $white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+  margin: 5px;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  font-weight: $font-weight-medium;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($primary-blue, 0.3);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// BUTTON VARIANTS
+// -----------------------------------------------------------------------------
+.btn-secondary {
+  background: $secondary;
+  
+  &:hover {
+    background: darken($secondary, 10%);
+  }
+}
+
+.btn-success {
+  background: $gradient-success;
+  
+  &:hover {
+    background: linear-gradient(135deg, darken($success, 10%), darken($success-light, 10%));
+  }
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, $warning, #fd7e14);
+  color: $text-dark;
+  
+  &:hover {
+    background: linear-gradient(135deg, darken($warning, 10%), darken(#fd7e14, 10%));
+  }
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, $danger, #c82333);
+  
+  &:hover {
+    background: linear-gradient(135deg, darken($danger, 10%), darken(#c82333, 10%));
+  }
+}
+
+// -----------------------------------------------------------------------------
+// BUTTON SIZES
+// -----------------------------------------------------------------------------
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+}
+
+.btn-lg {
+  padding: 16px 32px;
+  font-size: 1.125rem;
+}
+
+// -----------------------------------------------------------------------------
+// BUTTON STATES
+// -----------------------------------------------------------------------------
+.btn-block {
+  width: 100%;
+  display: block;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid $primary-blue;
+  color: $primary-blue;
+
+  &:hover {
+    background: $primary-blue;
+    color: $white;
+  }
+
+  &.btn-secondary {
+    border-color: $secondary;
+    color: $secondary;
+
+    &:hover {
+      background: $secondary;
+      color: $white;
+    }
+  }
+
+  &.btn-success {
+    border-color: $success;
+    color: $success;
+
+    &:hover {
+      background: $success;
+      color: $white;
+    }
+  }
+
+  &.btn-warning {
+    border-color: $warning;
+    color: $warning;
+
+    &:hover {
+      background: $warning;
+      color: $text-dark;
+    }
+  }
+
+  &.btn-danger {
+    border-color: $danger;
+    color: $danger;
+
+    &:hover {
+      background: $danger;
+      color: $white;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// SPECIAL BUTTON STYLES
+// -----------------------------------------------------------------------------
+.wip-toggle {
+  background: $success;
+  color: $white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+
+  &.enforced {
+    background: $danger;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.pull-signal {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  background: $success;
+  border-radius: 50%;
+  animation: pulse-green 2s infinite;
+  cursor: pointer;
+  border: none;
+  
+  &:hover {
+    animation-play-state: paused;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// BUTTON ANIMATIONS
+// -----------------------------------------------------------------------------
+@keyframes pulse-green {
+  0%, 100% { 
+    transform: scale(1); 
+    opacity: 1; 
+  }
+  50% { 
+    transform: scale(1.2); 
+    opacity: 0.7; 
+  }
+} 

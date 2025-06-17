@@ -1,0 +1,32 @@
+// =============================================================================
+// Z-INDEX - SCSS Variables
+// =============================================================================
+// Z-index values for proper layering of components
+
+// -----------------------------------------------------------------------------
+// Z-INDEX SCALE
+// -----------------------------------------------------------------------------
+$z-index-base: 1;
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+$z-index-toast: 1080;
+
+// -----------------------------------------------------------------------------
+// COMPONENT Z-INDEX VALUES
+// -----------------------------------------------------------------------------
+$z-index-header: $z-index-sticky;
+$z-index-navigation: $z-index-sticky + 1;
+$z-index-overlay: $z-index-modal-backdrop;
+$z-index-modal-content: $z-index-modal;
+$z-index-dropdown-menu: $z-index-dropdown;
+
+// -----------------------------------------------------------------------------
+// SPECIAL CASES
+// -----------------------------------------------------------------------------
+$z-index-behind: -1;
+$z-index-auto: auto; 

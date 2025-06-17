@@ -4,6 +4,7 @@ import path from 'path';
 import { log, readJSON, writeJSON } from '../utils.js';
 import generateTaskFiles from './generate-task-files.js';
 import taskExists from './task-exists.js';
+import { logTaskDeleted, logSubtaskDeleted } from '../../../server/utils/activityLogger.js';
 
 /**
  * Removes one or more tasks or subtasks from the tasks file
@@ -82,6 +83,14 @@ async function removeTask(tasksPath, taskIds) {
 					// Remove the subtask from the parent
 					parentTask.subtasks.splice(subtaskIndex, 1);
 
+					// Log subtask deletion activity
+					try {
+						const userId = 'cli_user'; // remove-task doesn't have session context
+						logSubtaskDeleted(removedSubtask, parentTaskId, userId);
+					} catch (logError) {
+						log('warn', `Warning: Failed to log subtask deletion activity: ${logError.message}`);
+					}
+
 					results.messages.push(`Successfully removed subtask ${taskId}`);
 				}
 				// Handle main task removal
@@ -101,6 +110,14 @@ async function removeTask(tasksPath, taskIds) {
 
 					// Remove the task from the main array
 					data.tasks.splice(taskIndex, 1);
+
+					// Log task deletion activity
+					try {
+						const userId = 'cli_user'; // remove-task doesn't have session context
+						logTaskDeleted(removedTask, userId);
+					} catch (logError) {
+						log('warn', `Warning: Failed to log task deletion activity: ${logError.message}`);
+					}
 
 					results.messages.push(`Successfully removed task ${taskId}`);
 				}
