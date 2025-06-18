@@ -150,7 +150,7 @@ const StickyNote = styled(Card)(({ theme, noteType }) => ({
   }),
 }));
 
-const StakeholderCard = styled(Card)(({ theme, agentType }) => ({
+const StakeholderCard = styled(({ agentType, ...props }) => <Card {...props} />)(({ theme, agentType }) => ({
   display: 'flex',
   alignItems: 'center',
   padding: theme.spacing(2),

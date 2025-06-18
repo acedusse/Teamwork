@@ -1,5 +1,7 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
 import { Box, useTheme, CircularProgress, Typography, Stack } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import TopAppBar from './components/TopAppBar';
@@ -8,6 +10,7 @@ import KeyboardShortcutHelp, { useKeyboardShortcutHelp } from './components/acce
 import keyboardShortcuts from './services/keyboardShortcuts';
 import CollaborativePlanningPage from './pages/CollaborativePlanningPage';
 import BucketPlanningPage from './pages/BucketPlanningPage';
+import ScrumbanBoardTab from './components/dashboard/ScrumbanBoardTab';
 
 // Lazy load page components for code splitting
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -425,6 +428,14 @@ function AppContent() {
               </Suspense>
             } 
           />
+          <Route 
+            path="/scrumban" 
+            element={
+              <Suspense fallback={<FeatureLoadingSpinner feature="Scrumban Board" />}>
+                <ScrumbanBoardTab />
+              </Suspense>
+            } 
+          />
         </Routes>
       </Box>
 
@@ -468,11 +479,13 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <Router>
-        <div data-testid="app-ready">
-          <AppContent />
-        </div>
-      </Router>
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <Router>
+          <div data-testid="app-ready">
+            <AppContent />
+          </div>
+        </Router>
+      </LocalizationProvider>
     </ErrorBoundary>
   );
 }

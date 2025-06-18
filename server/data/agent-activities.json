@@ -1,0 +1,60 @@
+{
+  "activities": [
+    {
+      "id": "1750256710932",
+      "agentId": "task-optimizer",
+      "action": "task_completed",
+      "details": {
+        "taskId": "test-task",
+        "duration": 4000
+      },
+      "timestamp": "2025-06-18T14:25:10.932Z"
+    },
+    {
+      "id": "1750256710926",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "idle",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-18T14:25:10.926Z"
+    },
+    {
+      "id": "1750256710917",
+      "agentId": "task-optimizer",
+      "action": "recommendation",
+      "details": {
+        "title": "Optimize Task Flow",
+        "description": "Consider moving \"Test Task Analysis\" to a different column to improve flow",
+        "priority": "medium",
+        "type": "optimization",
+        "actionable": true
+      },
+      "timestamp": "2025-06-18T14:25:10.917Z"
+    },
+    {
+      "id": "1750256708911",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "working",
+        "currentTask": "test-task"
+      },
+      "timestamp": "2025-06-18T14:25:08.911Z"
+    },
+    {
+      "id": "1750256706905",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "thinking",
+        "currentTask": "test-task"
+      },
+      "timestamp": "2025-06-18T14:25:06.905Z"
+    }
+  ],
+  "metadata": {
+    "updated": "2025-06-18T14:25:10.932Z"
+  }
+}

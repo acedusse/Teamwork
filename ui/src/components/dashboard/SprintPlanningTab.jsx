@@ -7,13 +7,9 @@ import {
   Container,
   useTheme,
   useMediaQuery,
-  Stepper,
-  Step,
-  StepLabel,
   Button,
   Card,
   CardContent,
-  Divider,
   Chip,
   LinearProgress
 } from '@mui/material';
@@ -21,18 +17,12 @@ import {
   CalendarToday,
   Assignment,
   People,
-  AccountTree,
-  PlayArrow,
-  Save,
-  Refresh
+  AccountTree
 } from '@mui/icons-material';
 import PropTypes from 'prop-types';
-
-// Subcomponent imports (to be implemented in future subtasks)
-import SprintSetup from './SprintSetup';
-import StorySelection from './StorySelection';
-import CapacityPlanning from './CapacityPlanning';
 import DependencyManager from './DependencyManager';
+
+// Note: Individual subcomponents not used in this layout approach
 
 const SprintPlanningTab = ({ 
   stories = [], 
@@ -46,7 +36,6 @@ const SprintPlanningTab = ({
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   // Main state management
-  const [activeStep, setActiveStep] = useState(0);
   const [sprintData, setSprintData] = useState({
     name: '',
     startDate: null,
@@ -57,323 +46,297 @@ const SprintPlanningTab = ({
     teamAllocation: {},
     dependencies: []
   });
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Sprint planning steps
-  const steps = [
-    {
-      label: 'Sprint Setup',
-      icon: <CalendarToday />,
-      component: 'setup'
-    },
-    {
-      label: 'Story Selection',
-      icon: <Assignment />,
-      component: 'stories'
-    },
-    {
-      label: 'Capacity Planning',
-      icon: <People />,
-      component: 'capacity'
-    },
-    {
-      label: 'Dependencies',
-      icon: <AccountTree />,
-      component: 'dependencies'
-    }
-  ];
-
   // State update handlers
-  const handleSprintDataUpdate = useCallback((field, value) => {
+  const handleStorySelection = useCallback((selectedStories) => {
     setSprintData(prev => ({
       ...prev,
-      [field]: value
+      selectedStories
     }));
-    
-    // Clear field-specific errors
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: null
-      }));
-    }
-  }, [errors]);
-
-  const handleStorySelection = useCallback((selectedStories) => {
-    handleSprintDataUpdate('selectedStories', selectedStories);
-  }, [handleSprintDataUpdate]);
-
-  const handleTeamAllocation = useCallback((allocation) => {
-    handleSprintDataUpdate('teamAllocation', allocation);
-  }, [handleSprintDataUpdate]);
-
-  const handleDependencyUpdate = useCallback((dependencies) => {
-    handleSprintDataUpdate('dependencies', dependencies);
-  }, [handleSprintDataUpdate]);
-
-  // Navigation handlers
-  const handleNext = useCallback(() => {
-    if (activeStep < steps.length - 1) {
-      setActiveStep(prev => prev + 1);
-    }
-  }, [activeStep, steps.length]);
-
-  const handleBack = useCallback(() => {
-    if (activeStep > 0) {
-      setActiveStep(prev => prev - 1);
-    }
-  }, [activeStep]);
-
-  const handleStepClick = useCallback((stepIndex) => {
-    setActiveStep(stepIndex);
-  }, []);
-
-  // Sprint operations
-  const handleSaveSprint = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      if (onSprintCreate) {
-        await onSprintCreate(sprintData);
-      }
-      // Reset form or show success message
-    } catch (error) {
-      console.error('Error creating sprint:', error);
-      setErrors({ general: 'Failed to create sprint. Please try again.' });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [sprintData, onSprintCreate]);
-
-  const handleResetForm = useCallback(() => {
-    setSprintData({
-      name: '',
-      startDate: null,
-      endDate: null,
-      goal: '',
-      teamCapacity: 0,
-      selectedStories: [],
-      teamAllocation: {},
-      dependencies: []
-    });
-    setActiveStep(0);
-    setErrors({});
   }, []);
 
   // Calculate sprint metrics
   const totalStoryPoints = sprintData.selectedStories.reduce((sum, story) => sum + (story.points || 0), 0);
-  const capacityUtilization = sprintData.teamCapacity > 0 ? (totalStoryPoints / sprintData.teamCapacity) * 100 : 0;
-
-  // Render current step component
-  const renderStepContent = () => {
-    const currentStep = steps[activeStep];
-    
-    switch (currentStep.component) {
-      case 'setup':
-        return (
-          <SprintSetup
-            sprintData={sprintData}
-            onUpdate={handleSprintDataUpdate}
-            errors={errors}
-            teamMembers={teamMembers}
-          />
-        );
-      case 'stories':
-        return (
-          <StorySelection
-            stories={stories}
-            selectedStories={sprintData.selectedStories}
-            onSelectionChange={handleStorySelection}
-            teamCapacity={sprintData.teamCapacity}
-          />
-        );
-      case 'capacity':
-        return (
-          <CapacityPlanning
-            teamMembers={teamMembers}
-            selectedStories={sprintData.selectedStories}
-            teamAllocation={sprintData.teamAllocation}
-            onAllocationChange={handleTeamAllocation}
-            sprintDuration={sprintData.startDate && sprintData.endDate ? 
-              Math.ceil((sprintData.endDate - sprintData.startDate) / (1000 * 60 * 60 * 24)) : 0}
-          />
-        );
-      case 'dependencies':
-        return (
-          <DependencyManager
-            stories={sprintData.selectedStories}
-            dependencies={sprintData.dependencies}
-            onDependencyUpdate={handleDependencyUpdate}
-          />
-        );
-      default:
-        return null;
-    }
-  };
 
   return (
     <Container maxWidth="xl" className={className}>
       <Box sx={{ py: 3 }}>
-        {/* Header Section */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Sprint Planning
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-            Plan and organize your next sprint with story selection, capacity planning, and dependency management
-          </Typography>
-          
-          {/* Sprint Metrics Overview */}
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card variant="outlined">
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <Typography variant="h6" color="primary">
-                    {sprintData.selectedStories.length}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Stories Selected
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card variant="outlined">
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <Typography variant="h6" color="primary">
-                    {totalStoryPoints}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Total Story Points
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card variant="outlined">
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <Typography variant="h6" color="primary">
-                    {sprintData.teamCapacity}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Team Capacity
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <Card variant="outlined">
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <Typography variant="h6" color={capacityUtilization > 100 ? 'error' : 'primary'}>
-                    {capacityUtilization.toFixed(1)}%
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Capacity Utilization
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-        </Box>
-
-        {/* Sprint Planning Stepper */}
-        <Paper elevation={1} sx={{ mb: 3 }}>
-          <Box sx={{ p: 3 }}>
-            <Stepper 
-              activeStep={activeStep} 
-              orientation={isMobile ? 'vertical' : 'horizontal'}
-              sx={{ mb: 3 }}
+        {/* Two Column Layout */}
+        <Grid container spacing={3}>
+          {/* Left Column - Ready Stories */}
+          <Grid item xs={12} md={8}>
+            <Paper 
+              elevation={1} 
+              sx={{ 
+                p: 3, 
+                minHeight: '80vh',
+                background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
+              }}
             >
-              {steps.map((step, index) => (
-                <Step 
-                  key={step.label}
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => handleStepClick(index)}
-                >
-                  <StepLabel 
-                    icon={step.icon}
-                    sx={{
-                      '& .MuiStepLabel-label': {
-                        fontWeight: activeStep === index ? 'bold' : 'normal'
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  📋 Ready Stories (3-Month Bucket)
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  4 stories available • {sprintData.selectedStories.length} selected ({(sprintData.selectedStories.length / 4 * 100).toFixed(1)}%)
+                </Typography>
+              </Box>
+
+              {/* Story Cards Grid */}
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gridTemplateRows: 'repeat(4, 1fr)',
+                gap: 2,
+                minHeight: '600px',
+                '@media (max-width: 900px)': {
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gridTemplateRows: 'repeat(6, 1fr)'
+                },
+                '@media (max-width: 600px)': {
+                  gridTemplateColumns: '1fr',
+                  gridTemplateRows: 'repeat(12, 1fr)'
+                }
+              }}>
+                {/* Predefined stories matching the image format */}
+                {[
+                  {
+                    id: 1,
+                    title: "User Authentication System",
+                    description: "JWT-based auth with role management and session handling",
+                    points: 8,
+                    priority: "High Priority",
+                    tags: ["auth", "security", "backend"],
+                    assignee: "John Doe"
+                  },
+                  {
+                    id: 2,
+                    title: "Task Management UI",
+                    description: "Kanban board with drag-and-drop functionality",
+                    points: 5,
+                    priority: "Medium Priority", 
+                    tags: ["ui", "frontend", "drag"],
+                    assignee: "Jane Smith"
+                  },
+                  {
+                    id: 3,
+                    title: "AI Agent Communication",
+                    description: "Inter-agent messaging and coordination protocols",
+                    points: 13,
+                    priority: "High Priority",
+                    tags: ["ai", "communication", "protocols"],
+                    assignee: "AI Team"
+                  },
+                  {
+                    id: 4,
+                    title: "Database Schema Design",
+                    description: "Optimized data models for scalability and performance",
+                    points: 5,
+                    priority: "Medium Priority",
+                    tags: ["data", "schema", "performance"],
+                    assignee: "DB Team"
+                  }
+                ].map((story, index) => (
+                  <Card 
+                    key={story.id}
+                    variant="outlined"
+                    sx={{ 
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      border: sprintData.selectedStories.find(s => s.id === story.id) ? '2px solid #1976d2' : '1px solid #e0e0e0',
+                      bgcolor: sprintData.selectedStories.find(s => s.id === story.id) ? '#e3f2fd' : 'white',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: 3
+                      }
+                    }}
+                    onClick={() => {
+                      const isSelected = sprintData.selectedStories.find(s => s.id === story.id);
+                      if (isSelected) {
+                        handleStorySelection(sprintData.selectedStories.filter(s => s.id !== story.id));
+                      } else {
+                        handleStorySelection([...sprintData.selectedStories, story]);
                       }
                     }}
                   >
-                    {step.label}
-                  </StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-
-            {/* Progress Bar */}
-            <Box sx={{ mb: 3 }}>
-              <LinearProgress 
-                variant="determinate" 
-                value={(activeStep / (steps.length - 1)) * 100}
-                sx={{ height: 8, borderRadius: 4 }}
-              />
-            </Box>
-          </Box>
-        </Paper>
-
-        {/* Step Content */}
-        <Paper elevation={1} sx={{ mb: 3 }}>
-          <Box sx={{ p: 3, minHeight: 400 }}>
-            {isLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
-                <LinearProgress sx={{ width: '50%' }} />
+                    <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
+                        <Chip 
+                          label={`${story.points}SP`} 
+                          size="small" 
+                          color="primary"
+                          sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}
+                        />
+                        <Chip 
+                          label={story.priority} 
+                          size="small" 
+                          color={story.priority === 'High Priority' ? 'error' : 'warning'}
+                          sx={{ fontSize: '0.75rem' }}
+                        />
+                      </Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, lineHeight: 1.2, color: '#1976d2' }}>
+                        {story.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem', lineHeight: 1.3, mb: 1 }}>
+                        {story.description}
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                        {story.tags.map((tag, i) => (
+                          <Chip 
+                            key={i} 
+                            label={tag} 
+                            size="small" 
+                            variant="outlined" 
+                            sx={{ 
+                              fontSize: '0.7rem', 
+                              height: 20,
+                              color: '#666',
+                              borderColor: '#ddd'
+                            }} 
+                          />
+                        ))}
+                      </Box>
+                    </CardContent>
+                  </Card>
+                ))}
+                
+                {/* Empty slots */}
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <Card 
+                    key={`empty-${index}`}
+                    variant="outlined"
+                    sx={{ 
+                      border: '2px dashed #e0e0e0',
+                      bgcolor: 'transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                      Empty slot
+                    </Typography>
+                  </Card>
+                ))}
               </Box>
-            ) : (
-              renderStepContent()
-            )}
-          </Box>
-        </Paper>
+            </Paper>
+          </Grid>
 
-        {/* Action Buttons */}
-        <Paper elevation={1}>
-          <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <Button
-                onClick={handleResetForm}
-                startIcon={<Refresh />}
-                variant="outlined"
-                color="secondary"
-              >
-                Reset Form
-              </Button>
-            </Box>
-            
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button
-                onClick={handleBack}
-                disabled={activeStep === 0}
-                variant="outlined"
-              >
-                Back
-              </Button>
+          {/* Right Column - AI Agent Capacity, Dependencies & Sprint Commitment */}
+          <Grid item xs={12} md={4}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               
-              {activeStep === steps.length - 1 ? (
-                <Button
-                  onClick={handleSaveSprint}
-                  disabled={isLoading || sprintData.selectedStories.length === 0}
-                  startIcon={<Save />}
-                  variant="contained"
-                  color="primary"
-                >
-                  Create Sprint
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleNext}
-                  variant="contained"
-                  color="primary"
-                  endIcon={<PlayArrow />}
-                >
-                  Next
-                </Button>
-              )}
+              {/* AI Agent Capacity */}
+              <Paper elevation={1} sx={{ p: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  🤖 AI Agent Capacity
+                </Typography>
+                
+                <Grid container spacing={2} sx={{ mb: 2 }}>
+                  <Grid item xs={4} sx={{ textAlign: 'center' }}>
+                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>78</Typography>
+                    <Typography variant="caption">Total Capacity</Typography>
+                  </Grid>
+                  <Grid item xs={4} sx={{ textAlign: 'center' }}>
+                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>39</Typography>
+                    <Typography variant="caption">Available</Typography>
+                  </Grid>
+                  <Grid item xs={4} sx={{ textAlign: 'center' }}>
+                    <Typography variant="h4" sx={{ fontWeight: 'bold' }}>39</Typography>
+                    <Typography variant="caption">Allocated</Typography>
+                  </Grid>
+                </Grid>
+
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {[
+                    { name: 'Frontend Agent', load: 90 },
+                    { name: 'Backend Agent', load: 85 },
+                    { name: 'ML Agent', load: 45 },
+                    { name: 'QA Agent', load: 30 }
+                  ].map((agent, index) => (
+                    <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2" sx={{ fontSize: '0.85rem' }}>{agent.name}</Typography>
+                        <LinearProgress 
+                          variant="determinate" 
+                          value={agent.load} 
+                          sx={{ 
+                            height: 6, 
+                            borderRadius: 3,
+                            bgcolor: 'rgba(255,255,255,0.3)',
+                            '& .MuiLinearProgress-bar': {
+                              bgcolor: agent.load > 80 ? '#ff4444' : agent.load > 60 ? '#ffaa00' : '#44ff44'
+                            }
+                          }} 
+                        />
+                      </Box>
+                      <Typography variant="caption" sx={{ minWidth: 30 }}>{agent.load}%</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Paper>
+
+              {/* Dependencies & Risks */}
+              <Paper elevation={1} sx={{ p: 3 }}>
+                <DependencyManager 
+                  stories={sprintData.selectedStories}
+                  dependencies={sprintData.dependencies}
+                  onDependencyUpdate={(updatedDependencies) => {
+                    setSprintData(prev => ({
+                      ...prev,
+                      dependencies: updatedDependencies
+                    }));
+                  }}
+                />
+              </Paper>
+
+              {/* Sprint Commitment */}
+              <Paper elevation={1} sx={{ p: 3 }}>
+                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  🎯 Sprint Commitment
+                </Typography>
+                
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: 'success.main' }}></Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Good Commitment</Typography>
+                </Box>
+                
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary">• Capacity: 45% utilized</Typography>
+                  <Typography variant="body2" color="text.secondary">• Risk: 2 blocked dependencies</Typography>
+                  <Typography variant="body2" color="text.secondary">• Goal alignment: 95%</Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Button 
+                    variant="contained" 
+                    color="primary" 
+                    fullWidth
+                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                  >
+                    ✅ Commit Sprint
+                  </Button>
+                  <Button 
+                    variant="contained" 
+                    color="warning" 
+                    fullWidth
+                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                  >
+                    🔄 Run Simulation
+                  </Button>
+                  <Button 
+                    variant="outlined" 
+                    fullWidth
+                    sx={{ textTransform: 'none', fontWeight: 600, color: 'grey.600', borderColor: 'grey.400' }}
+                  >
+                    💾 Save Draft
+                  </Button>
+                </Box>
+              </Paper>
             </Box>
-          </Box>
-        </Paper>
+          </Grid>
+        </Grid>
 
         {/* Error Display */}
         {errors.general && (

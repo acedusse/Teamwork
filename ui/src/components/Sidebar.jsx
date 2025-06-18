@@ -41,6 +41,7 @@ const routePreloaders = {
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/', key: 'dashboard' },
   { text: 'Task Board', icon: <TaskBoardIcon />, path: '/tasks', key: 'tasks' },
+  { text: 'Scrumban Board', icon: <TaskBoardIcon />, path: '/scrumban', key: 'scrumban' },
   { text: 'PRD Editor', icon: <PRDIcon />, path: '/prd', key: 'prd' },
   { text: 'Sprint Planning', icon: <SprintIcon />, path: '/sprints', key: 'sprints' },
   { text: 'Dependencies', icon: <DependenciesIcon />, path: '/dependencies', key: 'dependencies' },

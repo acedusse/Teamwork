@@ -1,0 +1,109 @@
+{
+  "aiAgents": [
+    {
+      "id": "task-optimizer",
+      "name": "Task Optimizer",
+      "type": "optimization",
+      "description": "AI agent that analyzes task flow and suggests optimizations",
+      "status": "idle",
+      "avatar": "🤖",
+      "color": "#2196F3",
+      "capabilities": [
+        "bottleneck-detection",
+        "wip-optimization",
+        "task-prioritization",
+        "flow-analysis"
+      ],
+      "lastActivity": "2025-06-18T14:25:10.926Z",
+      "currentTask": null,
+      "recommendations": [
+        {
+          "id": "1750256710916",
+          "timestamp": "2025-06-18T14:25:10.916Z",
+          "title": "Optimize Task Flow",
+          "description": "Consider moving \"Test Task Analysis\" to a different column to improve flow",
+          "priority": "medium",
+          "type": "optimization",
+          "actionable": true
+        }
+      ]
+    },
+    {
+      "id": "story-estimator",
+      "name": "Story Estimator",
+      "type": "estimation",
+      "description": "AI agent specialized in story point estimation and effort prediction",
+      "status": "idle",
+      "avatar": "📊",
+      "color": "#4CAF50",
+      "capabilities": [
+        "story-point-estimation",
+        "effort-prediction",
+        "complexity-analysis",
+        "historical-analysis"
+      ],
+      "lastActivity": null,
+      "currentTask": null,
+      "recommendations": []
+    },
+    {
+      "id": "dependency-tracker",
+      "name": "Dependency Tracker",
+      "type": "dependencies",
+      "description": "AI agent that identifies and manages task dependencies",
+      "status": "idle",
+      "avatar": "🔗",
+      "color": "#FF9800",
+      "capabilities": [
+        "dependency-detection",
+        "risk-assessment",
+        "critical-path-analysis",
+        "blocking-resolution"
+      ],
+      "lastActivity": null,
+      "currentTask": null,
+      "recommendations": []
+    },
+    {
+      "id": "quality-assurance",
+      "name": "Quality Assurance",
+      "type": "quality",
+      "description": "AI agent focused on quality metrics and testing strategies",
+      "status": "idle",
+      "avatar": "🛡️",
+      "color": "#9C27B0",
+      "capabilities": [
+        "test-strategy-generation",
+        "quality-metrics",
+        "defect-prediction",
+        "coverage-analysis"
+      ],
+      "lastActivity": null,
+      "currentTask": null,
+      "recommendations": []
+    },
+    {
+      "id": "resource-planner",
+      "name": "Resource Planner",
+      "type": "planning",
+      "description": "AI agent that manages resource allocation and capacity planning",
+      "status": "idle",
+      "avatar": "📅",
+      "color": "#607D8B",
+      "capabilities": [
+        "capacity-planning",
+        "resource-allocation",
+        "workload-balancing",
+        "timeline-optimization"
+      ],
+      "lastActivity": null,
+      "currentTask": null,
+      "recommendations": []
+    }
+  ],
+  "metadata": {
+    "created": "2025-01-17T12:00:00.000Z",
+    "updated": "2025-06-18T14:25:10.926Z",
+    "version": "1.0.0"
+  }
+}

@@ -16,6 +16,7 @@ import statusRouter from './routes/status.js';
 import mcpRouter from './routes/mcp.js';
 import cliRouter from './routes/cli.js';
 import teamPerformanceRouter from './routes/team-performance.js';
+import aiAgentsRouter from './routes/ai-agents.js';
 import sanitizeInputs from './middleware/sanitize.js';
 import errorHandler from './middleware/error-handler.js';
 import rateLimiter from './middleware/rate-limit.js';
@@ -80,6 +81,7 @@ app.use('/api/tasks', tasksRouter);
 app.use('/api/prd', prdRouter);
 app.use('/api/generate-tasks', generateTasksRouter);
 app.use('/api/agents', agentsRouter);
+app.use('/api/ai-agents', aiAgentsRouter);
 app.use('/api/team/performance', teamPerformanceRouter);
 
 app.use('/api/mcp', mcpRouter);
