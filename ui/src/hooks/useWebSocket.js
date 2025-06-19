@@ -40,11 +40,47 @@ const useWebSocket = (url, options = {}) => {
 
       ws.onmessage = (event) => {
         try {
-          const data = JSON.parse(event.data);
-          setLastMessage(data);
-          if (onMessage) onMessage(data);
+          // Check if the message is a Blob
+          if (event.data instanceof Blob) {
+            // Handle Blob data - read as text then try to parse
+            const reader = new FileReader();
+            reader.onload = () => {
+              try {
+                const jsonData = JSON.parse(reader.result);
+                setLastMessage(jsonData);
+                if (onMessage) onMessage(jsonData);
+              } catch (err) {
+                // If parsing fails, just send the text data
+                console.log('Received non-JSON blob data');
+                setLastMessage(reader.result);
+                if (onMessage) onMessage(reader.result);
+              }
+            };
+            reader.readAsText(event.data);
+            return;
+          }
+          
+          // Handle string data
+          if (typeof event.data === 'string') {
+            try {
+              const data = JSON.parse(event.data);
+              setLastMessage(data);
+              if (onMessage) onMessage(data);
+            } catch (err) {
+              // If not valid JSON, use as-is
+              console.log('Received non-JSON string data');
+              setLastMessage(event.data);
+              if (onMessage) onMessage(event.data);
+            }
+            return;
+          }
+          
+          // For other types, just use the data as-is
+          console.log('Received data of type:', typeof event.data);
+          setLastMessage(event.data);
+          if (onMessage) onMessage(event.data);
         } catch (err) {
-          console.error('Error parsing WebSocket message:', err);
+          console.error('Error handling WebSocket message:', err);
           setLastMessage(event.data);
           if (onMessage) onMessage(event.data);
         }

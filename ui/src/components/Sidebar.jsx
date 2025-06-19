@@ -11,7 +11,9 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   Person as PersonIcon,
-  GroupWork as GroupWorkIcon
+  GroupWork as GroupWorkIcon,
+  Analytics as FlowOptimizationIcon,
+  Psychology as ContinuousImprovementIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useState } from 'react';
@@ -32,6 +34,8 @@ const routePreloaders = {
     import('../components/PRDEditor')
   ],
   sprints: () => import('../pages/SprintPlanning'),
+  'flow-optimization': () => import('../pages/FlowOptimizationPage'),
+  'continuous-improvement': () => import('../pages/ContinuousImprovementPage'),
   dependencies: () => import('../components/DependencyGraph'),
   performance: () => import('../components/PerformanceDashboard'),
   'bucket-planning': () => import('../pages/BucketPlanningPage'),
@@ -44,6 +48,8 @@ const menuItems = [
   { text: 'Scrumban Board', icon: <TaskBoardIcon />, path: '/scrumban', key: 'scrumban' },
   { text: 'PRD Editor', icon: <PRDIcon />, path: '/prd', key: 'prd' },
   { text: 'Sprint Planning', icon: <SprintIcon />, path: '/sprints', key: 'sprints' },
+  { text: 'Flow Optimization', icon: <FlowOptimizationIcon />, path: '/flow-optimization', key: 'flow-optimization' },
+  { text: 'Continuous Improvement', icon: <ContinuousImprovementIcon />, path: '/continuous-improvement', key: 'continuous-improvement' },
   { text: 'Dependencies', icon: <DependenciesIcon />, path: '/dependencies', key: 'dependencies' },
   { text: 'Performance', icon: <PerformanceIcon />, path: '/performance', key: 'performance' },
   { text: 'Settings', icon: <SettingsIcon />, path: '/settings', key: 'settings' },

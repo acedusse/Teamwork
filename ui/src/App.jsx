@@ -17,6 +17,8 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const TaskBoard = lazy(() => import('./pages/TaskBoard'));
 const TaskCreation = lazy(() => import('./pages/TaskCreation'));
 const SprintPlanning = lazy(() => import('./pages/SprintPlanning'));
+const FlowOptimizationPage = lazy(() => import('./pages/FlowOptimizationPage'));
+const ContinuousImprovementPage = lazy(() => import('./pages/ContinuousImprovementPage'));
 const Settings = lazy(() => import('./pages/Settings'));
 const ModalDemo = lazy(() => import('./pages/ModalDemo'));
 const PerformanceDashboard = lazy(() => import('./components/PerformanceDashboard'));
@@ -373,6 +375,22 @@ function AppContent() {
             element={
               <Suspense fallback={<FeatureLoadingSpinner feature="Sprint Planning" />}>
                 <SprintPlanning />
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/flow-optimization" 
+            element={
+              <Suspense fallback={<FeatureLoadingSpinner feature="Flow Optimization" />}>
+                <FlowOptimizationPage />
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/continuous-improvement" 
+            element={
+              <Suspense fallback={<FeatureLoadingSpinner feature="Continuous Improvement" />}>
+                <ContinuousImprovementPage />
               </Suspense>
             } 
           />
