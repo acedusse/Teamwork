@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import logger from './logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -76,7 +77,7 @@ function writeActivityEntry(activityEntry) {
     const logLine = JSON.stringify(activityEntry) + '\n';
     fs.appendFileSync(ACTIVITY_LOG_PATH, logLine, 'utf8');
     
-    console.log(`[ACTIVITY] ${activityEntry.activityType}: ${activityEntry.details.taskId || activityEntry.details.id || 'N/A'}`);
+    logger.info(`[ACTIVITY] ${activityEntry.activityType}: ${activityEntry.details.taskId || activityEntry.details.id || 'N/A'}`);
   } catch (error) {
     console.error('Failed to write activity log:', error);
   }

@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { promises as fsPromises } from 'fs';
+import logger from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,24 +29,24 @@ router.get('/', async (req, res) => {
   try {
     // Get query parameters
     const { timeRange, team, role, startDate, endDate } = req.query;
-    console.log('Team performance API called with parameters:', { timeRange, team, role, startDate, endDate });
+    logger.debug('Team performance API called with parameters:', { timeRange, team, role, startDate, endDate });
 
     // Get agent profiles
     const profiles = await getAgentProfiles();
-    console.log(`Retrieved ${profiles.length} agent profiles`);
+    logger.debug(`Retrieved ${profiles.length} agent profiles`);
 
     // Filter profiles by team and role if provided
     let filteredProfiles = profiles;
     if (team) {
       filteredProfiles = filteredProfiles.filter(profile => 
         profile.department && profile.department.toLowerCase() === team.toLowerCase());
-      console.log(`Filtered profiles by team '${team}': ${filteredProfiles.length} results`);
+      logger.debug(`Filtered profiles by team '${team}': ${filteredProfiles.length} results`);
     }
     
     if (role) {
       filteredProfiles = filteredProfiles.filter(profile => 
         profile.role && profile.role.toLowerCase() === role.toLowerCase());
-      console.log(`Filtered profiles by role '${role}': ${filteredProfiles.length} results`);
+      logger.debug(`Filtered profiles by role '${role}': ${filteredProfiles.length} results`);
     }
 
     // Get task data with date filtering if provided
@@ -53,15 +54,15 @@ router.get('/', async (req, res) => {
     
     // Calculate performance metrics
     const metrics = calculatePerformanceMetrics(taskData, timeRange);
-    console.log(`Generated metrics for ${metrics.length} team members`);
+    logger.debug(`Generated metrics for ${metrics.length} team members`);
 
     // Merge agent profiles with metrics
     const teamData = mergeProfilesWithMetrics(filteredProfiles, metrics);
-    console.log(`Final team data contains ${teamData.length} entries`);
+    logger.debug(`Final team data contains ${teamData.length} entries`);
     
     // Show sample of what we're returning (first entry)
     if (teamData.length > 0) {
-      console.log('Sample team data entry:', JSON.stringify(teamData[0]).substring(0, 200) + '...');
+      logger.debug('Sample team data entry:', JSON.stringify(teamData[0]).substring(0, 200) + '...');
     }
 
     res.json(teamData);
@@ -83,7 +84,7 @@ async function getAgentProfiles() {
       const profilesData = await fsPromises.readFile(agentProfilesPath, 'utf8');
       return JSON.parse(profilesData);
     } catch (fileError) {
-      console.log('Agent profiles file not found, using fallback profiles');
+      logger.debug('Agent profiles file not found, using fallback profiles');
       // Return some basic agent profiles if file not found
       return [
         { id: 'agent1', name: 'Alex Chen', role: 'Senior Developer', avatar: 'https://randomuser.me/api/portraits/men/1.jpg' },
@@ -117,22 +118,22 @@ async function getRealTimeTaskData(timeRange, startDate, endDate) {
   try {
     // Get all tasks from the task management system
     const tasksFilePath = path.resolve(__dirname, '../../.taskmaster/tasks/tasks.json');
-    console.log(`Reading tasks from: ${tasksFilePath}`);
+    logger.debug(`Reading tasks from: ${tasksFilePath}`);
     const tasksData = await fsPromises.readFile(tasksFilePath, 'utf8');
     const parsedData = JSON.parse(tasksData);
     
-    console.log(`Task data structure keys: ${Object.keys(parsedData)}`);
+    logger.debug(`Task data structure keys: ${Object.keys(parsedData)}`);
     const allTasks = parsedData.tasks || [];
-    console.log(`Total tasks found: ${allTasks.length}`);
+    logger.debug(`Total tasks found: ${allTasks.length}`);
     
     if (allTasks.length === 0) {
-      console.warn('No tasks found in tasks.json!');
+      logger.warn('No tasks found in tasks.json!');
       return [];
     }
     
     // Log sample task to understand structure
     if (allTasks.length > 0) {
-      console.log('Sample task structure:', JSON.stringify(allTasks[0], null, 2).substring(0, 500) + '...');
+      logger.debug('Sample task structure:', JSON.stringify(allTasks[0], null, 2).substring(0, 500) + '...');
     }
     
     // Default to 'week' if timeRange is not provided
@@ -147,7 +148,7 @@ async function getRealTimeTaskData(timeRange, startDate, endDate) {
     if (startDate && endDate) {
       filterStartDate = new Date(startDate);
       filterEndDate = new Date(endDate);
-      console.log(`Using custom date range: ${filterStartDate.toISOString()} to ${filterEndDate.toISOString()}`);
+      logger.debug(`Using custom date range: ${filterStartDate.toISOString()} to ${filterEndDate.toISOString()}`);
     } else {
       // Otherwise use timeRange
       switch(range) { // Use 'range' instead of 'timeRange' to respect the default value
@@ -176,9 +177,9 @@ async function getRealTimeTaskData(timeRange, startDate, endDate) {
           filterStartDate.setDate(filterStartDate.getDate() - 7);
           break;
       }
-      console.log(`Using timeRange filter: ${range}, from ${filterStartDate.toISOString()} to ${filterEndDate.toISOString()}`);
+      logger.debug(`Using timeRange filter: ${range}, from ${filterStartDate.toISOString()} to ${filterEndDate.toISOString()}`);
     }
-    console.log(`Current time reference: ${now.toISOString()}`);
+    logger.debug(`Current time reference: ${now.toISOString()}`);
     
     // Filter tasks based on timestamp/date if available
     // Track task date fields for debugging
@@ -233,13 +234,13 @@ async function getRealTimeTaskData(timeRange, startDate, endDate) {
       }
     }
     
-    console.log(`Date filtering statistics:`);
-    console.log(`- Tasks with valid dates: ${tasksWithCreatedAt + tasksWithCompletedAt + tasksWithDueDate + tasksWithUpdatedAt}`);
-    console.log(`- Tasks with no date fields: ${allTasks.length - (tasksWithCreatedAt + tasksWithCompletedAt + tasksWithDueDate + tasksWithUpdatedAt)}`);
-    console.log(`- Tasks skipped: ${skippedTasks}`);
-    console.log(`- Tasks in date range: ${tasksInDateRange}`);
-    console.log(`- Total tasks added: ${addedTasks}`);
-    console.log(`Retrieved ${filteredTasks.length} tasks for time range: ${range} (from ${filterStartDate.toISOString()} to ${filterEndDate.toISOString()})`);
+    logger.debug(`Date filtering statistics:`);
+    logger.debug(`- Tasks with valid dates: ${tasksWithCreatedAt + tasksWithCompletedAt + tasksWithDueDate + tasksWithUpdatedAt}`);
+    logger.debug(`- Tasks with no date fields: ${allTasks.length - (tasksWithCreatedAt + tasksWithCompletedAt + tasksWithDueDate + tasksWithUpdatedAt)}`);
+    logger.debug(`- Tasks skipped: ${skippedTasks}`);
+    logger.debug(`- Tasks in date range: ${tasksInDateRange}`);
+    logger.debug(`- Total tasks added: ${addedTasks}`);
+    logger.debug(`Retrieved ${filteredTasks.length} tasks for time range: ${range} (from ${filterStartDate.toISOString()} to ${filterEndDate.toISOString()})`);
     return filteredTasks;
   } catch (error) {
     console.error('Error getting real-time task data:', error);
@@ -254,8 +255,8 @@ async function getRealTimeTaskData(timeRange, startDate, endDate) {
  * @returns {Array} - Array of performance metric objects with enhanced metrics
  */
 function calculatePerformanceMetrics(taskData, timeRange) {
-  console.log('\n==================== CALCULATING PERFORMANCE METRICS ====================');
-  console.log(`Input: ${taskData.length} tasks, time range: ${timeRange}`);
+  logger.debug('\n==================== CALCULATING PERFORMANCE METRICS ====================');
+  logger.debug(`Input: ${taskData.length} tasks, time range: ${timeRange}`);
   
   // Create a default set of agent IDs if we need them
   const defaultAgentIds = ['agent1', 'agent2', 'agent3', 'agent4', 'agent5'];
@@ -297,30 +298,30 @@ function calculatePerformanceMetrics(taskData, timeRange) {
   
   // If no explicit assignees found in any tasks, add default agent IDs
   if (uniqueAssignees.size === 0) {
-    console.log('No explicit assignee information found in tasks. Using default agent IDs.');
+    logger.debug('No explicit assignee information found in tasks. Using default agent IDs.');
     defaultAgentIds.forEach(id => uniqueAssignees.add(id));
     tasksUsingId = taskData.length; // All tasks will use ID distribution
   } else {
     // If we found some assignees, make sure all default agent IDs are included
     // This ensures we always have metrics for all team members
     defaultAgentIds.forEach(id => uniqueAssignees.add(id));
-    console.log(`Found ${uniqueAssignees.size} unique assignees in tasks (including defaults).`);
+    logger.debug(`Found ${uniqueAssignees.size} unique assignees in tasks (including defaults).`);
   }
   
-  console.log('Task assignment field statistics:');
-  console.log(`- Tasks with direct assignee: ${tasksWithAssignee}`);
-  console.log(`- Tasks with subtask assignees: ${tasksWithSubtaskAssignees}`);
-  console.log(`- Tasks with createdBy: ${tasksWithCreatedBy}`);
-  console.log(`- Tasks using ID fallback: ${tasksUsingId}`);
+  logger.debug('Task assignment field statistics:');
+  logger.debug(`- Tasks with direct assignee: ${tasksWithAssignee}`);
+  logger.debug(`- Tasks with subtask assignees: ${tasksWithSubtaskAssignees}`);
+  logger.debug(`- Tasks with createdBy: ${tasksWithCreatedBy}`);
+  logger.debug(`- Tasks using ID fallback: ${tasksUsingId}`);
   
   // Final fallback: if still no assignees, use the default agent IDs
   if (uniqueAssignees.size === 0) {
-    console.log('Using default agent IDs as no assignment information was found.');
+    logger.debug('Using default agent IDs as no assignment information was found.');
     defaultAgentIds.forEach(id => uniqueAssignees.add(id));
   }
   
-  console.log(`Found ${uniqueAssignees.size} unique assignees in task data:`);
-  console.log([...uniqueAssignees]);
+  logger.debug(`Found ${uniqueAssignees.size} unique assignees in task data:`);
+  logger.debug([...uniqueAssignees]);
   
   // Map to store metrics by agent ID
   const metricsMap = new Map();
@@ -447,7 +448,7 @@ function calculatePerformanceMetrics(taskData, timeRange) {
     
     // Skip if somehow assignee is still not in our map
     if (!assignee || !metricsMap.has(assignee)) {
-      console.log(`Task ${task.id} could not be assigned to any agent`);
+      logger.debug(`Task ${task.id} could not be assigned to any agent`);
       tasksSkipped++;
       return;
     }
@@ -526,14 +527,14 @@ function calculatePerformanceMetrics(taskData, timeRange) {
     }
   });
   
-  console.log('Task processing statistics:');
-  console.log(`- Tasks successfully assigned and counted: ${taskAssignmentCount}`);
-  console.log(`- Tasks skipped: ${tasksSkipped}`);
-  console.log('Task status counts:');
-  console.log(`- Done: ${doneCount}`);
-  console.log(`- Pending: ${pendingCount}`);
-  console.log(`- In Progress: ${inProgressCount}`);
-  console.log(`- Other statuses: ${otherStatusCount} (${Array.from(otherStatuses).join(', ')})`);
+  logger.debug('Task processing statistics:');
+  logger.debug(`- Tasks successfully assigned and counted: ${taskAssignmentCount}`);
+  logger.debug(`- Tasks skipped: ${tasksSkipped}`);
+  logger.debug('Task status counts:');
+  logger.debug(`- Done: ${doneCount}`);
+  logger.debug(`- Pending: ${pendingCount}`);
+  logger.debug(`- In Progress: ${inProgressCount}`);
+  logger.debug(`- Other statuses: ${otherStatusCount} (${Array.from(otherStatuses).join(', ')})`);
   
   // Calculate productivity percentages and advanced metrics
   metricsMap.forEach((metrics, id) => {
@@ -603,13 +604,13 @@ function calculatePerformanceMetrics(taskData, timeRange) {
     }
     
     // Log the enhanced metrics
-    console.log(`Agent ${id}: ${metrics.tasksCompleted} completed, ${metrics.tasksInProgress} in progress, ` + 
+    logger.debug(`Agent ${id}: ${metrics.tasksCompleted} completed, ${metrics.tasksInProgress} in progress, ` + 
       `${metrics.totalTasks} total, ${metrics.productivity}% productivity, ` + 
       `${metrics.efficiency}% efficiency, ${metrics.focusScore}% focus score`);
   });
   
-  console.log(`Calculated performance metrics for ${metricsMap.size} team members based on ${taskData.length} tasks`);
-  console.log('===============================================================================\n');
+  logger.debug(`Calculated performance metrics for ${metricsMap.size} team members based on ${taskData.length} tasks`);
+  logger.debug('===============================================================================\n');
   
   // Convert map to array
   return Array.from(metricsMap.values());
@@ -622,16 +623,16 @@ function calculatePerformanceMetrics(taskData, timeRange) {
  * @returns {Array} - Array of merged profile and metric objects
  */
 function mergeProfilesWithMetrics(profiles, metrics) {
-  console.log('\n=================== MERGING PROFILES WITH METRICS ===================');
-  console.log(`Input: ${profiles.length} profiles, ${metrics.length} metrics`);
+  logger.debug('\n=================== MERGING PROFILES WITH METRICS ===================');
+  logger.debug(`Input: ${profiles.length} profiles, ${metrics.length} metrics`);
   
   if (!profiles || profiles.length === 0) {
-    console.warn('No agent profiles found.');
+    logger.warn('No agent profiles found.');
     return [];
   }
   
   if (!metrics || metrics.length === 0) {
-    console.log('No metrics found. Returning profiles with zero values.');
+    logger.debug('No metrics found. Returning profiles with zero values.');
     return profiles.map(profile => ({
       ...profile,
       tasksCompleted: 0,
@@ -648,9 +649,9 @@ function mergeProfilesWithMetrics(profiles, metrics) {
     }
   });
   
-  console.log(`Metrics map contains ${Object.keys(metricsMap).length} entries`);
-  console.log('Available metric IDs:', Object.keys(metricsMap).join(', '));
-  console.log('Available profile IDs:', profiles.map(p => p.id).join(', '));
+  logger.debug(`Metrics map contains ${Object.keys(metricsMap).length} entries`);
+  logger.debug('Available metric IDs:', Object.keys(metricsMap).join(', '));
+  logger.debug('Available profile IDs:', profiles.map(p => p.id).join(', '));
   
   // Merge profiles with metrics
   const result = profiles.map(profile => {
@@ -667,12 +668,12 @@ function mergeProfilesWithMetrics(profiles, metrics) {
       productivity: agentMetrics.productivity || 0
     };
     
-    console.log(`Profile ${profile.id} merged with metrics: completed=${mergedData.tasksCompleted}, inProgress=${mergedData.tasksInProgress}, productivity=${mergedData.productivity}%`);
+    logger.debug(`Profile ${profile.id} merged with metrics: completed=${mergedData.tasksCompleted}, inProgress=${mergedData.tasksInProgress}, productivity=${mergedData.productivity}%`);
     return mergedData;
   });
   
-  console.log(`Returned ${result.length} merged profiles+metrics entries`);
-  console.log('==============================================================\n');
+  logger.debug(`Returned ${result.length} merged profiles+metrics entries`);
+  logger.debug('==============================================================\n');
   return result;
 }
 

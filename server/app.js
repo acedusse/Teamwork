@@ -85,9 +85,9 @@ app.use('/api/agents', agentsRouter);
 app.use('/api/ai-agents', aiAgentsRouter);
 app.use('/api/team/performance', teamPerformanceRouter);
 // Debug logging for flow optimization route
-console.log('Registering flow optimization routes');
+logger.debug('Registering flow optimization routes');
 app.use('/api/flow-optimization', flowOptimizationRouter);
-console.log('Flow optimization routes registered');
+logger.debug('Flow optimization routes registered');
 
 app.use('/api/mcp', mcpRouter);
 app.use('/api/cli', cliRouter);
