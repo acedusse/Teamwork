@@ -8,6 +8,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import validate from '../middleware/validation.js';
 import { PRDSchema } from '../schemas/prd.js';
+import logger from '../utils/logger.js';
 
 const router = express.Router();
 const execAsync = promisify(exec);
@@ -241,7 +242,7 @@ router.post('/process/:fileId', async (req, res, next) => {
           const tasksContent = fs.readFileSync(tasksFile, 'utf8');
           tasksData = JSON.parse(tasksContent);
         } catch (parseError) {
-          console.warn('Failed to parse tasks.json:', parseError);
+          logger.warn('Failed to parse tasks.json:', parseError);
         }
       }
 
@@ -270,7 +271,7 @@ router.post('/process/:fileId', async (req, res, next) => {
           }
           processingJobs.delete(fileId);
         } catch (cleanupError) {
-          console.warn('Failed to cleanup file:', cleanupError);
+          logger.warn('Failed to cleanup file:', cleanupError);
         }
       }, 300000); // Clean up after 5 minutes
 

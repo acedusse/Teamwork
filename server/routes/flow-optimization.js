@@ -132,7 +132,7 @@ const mockFlowData = {
 
 // Register explicit route for debugging
 router.get('/', (req, res) => {
-  console.log('Root flow optimization route accessed');
+  logger.debug('Root flow optimization route accessed');
   res.json({ message: 'Flow optimization API is available' });
 });
 
@@ -144,9 +144,9 @@ router.get('/', (req, res) => {
 // TODO: Implement actual API endpoint when real data source is available
 // This is currently just a mock endpoint that returns simulated data
 router.get('/data', (req, res) => {
-  console.log('⭐ Flow optimization /data endpoint requested - NOTE: This is currently a mock endpoint');
+  logger.debug('⭐ Flow optimization /data endpoint requested - NOTE: This is currently a mock endpoint');
   try {
-    console.log('Returning mock flow optimization data');
+    logger.debug('Returning mock flow optimization data');
     logger.info('Returning mock flow optimization data - real implementation pending');
     
     // Simulate some variability in the data
@@ -312,7 +312,7 @@ setInterval(() => {
     mockFlowData.bottlenecks.push(newBottleneck);
     
     // This would broadcast to WebSocket clients
-    console.log('New bottleneck detected:', newBottleneck);
+    logger.debug('New bottleneck detected:', newBottleneck);
   }
 
   // Simulate metric updates

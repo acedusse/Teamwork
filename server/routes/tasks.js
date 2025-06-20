@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import logger from '../utils/logger.js';
 import { readJSON, writeJSON } from '../../scripts/modules/utils.js';
 import validate from '../middleware/validation.js';
 import { TaskSchema } from '../schemas/task.js';
@@ -25,7 +26,7 @@ const TASKS_FILE =
 	process.env.TASKS_FILE ||
 	path.join(__dirname, '../../.taskmaster/tasks/tasks.json');
 
-console.log(`[DEBUG] TASKS_FILE path: ${TASKS_FILE}`);
+logger.debug(`[DEBUG] TASKS_FILE path: ${TASKS_FILE}`);
 
 function getVersion() {
 	try {
@@ -36,9 +37,9 @@ function getVersion() {
 }
 
 function loadTasks() {
-        console.log(`[DEBUG] Loading tasks from: ${TASKS_FILE}`);
+        logger.debug(`[DEBUG] Loading tasks from: ${TASKS_FILE}`);
         const data = readJSON(TASKS_FILE) || { schemaVersion: 1, tasks: [] };
-        console.log(`[DEBUG] Loaded data:`, data ? `${data.tasks?.length || 0} tasks` : 'null');
+        logger.debug(`[DEBUG] Loaded data:`, data ? `${data.tasks?.length || 0} tasks` : 'null');
         return Array.isArray(data.tasks) ? data.tasks : [];
 }
 
@@ -57,7 +58,7 @@ router.put('/:id/assign', (req, res, next) => {
             return res.status(400).json({ error: 'Task ID and agent ID are required' });
         }
         
-        console.log(`[DEBUG] Assigning agent ${agentId} to task ${id}`);
+        logger.debug(`[DEBUG] Assigning agent ${agentId} to task ${id}`);
         
         // Load tasks and find the target task
         const tasks = loadTasks();
@@ -232,7 +233,7 @@ router.get('/stats', (req, res, next) => {
 router.get('/activities', (req, res, next) => {
     try {
         const tasks = loadTasks();
-        console.log(`[DEBUG] Loaded ${tasks.length} tasks for activities`);
+        logger.debug(`[DEBUG] Loaded ${tasks.length} tasks for activities`);
         let activities = [];
         
         // Generate real activities from actual task data and timestamps
@@ -322,7 +323,7 @@ router.get('/activities', (req, res, next) => {
             }
         });
         
-        console.log(`[DEBUG] Generated ${activities.length} real activities from task data`);
+        logger.debug(`[DEBUG] Generated ${activities.length} real activities from task data`);
         
         // Sort by date descending (most recent first)
         activities.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -333,10 +334,10 @@ router.get('/activities', (req, res, next) => {
             .filter(activity => new Date(activity.date) >= thirtyDaysAgo)
             .slice(0, 15);
         
-        console.log(`[DEBUG] Returning ${activities.length} recent activities (last 30 days)`);
+        logger.debug(`[DEBUG] Returning ${activities.length} recent activities (last 30 days)`);
         res.json(activities);
     } catch (err) {
-        console.log(`[DEBUG] Error in activities endpoint:`, err);
+        logger.debug(`[DEBUG] Error in activities endpoint:`, err);
         next(err);
     }
 });
@@ -516,8 +517,8 @@ router.get('/statistics/daily', (req, res, next) => {
             }
         });
 
-        console.log(`[DEBUG] Generated daily statistics from ${tasks.length} tasks across ${dailyStats.length} days`);
-        console.log(`[DEBUG] Daily stats summary:`, dailyStats.map(s => `${s.date}: ${s.total} total (${s.completed}c, ${s.inProgress}i, ${s.pending}p)`));
+        logger.debug(`[DEBUG] Generated daily statistics from ${tasks.length} tasks across ${dailyStats.length} days`);
+        logger.debug(`[DEBUG] Daily stats summary:`, dailyStats.map(s => `${s.date}: ${s.total} total (${s.completed}c, ${s.inProgress}i, ${s.pending}p)`));
 
         res.json({
             dateRange: {
@@ -559,7 +560,7 @@ router.get('/statistics/current', (req, res, next) => {
             total: total
         }];
         
-        console.log(`[DEBUG] Current task breakdown: ${completed} completed, ${inProgress} in-progress, ${pending} pending, ${blocked} blocked, ${deferred} deferred (${total} total)`);
+        logger.debug(`[DEBUG] Current task breakdown: ${completed} completed, ${inProgress} in-progress, ${pending} pending, ${blocked} blocked, ${deferred} deferred (${total} total)`);
         
         res.json({
             dateRange: {
