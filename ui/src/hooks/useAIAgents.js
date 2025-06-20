@@ -2,8 +2,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import useWebSocket from './useWebSocket';
 
 // Access environment variables safely in the browser context
-const API_BASE_URL = window.env?.REACT_APP_API_URL || 'http://localhost:3001';
-const WS_URL = window.env?.REACT_APP_WS_URL || 'ws://localhost:3001';
+const API_BASE_URL = window.env?.REACT_APP_API_URL || 'http://localhost:3000';
+const WS_URL = window.env?.REACT_APP_WS_URL || 'ws://localhost:3000';
+
+// Control WebSocket functionality
+// Set to true when the WebSocket server is ready to handle agent connections
+const WS_ENABLED = false;
 
 const useAIAgents = () => {
   const [agents, setAgents] = useState([]);
@@ -13,8 +17,16 @@ const useAIAgents = () => {
   const [notifications, setNotifications] = useState([]);
   const lastUpdateRef = useRef(Date.now());
 
-  // WebSocket connection for real-time updates
-  const { lastMessage, readyState, sendMessage } = useWebSocket(WS_URL, {
+  // Mock WebSocket values when disabled
+  const mockWebSocketValues = {
+    lastMessage: null,
+    readyState: 3, // CLOSED state
+    sendMessage: () => console.log('AI Agents WebSocket disabled: message not sent'),
+    error: null
+  };
+  
+  // WebSocket connection for real-time updates - only if enabled
+  const { lastMessage, readyState, sendMessage } = WS_ENABLED ? useWebSocket(WS_URL, {
     onMessage: handleWebSocketMessage,
     onError: (error) => {
       console.error('WebSocket error:', error);
@@ -23,7 +35,14 @@ const useAIAgents = () => {
     shouldReconnect: true,
     reconnectLimit: 10,
     reconnectInterval: 5000
-  });
+  }) : mockWebSocketValues;
+  
+  // Inform when WebSockets are disabled
+  useEffect(() => {
+    if (!WS_ENABLED) {
+      console.log('AI Agents WebSocket disabled: using polling fallback');
+    }
+  }, []);
 
   // Handle WebSocket messages
   function handleWebSocketMessage(message) {

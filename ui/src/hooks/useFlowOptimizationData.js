@@ -3,7 +3,9 @@ import useWebSocket from './useWebSocket';
 
 // Server URL constants
 const WS_URL = window.env?.REACT_APP_WS_URL || 'ws://localhost:3000';
-const WS_ENABLED = false; // Disable WebSocket until endpoints are ready
+// WebSockets are disabled until server endpoints are ready
+// Set to true to enable WebSocket-based real-time updates
+const WS_ENABLED = false;
 const POLLING_INTERVAL = 30000; // 30 seconds fallback polling
 const CACHE_DURATION = 60000; // 1 minute cache
 const AUTO_REFRESH_INTERVAL = 10000; // 10 seconds auto-refresh
@@ -40,12 +42,31 @@ const useFlowOptimizationData = (options = {}) => {
   const cacheRef = useRef(new Map());
   const optimisticUpdatesRef = useRef(new Map());
 
-  // WebSocket connection for real-time updates (temporarily disabled)
-  const { lastMessage, readyState, sendMessage, error: wsError } = useWebSocket(
-    enableWebSocket && WS_ENABLED ? WS_URL : null,
+  // WebSocket connection for real-time updates
+  // Only create socket connection if explicitly enabled
+  const wsEnabled = enableWebSocket && WS_ENABLED;
+  const wsUrl = wsEnabled ? WS_URL : null;
+  
+  // Mock WebSocket values when disabled
+  const mockWebSocketValues = {
+    lastMessage: null,
+    readyState: 3, // CLOSED state
+    sendMessage: () => console.log('WebSocket disabled: message not sent'),
+    error: null
+  };
+  
+  // Only use WebSocket if explicitly enabled
+  const { 
+    lastMessage, 
+    readyState, 
+    sendMessage, 
+    error: wsError 
+  } = wsEnabled ? useWebSocket(
+    wsUrl,
     {
       onMessage: handleWebSocketMessage,
       onOpen: () => {
+        console.log('WebSocket connected successfully');
         setConnectionStatus('connected');
         setError(null);
         // Subscribe to flow optimization updates
@@ -58,15 +79,23 @@ const useFlowOptimizationData = (options = {}) => {
         setConnectionStatus('disconnected');
       },
       onError: (error) => {
-        console.log('WebSocket temporarily disabled - will be connected later');
+        console.warn('WebSocket connection error - switching to polling fallback');
         setConnectionStatus('fallback');
         if (onError) onError(error);
       },
-      shouldReconnect: true,
+      shouldReconnect: wsEnabled,
       reconnectLimit: 5,
       reconnectInterval: 3000
     }
-  );
+  ) : mockWebSocketValues;
+  
+  // Set fallback mode when WebSockets are explicitly disabled
+  useEffect(() => {
+    if (!wsEnabled) {
+      setConnectionStatus('fallback');
+      console.log('WebSocket connections disabled in configuration - using polling fallback');
+    }
+  }, [wsEnabled]);
 
   // Handle WebSocket messages
   function handleWebSocketMessage(message) {

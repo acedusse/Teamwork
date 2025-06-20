@@ -14,6 +14,7 @@ import ScrumbanBoardTab from './components/dashboard/ScrumbanBoardTab';
 
 // Lazy load page components for code splitting
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const MainDashboard = lazy(() => import('./components/dashboard/MainDashboard'));
 const TaskBoard = lazy(() => import('./pages/TaskBoard'));
 const TaskCreation = lazy(() => import('./pages/TaskCreation'));
 const SprintPlanning = lazy(() => import('./pages/SprintPlanning'));
@@ -333,6 +334,22 @@ function AppContent() {
             element={
               <Suspense fallback={<LoadingSpinner message="Loading Dashboard..." />}>
                 <Dashboard />
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/dashboard" 
+            element={
+              <Suspense fallback={<LoadingSpinner message="Loading Main Dashboard..." />}>
+                <MainDashboard />
+              </Suspense>
+            } 
+          />
+          <Route 
+            path="/dashboard/:tab" 
+            element={
+              <Suspense fallback={<LoadingSpinner message="Loading Main Dashboard..." />}>
+                <MainDashboard />
               </Suspense>
             } 
           />

@@ -128,7 +128,9 @@ const PhaseLabel = styled(Typography)(({ theme }) => ({
   maxWidth: 80,
 }));
 
-const StickyNote = styled(Card)(({ theme, noteType }) => ({
+const StickyNote = styled(Card, {
+  shouldForwardProp: (prop) => prop !== 'noteType',
+})(({ theme, noteType }) => ({
   cursor: 'grab',
   transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   borderLeft: `4px solid ${noteType === 'feature' ? '#28a745' : noteType === 'user-story' ? '#17a2b8' : '#dc3545'}`,
@@ -235,7 +237,7 @@ const PhaseTracker = ({ currentPhase, phases, onPhaseChange, onCompletePhase }) 
             </PhaseCircle>
             <PhaseLabel>
               {phase.label.split('\n').map((line, idx) => (
-                <div key={idx}>{line}</div>
+                <span key={idx}>{line}</span>
               ))}
             </PhaseLabel>
           </PhaseStep>

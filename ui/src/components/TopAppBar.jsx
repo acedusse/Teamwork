@@ -71,6 +71,7 @@ const SkipLink = styled(Link)(({ theme }) => ({
 function getBreadcrumbs(pathname) {
   const routes = {
     '/': { label: 'Dashboard', url: '/' },
+    '/dashboard': { label: 'Main Dashboard', url: '/dashboard' },
     '/tasks': { label: 'Task Board', url: '/tasks' },
     '/prd': { label: 'PRD Editor', url: '/prd' },
     '/sprints': { label: 'Sprint Planning', url: '/sprints' },
@@ -79,9 +80,33 @@ function getBreadcrumbs(pathname) {
     '/settings': { label: 'Settings', url: '/settings' },
   };
 
+  // Dashboard tab routes
+  const dashboardTabs = {
+    'collaborative-planning': 'Collaborative Planning',
+    'bucket-planning': 'Bucket Planning',
+    'sprint-planning': 'Sprint Planning',
+    'scrumban-board': 'Scrumban Board',
+    'flow-optimization': 'Flow Optimization',
+    'continuous-improvement': 'Continuous Improvement'
+  };
+
   const breadcrumbs = [routes['/']]; // Always start with Dashboard
 
-  if (pathname !== '/' && routes[pathname]) {
+  // Handle dashboard tab routes
+  if (pathname.startsWith('/dashboard')) {
+    const dashboardMatch = pathname.match(/^\/dashboard(?:\/(.+))?$/);
+    if (dashboardMatch) {
+      breadcrumbs.push(routes['/dashboard']);
+      
+      const tabPath = dashboardMatch[1];
+      if (tabPath && dashboardTabs[tabPath]) {
+        breadcrumbs.push({
+          label: dashboardTabs[tabPath],
+          url: `/dashboard/${tabPath}`
+        });
+      }
+    }
+  } else if (pathname !== '/' && routes[pathname]) {
     breadcrumbs.push(routes[pathname]);
   }
 

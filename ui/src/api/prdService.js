@@ -2,6 +2,10 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:3000/api';
 
+// Control whether WebSockets are enabled
+// Set to true when the WebSocket server is ready to handle connections
+const WS_ENABLED = false;
+
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_URL,
@@ -72,6 +76,12 @@ export class PRDProcessingSocket {
   }
 
   connect() {
+    // Skip WebSocket connection if explicitly disabled
+    if (!WS_ENABLED) {
+      console.log('PRD WebSocket disabled: falling back to polling');
+      return false;
+    }
+    
     try {
       // Use the same host as the API but with WebSocket protocol
       const wsUrl = API_URL.replace('http://', 'ws://').replace('/api', '');
@@ -197,7 +207,7 @@ export const uploadAndProcessPRD = async (
   file, 
   onUploadProgress = null, 
   onProcessingProgress = null,
-  useWebSocket = true
+  useWebSocket = WS_ENABLED // Only use WebSocket if globally enabled
 ) => {
   try {
     // Step 1: Upload file
