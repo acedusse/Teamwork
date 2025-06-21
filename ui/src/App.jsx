@@ -2,24 +2,17 @@ import { useState, useEffect, Suspense, lazy } from 'react';
 import { Box, useTheme, CircularProgress, Typography, Stack } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import TopAppBar from './components/TopAppBar';
 import ErrorBoundary from './components/ErrorBoundary';
 import KeyboardShortcutHelp, { useKeyboardShortcutHelp } from './components/accessibility/KeyboardShortcutHelp';
 import keyboardShortcuts from './services/keyboardShortcuts';
-import CollaborativePlanningPage from './pages/CollaborativePlanningPage';
-import BucketPlanningPage from './pages/BucketPlanningPage';
-import ScrumbanBoardTab from './components/dashboard/ScrumbanBoardTab';
 
-// Lazy load page components for code splitting
-const Dashboard = lazy(() => import('./pages/Dashboard'));
+// Lazy load main dashboard and core components
 const MainDashboard = lazy(() => import('./components/dashboard/MainDashboard'));
 const TaskBoard = lazy(() => import('./pages/TaskBoard'));
 const TaskCreation = lazy(() => import('./pages/TaskCreation'));
-const SprintPlanning = lazy(() => import('./pages/SprintPlanning'));
-const FlowOptimizationPage = lazy(() => import('./pages/FlowOptimizationPage'));
-const ContinuousImprovementPage = lazy(() => import('./pages/ContinuousImprovementPage'));
 const Settings = lazy(() => import('./pages/Settings'));
 const ModalDemo = lazy(() => import('./pages/ModalDemo'));
 const PerformanceDashboard = lazy(() => import('./components/PerformanceDashboard'));
@@ -329,14 +322,10 @@ function AppContent() {
         }}
       >
         <Routes>
-          <Route 
-            path="/" 
-            element={
-              <Suspense fallback={<LoadingSpinner message="Loading Dashboard..." />}>
-                <Dashboard />
-              </Suspense>
-            } 
-          />
+          {/* Root route redirects to unified dashboard */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          
+          {/* Unified Dashboard Routes */}
           <Route 
             path="/dashboard" 
             element={
@@ -353,6 +342,8 @@ function AppContent() {
               </Suspense>
             } 
           />
+          
+          {/* Core Application Routes */}
           <Route 
             path="/tasks" 
             element={
@@ -384,30 +375,6 @@ function AppContent() {
                     <PRDEditor file={selectedFile} onSave={handleSaveContent} />
                   </Suspense>
                 </Box>
-              </Suspense>
-            } 
-          />
-          <Route 
-            path="/sprints" 
-            element={
-              <Suspense fallback={<FeatureLoadingSpinner feature="Sprint Planning" />}>
-                <SprintPlanning />
-              </Suspense>
-            } 
-          />
-          <Route 
-            path="/flow-optimization" 
-            element={
-              <Suspense fallback={<FeatureLoadingSpinner feature="Flow Optimization" />}>
-                <FlowOptimizationPage />
-              </Suspense>
-            } 
-          />
-          <Route 
-            path="/continuous-improvement" 
-            element={
-              <Suspense fallback={<FeatureLoadingSpinner feature="Continuous Improvement" />}>
-                <ContinuousImprovementPage />
               </Suspense>
             } 
           />
@@ -454,23 +421,14 @@ function AppContent() {
               </Suspense>
             } 
           />
-          <Route path="/collaborative-planning" element={<CollaborativePlanningPage />} />
-          <Route 
-            path="/bucket-planning" 
-            element={
-              <Suspense fallback={<FeatureLoadingSpinner feature="Bucket Planning" />}>
-                <BucketPlanningPage />
-              </Suspense>
-            } 
-          />
-          <Route 
-            path="/scrumban" 
-            element={
-              <Suspense fallback={<FeatureLoadingSpinner feature="Scrumban Board" />}>
-                <ScrumbanBoardTab />
-              </Suspense>
-            } 
-          />
+          
+          {/* Backward Compatibility Redirects for Legacy Routes */}
+          <Route path="/collaborative-planning" element={<Navigate to="/dashboard/collaborative-planning" replace />} />
+          <Route path="/bucket-planning" element={<Navigate to="/dashboard/bucket-planning" replace />} />
+          <Route path="/sprints" element={<Navigate to="/dashboard/sprint-planning" replace />} />
+          <Route path="/scrumban" element={<Navigate to="/dashboard/scrumban-board" replace />} />
+          <Route path="/flow-optimization" element={<Navigate to="/dashboard/flow-optimization" replace />} />
+          <Route path="/continuous-improvement" element={<Navigate to="/dashboard/continuous-improvement" replace />} />
         </Routes>
       </Box>
 

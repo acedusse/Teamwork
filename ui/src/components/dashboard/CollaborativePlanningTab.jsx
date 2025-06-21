@@ -30,6 +30,7 @@ import {
   Snackbar,
 } from '@mui/material';
 import { useCollaborativePlanning } from '../../hooks/useCollaborativePlanning';
+import { useDashboardModals } from './MainDashboard';
 import { styled } from '@mui/material/styles';
 import {
   Psychology as BrainIcon,
@@ -848,6 +849,7 @@ const PhaseActions = ({ onAction }) => (
 // Main Component
 const CollaborativePlanningTab = () => {
   const { state, actions, computed, utils, error, setError } = useCollaborativePlanning();
+  const modalActions = useDashboardModals();
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
@@ -892,55 +894,84 @@ const CollaborativePlanningTab = () => {
     showNotification('🚀 AI-powered brainstorming session started! All agents are now active.', 'success');
   };
 
-  const handleInviteAgents = () => {
-    // Simulate inviting new agents
-    const availableAgents = [
-      { name: 'Security Analysis Agent', type: 'security-expert' },
-      { name: 'DevOps Strategy Agent', type: 'devops-lead' },
-      { name: 'Data Science Agent', type: 'data-scientist' },
-    ];
-    
-    const randomAgent = availableAgents[Math.floor(Math.random() * availableAgents.length)];
-    actions.addParticipant({
-      ...randomAgent,
-      status: 'active',
-    });
-    
-    showNotification(`🤖 ${randomAgent.name} has joined the session!`, 'info');
+  const handleInviteAgents = async () => {
+    try {
+      const result = await modalActions.addAIAgent({
+        sessionType: 'brainstorming',
+        currentParticipants: state.participants
+      });
+      
+      if (result) {
+        actions.addParticipant({
+          ...result,
+          status: 'active',
+        });
+        showNotification(`🤖 ${result.name} has joined the session!`, 'info');
+      }
+    } catch (error) {
+      showNotification('Failed to add AI agent. Please try again.', 'error');
+    }
   };
 
-  const handleAddIdea = (type) => {
-    const title = prompt(`Enter the title for your ${type.replace('-', ' ')}:`);
-    if (!title) return;
-    
-    const content = prompt(`Enter the description for "${title}":`);
-    if (!content) return;
-    
-    const agentNames = state.participants
-      .filter(p => p.status === 'active')
-      .map(p => p.name);
-    const randomAgent = agentNames[Math.floor(Math.random() * agentNames.length)] || 'User';
-    
-    const ideaData = {
-      type,
-      title,
-      content,
-      author: randomAgent,
-      tags: [type, 'brainstorming'],
-    };
-    
-    actions.addIdea(ideaData);
-    showNotification(`💡 New ${type.replace('-', ' ')} added by ${randomAgent}!`, 'success');
-    
-    // Simulate AI agent response after a delay
-    setTimeout(() => {
-      const suggestions = {
-        feature: 'Consider technical feasibility and user impact metrics',
-        'user-story': 'Define acceptance criteria and edge cases',
-        'business-goal': 'Establish measurable KPIs and timeline'
-      };
-      showNotification(`🤖 AI Suggestion: ${suggestions[type]}`, 'info');
-    }, 2000);
+  const handleAddIdea = async (type) => {
+    try {
+      const result = await modalActions.openForm({
+        title: `Add ${type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`,
+        fields: [
+          { 
+            name: 'title', 
+            label: 'Title', 
+            type: 'text', 
+            required: true,
+            placeholder: `Enter the title for your ${type.replace('-', ' ')}`
+          },
+          { 
+            name: 'content', 
+            label: 'Description', 
+            type: 'textarea', 
+            required: true,
+            placeholder: `Describe your ${type.replace('-', ' ')} in detail`
+          },
+          {
+            name: 'author',
+            label: 'Author',
+            type: 'select',
+            options: [
+              'User',
+              ...state.participants
+                .filter(p => p.status === 'active')
+                .map(p => p.name)
+            ],
+            defaultValue: 'User'
+          }
+        ]
+      });
+      
+      if (result) {
+        const ideaData = {
+          type,
+          title: result.title,
+          content: result.content,
+          author: result.author,
+          tags: [type, 'brainstorming'],
+        };
+        
+        actions.addIdea(ideaData);
+        showNotification(`💡 New ${type.replace('-', ' ')} added by ${result.author}!`, 'success');
+        
+        // Simulate AI agent response after a delay
+        setTimeout(() => {
+          const suggestions = {
+            feature: 'Consider technical feasibility and user impact metrics',
+            'user-story': 'Define acceptance criteria and edge cases',
+            'business-goal': 'Establish measurable KPIs and timeline'
+          };
+          showNotification(`🤖 AI Suggestion: ${suggestions[type]}`, 'info');
+        }, 2000);
+      }
+    } catch (error) {
+      showNotification('Failed to add idea. Please try again.', 'error');
+    }
   };
 
   const handleVoteIdea = (ideaId) => {
@@ -993,22 +1024,46 @@ const CollaborativePlanningTab = () => {
     actions.setResearchTab(tab);
   };
 
-  const handlePhaseAction = (action) => {
-    const actionMessages = {
-      schedule: '📅 Session scheduled for next week!',
-      workshop: '🎪 Workshop facilitated with all stakeholders!',
-      consolidate: '📝 Findings consolidated into actionable insights!',
-      validate: '✅ Requirements validated with stakeholders!',
-      export: '📤 All artifacts exported successfully!',
-      share: '👥 Shared with team via collaboration platform!',
-    };
-    
-    showNotification(actionMessages[action] || 'Action completed!', 'success');
-    
-    // Update document progress based on action
-    if (action === 'consolidate') {
-      actions.updateDocumentProgress('prd', { progress: Math.min(state.documents.prd.progress + 10, 100) });
-      actions.updateDocumentProgress('brd', { progress: Math.min(state.documents.brd.progress + 5, 100) });
+  const handlePhaseAction = async (action) => {
+    try {
+      switch (action) {
+        case 'schedule':
+          const sessionResult = await modalActions.schedulePlanningSession({
+            type: 'planning',
+            phase: state.currentPhase
+          });
+          if (sessionResult) {
+            showNotification('📅 Planning session scheduled successfully!', 'success');
+          }
+          break;
+          
+        case 'workshop':
+          showNotification('🎪 Workshop facilitated with all stakeholders!', 'success');
+          break;
+          
+        case 'consolidate':
+          actions.updateDocumentProgress('prd', { progress: Math.min(state.documents.prd.progress + 10, 100) });
+          actions.updateDocumentProgress('brd', { progress: Math.min(state.documents.brd.progress + 5, 100) });
+          showNotification('📝 Findings consolidated into actionable insights!', 'success');
+          break;
+          
+        case 'validate':
+          showNotification('✅ Requirements validated with stakeholders!', 'success');
+          break;
+          
+        case 'export':
+          showNotification('📤 All artifacts exported successfully!', 'success');
+          break;
+          
+        case 'share':
+          showNotification('👥 Shared with team via collaboration platform!', 'success');
+          break;
+          
+        default:
+          showNotification('Action completed!', 'success');
+      }
+    } catch (error) {
+      showNotification('Failed to complete action. Please try again.', 'error');
     }
   };
 

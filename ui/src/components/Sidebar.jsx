@@ -26,35 +26,37 @@ const COLLAPSED_DRAWER_WIDTH = 65;
 
 // Route preloading functions - these match the lazy imports in App.jsx
 const routePreloaders = {
-  dashboard: () => import('../pages/Dashboard'),
+  dashboard: () => import('../components/dashboard/MainDashboard'),
+  'collaborative-planning': () => import('../components/dashboard/MainDashboard'),
+  'bucket-planning': () => import('../components/dashboard/MainDashboard'),
+  'sprint-planning': () => import('../components/dashboard/MainDashboard'),
+  'scrumban-board': () => import('../components/dashboard/MainDashboard'),
+  'flow-optimization': () => import('../components/dashboard/MainDashboard'),
+  'continuous-improvement': () => import('../components/dashboard/MainDashboard'),
   tasks: () => import('../pages/TaskBoard'),
   prd: () => [
     import('../components/PRDUpload'),
     import('../components/PRDPreview'),
     import('../components/PRDEditor')
   ],
-  sprints: () => import('../pages/SprintPlanning'),
-  'flow-optimization': () => import('../pages/FlowOptimizationPage'),
-  'continuous-improvement': () => import('../pages/ContinuousImprovementPage'),
   dependencies: () => import('../components/DependencyGraph'),
   performance: () => import('../components/PerformanceDashboard'),
-  'bucket-planning': () => import('../pages/BucketPlanningPage'),
   settings: () => import('../pages/Settings')
 };
 
 const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/', key: 'dashboard' },
+  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', key: 'dashboard' },
+  { text: 'Collaborative Planning', icon: <GroupWorkIcon />, path: '/dashboard/collaborative-planning', key: 'collaborative-planning' },
+  { text: 'Bucket Planning', icon: <TaskBoardIcon />, path: '/dashboard/bucket-planning', key: 'bucket-planning' },
+  { text: 'Sprint Planning', icon: <SprintIcon />, path: '/dashboard/sprint-planning', key: 'sprint-planning' },
+  { text: 'Scrumban Board', icon: <TaskBoardIcon />, path: '/dashboard/scrumban-board', key: 'scrumban-board' },
+  { text: 'Flow Optimization', icon: <FlowOptimizationIcon />, path: '/dashboard/flow-optimization', key: 'flow-optimization' },
+  { text: 'Continuous Improvement', icon: <ContinuousImprovementIcon />, path: '/dashboard/continuous-improvement', key: 'continuous-improvement' },
   { text: 'Task Board', icon: <TaskBoardIcon />, path: '/tasks', key: 'tasks' },
-  { text: 'Scrumban Board', icon: <TaskBoardIcon />, path: '/scrumban', key: 'scrumban' },
   { text: 'PRD Editor', icon: <PRDIcon />, path: '/prd', key: 'prd' },
-  { text: 'Sprint Planning', icon: <SprintIcon />, path: '/sprints', key: 'sprints' },
-  { text: 'Flow Optimization', icon: <FlowOptimizationIcon />, path: '/flow-optimization', key: 'flow-optimization' },
-  { text: 'Continuous Improvement', icon: <ContinuousImprovementIcon />, path: '/continuous-improvement', key: 'continuous-improvement' },
   { text: 'Dependencies', icon: <DependenciesIcon />, path: '/dependencies', key: 'dependencies' },
   { text: 'Performance', icon: <PerformanceIcon />, path: '/performance', key: 'performance' },
-  { text: 'Settings', icon: <SettingsIcon />, path: '/settings', key: 'settings' },
-  { text: 'Collaborative Planning', icon: <GroupWorkIcon />, path: '/collaborative-planning', key: 'collaborative-planning' },
-  { text: 'Bucket Planning', icon: <TaskBoardIcon />, path: '/bucket-planning', key: 'bucket-planning' }
+  { text: 'Settings', icon: <SettingsIcon />, path: '/settings', key: 'settings' }
 ];
 
 // Demo/Development menu items (only shown in development)
@@ -124,7 +126,23 @@ export default function Sidebar({ open, onClose }) {
   };
 
   const isItemActive = (path) => {
-    return location.pathname === path;
+    // For exact path matches
+    if (location.pathname === path) {
+      return true;
+    }
+    
+    // Special handling for dashboard items
+    if (path === '/dashboard') {
+      // Only highlight main dashboard when on exact dashboard path or no specific tab
+      return location.pathname === '/dashboard';
+    }
+    
+    // For specific dashboard tabs, check exact match
+    if (path.startsWith('/dashboard/')) {
+      return location.pathname === path;
+    }
+    
+    return false;
   };
 
   // Create hover preloader for a specific route
