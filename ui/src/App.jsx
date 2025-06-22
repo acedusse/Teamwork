@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import Sidebar from './components/Sidebar';
 import TopAppBar from './components/TopAppBar';
 import ErrorBoundary from './components/ErrorBoundary';
+import { WebSocketProvider } from './contexts/WebSocketContext';
 import KeyboardShortcutHelp, { useKeyboardShortcutHelp } from './components/accessibility/KeyboardShortcutHelp';
 import keyboardShortcuts from './services/keyboardShortcuts';
 
@@ -474,9 +475,11 @@ function App() {
     <ErrorBoundary>
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <Router>
-          <div data-testid="app-ready">
-            <AppContent />
-          </div>
+          <WebSocketProvider>
+            <div data-testid="app-ready">
+              <AppContent />
+            </div>
+          </WebSocketProvider>
         </Router>
       </LocalizationProvider>
     </ErrorBoundary>

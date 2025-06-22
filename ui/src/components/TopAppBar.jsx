@@ -7,6 +7,8 @@ import {
   NavigateNext as NavigateNextIcon,
   Accessibility as AccessibilityIcon
 } from '@mui/icons-material';
+import ConnectionStatus from './common/ConnectionStatus';
+import NotificationSystem from './common/NotificationSystem';
 import { styled, alpha } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ariaManager from '../services/ariaManager';
@@ -246,25 +248,13 @@ export default function TopAppBar({ onMenuClick, onCreateTask }) {
             role="toolbar"
             aria-label="Action buttons"
           >
-            <IconButton 
-              color="inherit"
-              aria-label="Notifications (4 unread)"
-              aria-describedby="notifications-tooltip"
-            >
-              <Badge 
-                badgeContent={4} 
-                color="error"
-                aria-label="4 unread notifications"
-              >
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            <div 
-              id="notifications-tooltip" 
-              className="sr-only"
-            >
-              View your notifications and alerts
-            </div>
+            {/* WebSocket Connection Status */}
+            <ConnectionStatus />
+            
+            {/* Real-time Notifications System */}
+            <Box sx={{ ml: 1 }}>
+              <NotificationSystem />
+            </Box>
                         <IconButton
               color="inherit"
               sx={{ ml: 1 }}

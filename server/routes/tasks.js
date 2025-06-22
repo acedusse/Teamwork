@@ -9,6 +9,14 @@ import { TaskSchema } from '../schemas/task.js';
 import { broadcast } from '../websocket.js';
 import { loadAgents, assignAgent, recordAssignment } from '../utils/agents.js';
 import { 
+    broadcastTaskCreated, 
+    broadcastTaskUpdated, 
+    broadcastTaskDeleted,
+    broadcastBulkTaskUpdate,
+    sendNotification,
+    NOTIFICATION_TYPES
+} from '../utils/taskEventManager.js';
+import { 
     logTaskCreated, 
     logTaskStatusChanged, 
     logTaskDeleted,
@@ -92,8 +100,20 @@ router.put('/:id/assign', (req, res, next) => {
         // Log the activity
         logTaskUpdated(tasks[taskIndex], 'Assigned agent');
         
-        // Broadcast the change via websocket
-        broadcast('task-updated', { task: tasks[taskIndex] });
+        // Get user information for broadcasting
+        const metadata = {
+            userId: req.headers['x-user-id'] || 'web_user',
+            userName: req.headers['x-user-name'] || 'User',
+            userAgent: req.headers['user-agent'],
+            source: 'assignment_api'
+        };
+        
+        // Broadcast the change via websocket using new event manager
+        broadcastTaskUpdated(
+            tasks.find(t => t.id.toString() === id.toString()), // old task (before assignment)
+            tasks[taskIndex], // new task (after assignment)
+            metadata
+        );
         
         // Return success response
         return res.json({
@@ -140,7 +160,20 @@ router.post('/', validate(TaskSchema), (req, res, next) => {
                 // Log task creation activity
                 logTaskCreated(newTask, req.headers['x-user-id'] || 'web_user');
                 
-                broadcast({ type: 'tasksUpdated', tasks });
+                // Get user information for broadcasting
+                const metadata = {
+                    userId: req.headers['x-user-id'] || 'web_user',
+                    userName: req.headers['x-user-name'] || 'User',
+                    userAgent: req.headers['user-agent'],
+                    source: 'create_api'
+                };
+                
+                // Broadcast task creation using new event manager
+                broadcastTaskCreated(newTask, metadata);
+                
+                // Also broadcast bulk update for backward compatibility
+                broadcastBulkTaskUpdate(tasks, metadata);
+                
                 res.set('X-Tasks-Version', String(getVersion()));
                 res.status(201).json(newTask);
         } catch (err) {
@@ -180,7 +213,21 @@ router.put('/:id', validate(TaskSchema.partial()), (req, res, next) => {
                     // General update
                     logTaskUpdated(tasks[index], update, userId);
                 }
-                broadcast({ type: 'tasksUpdated', tasks });
+                
+                // Get user information for broadcasting
+                const metadata = {
+                    userId: userId,
+                    userName: req.headers['x-user-name'] || 'User',
+                    userAgent: req.headers['user-agent'],
+                    source: 'update_api'
+                };
+                
+                // Broadcast task update using new event manager
+                broadcastTaskUpdated(prevTask, tasks[index], metadata);
+                
+                // Also broadcast bulk update for backward compatibility
+                broadcastBulkTaskUpdate(tasks, metadata);
+                
                 res.set('X-Tasks-Version', String(getVersion()));
                 res.json(tasks[index]);
         } catch (err) {
@@ -208,7 +255,21 @@ router.delete('/:id', (req, res, next) => {
 		
 		// Log task deletion activity
 		logTaskDeleted(deletedTask, req.headers['x-user-id'] || 'web_user');
-		broadcast({ type: 'tasksUpdated', tasks });
+		
+		// Get user information for broadcasting
+		const metadata = {
+			userId: req.headers['x-user-id'] || 'web_user',
+			userName: req.headers['x-user-name'] || 'User',
+			userAgent: req.headers['user-agent'],
+			source: 'delete_api'
+		};
+		
+		// Broadcast task deletion using new event manager
+		broadcastTaskDeleted(deletedTask, metadata);
+		
+		// Also broadcast bulk update for backward compatibility
+		broadcastBulkTaskUpdate(tasks, metadata);
+		
 		res.set('X-Tasks-Version', String(getVersion()));
 		res.status(204).end();
 	} catch (err) {

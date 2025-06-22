@@ -1,4 +1,4 @@
-import { WebSocketServer } from 'ws';
+import { Server } from 'socket.io';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,49 +16,97 @@ const MAX_CONNECTIONS = parseInt(process.env.MAX_WS_CONNECTIONS || '100', 10);
 const PING_INTERVAL = parseInt(process.env.WS_PING_INTERVAL || '30000', 10);
 const CONNECTION_TIMEOUT = parseInt(process.env.WS_CONNECTION_TIMEOUT || '120000', 10);
 
-// Store clients with metadata for better management
-const clients = new Set();
-let pingInterval = null;
+// Store connected clients with metadata
+const connectedClients = new Map();
+let io = null;
 
-export function broadcast(data) {
-	const message = typeof data === 'string' ? data : JSON.stringify(data);
-	for (const client of clients) {
-		if (client.readyState === client.OPEN) {
-			try {
-				client.send(message);
-			} catch (err) {
-				logger.error('Failed to send message to client', err);
-				// Remove problematic client
-				clients.delete(client);
-			}
+/**
+ * Broadcast message to all connected clients
+ * @param {string} event - Event name
+ * @param {any} data - Data to broadcast
+ * @param {string} [excludeSocketId] - Socket ID to exclude from broadcast
+ */
+export function broadcast(event, data, excludeSocketId = null) {
+	if (!io) return;
+	
+	try {
+		if (excludeSocketId) {
+			io.sockets.sockets.forEach((socket) => {
+				if (socket.id !== excludeSocketId) {
+					socket.emit(event, data);
+				}
+			});
+		} else {
+			io.emit(event, data);
 		}
+		logger.debug(`Broadcasted ${event} to ${io.sockets.sockets.size} clients`);
+	} catch (err) {
+		logger.error('Failed to broadcast message', { event, error: err.message });
 	}
 }
 
 /**
- * Clean up inactive connections to free resources
+ * Send message to specific client
+ * @param {string} socketId - Target socket ID
+ * @param {string} event - Event name
+ * @param {any} data - Data to send
  */
-function cleanupInactiveConnections() {
-	const now = Date.now();
-	for (const client of clients) {
-		if (client.readyState !== client.OPEN || (client._lastActivity && now - client._lastActivity > CONNECTION_TIMEOUT)) {
-			try {
-				client.terminate();
-			} catch (e) {
-				// Ignore errors during cleanup
-			}
-			clients.delete(client);
-			logger.info('WebSocket connection terminated due to inactivity');
-		}
+export function sendToClient(socketId, event, data) {
+	if (!io) return false;
+	
+	const socket = io.sockets.sockets.get(socketId);
+	if (socket) {
+		socket.emit(event, data);
+		return true;
 	}
+	return false;
 }
 
+/**
+ * Get all connected clients info
+ */
+export function getConnectedClients() {
+	return Array.from(connectedClients.values());
+}
+
+/**
+ * Clean up inactive connections
+ */
+function cleanupInactiveConnections() {
+	if (!io) return;
+	
+	const now = Date.now();
+	const socketsToDisconnect = [];
+	
+	connectedClients.forEach((client, socketId) => {
+		if (now - client.lastActivity > CONNECTION_TIMEOUT) {
+			socketsToDisconnect.push(socketId);
+		}
+	});
+	
+	socketsToDisconnect.forEach(socketId => {
+		const socket = io.sockets.sockets.get(socketId);
+		if (socket) {
+			socket.disconnect(true);
+			logger.info(`Disconnected inactive client: ${socketId}`);
+		}
+	});
+}
+
+/**
+ * Watch tasks file for changes and broadcast updates
+ */
 function watchTasksFile() {
 	if (!fs.existsSync(TASKS_FILE)) return;
+	
 	fs.watchFile(TASKS_FILE, { persistent: false, interval: 100 }, () => {
 		try {
 			const data = readJSON(TASKS_FILE) || { tasks: [] };
-			broadcast({ type: 'tasksUpdated', tasks: data.tasks || [] });
+			broadcast('tasksUpdated', { 
+				tasks: data.master?.tasks || data.tasks || [],
+				timestamp: new Date().toISOString()
+			});
+			logger.debug('Broadcasted task updates');
 		} catch (err) {
 			logger.error('Failed to broadcast tasks update', err);
 		}
@@ -66,127 +114,249 @@ function watchTasksFile() {
 }
 
 /**
- * Initialize WebSocket server for real-time communication.
- * @param {import('http').Server} server - HTTP server instance.
+ * Handle user authentication
+ * @param {Object} socket - Socket.io socket instance
+ * @param {Function} next - Next middleware function
+ */
+function authenticateSocket(socket, next) {
+	const token = socket.handshake.auth?.token || socket.handshake.query?.token;
+	const expectedToken = process.env.WS_TOKEN;
+	
+	// If token is required but not provided or invalid
+	if (expectedToken && token !== expectedToken) {
+		return next(new Error('Authentication failed'));
+	}
+	
+	// Store user info if provided
+	socket.userId = socket.handshake.auth?.userId || `user_${Date.now()}`;
+	socket.userName = socket.handshake.auth?.userName || 'Anonymous';
+	
+	next();
+}
+
+/**
+ * Handle connection limits
+ * @param {Object} socket - Socket.io socket instance
+ * @param {Function} next - Next middleware function
+ */
+function checkConnectionLimit(socket, next) {
+	if (connectedClients.size >= MAX_CONNECTIONS) {
+		return next(new Error('Maximum connections reached'));
+	}
+	next();
+}
+
+/**
+ * Initialize Socket.io server for real-time collaboration
+ * @param {import('http').Server} server - HTTP server instance
  */
 export default function initWebSocketServer(server) {
-	const wss = new WebSocketServer({ 
-		server,
-		perMessageDeflate: {
-			zlibDeflateOptions: { level: 1 }, // Use lower compression level to save CPU
-			serverNoContextTakeover: true,
-			clientNoContextTakeover: true
+	io = new Server(server, {
+		cors: {
+			origin: process.env.CORS_ORIGIN || "*",
+			methods: ["GET", "POST"],
+			credentials: true
 		},
-		maxPayload: 1024 * 1024 // 1MB max message size
+		pingTimeout: CONNECTION_TIMEOUT,
+		pingInterval: PING_INTERVAL,
+		maxHttpBufferSize: 1e6, // 1MB
+		transports: ['websocket', 'polling'],
+		allowEIO3: true
 	});
 
-	// Start ping interval for connection health checks and cleanup
-	if (pingInterval) {
-		clearInterval(pingInterval);
-	}
-	pingInterval = setInterval(() => {
-		cleanupInactiveConnections();
-		
-		for (const client of clients) {
-			if (client.readyState === client.OPEN) {
-				try {
-					client.ping();
-				} catch (err) {
-					// If ping fails, client will be cleaned up on next interval
-				}
-			}
-		}
-	}, PING_INTERVAL);
+	// Apply middleware
+	io.use(authenticateSocket);
+	io.use(checkConnectionLimit);
 
-	wss.on('connection', (ws, req) => {
-		// Check if we have reached the connection limit
-		if (clients.size >= MAX_CONNECTIONS) {
-			ws.close(1013, 'Maximum connections reached');
-			logger.warn(`WebSocket connection rejected: Max connections (${MAX_CONNECTIONS}) reached`);
-			return;
-		}
-
-		const url = new URL(req.url, `http://${req.headers.host}`);
-		const token = url.searchParams.get('token');
-		const expected = process.env.WS_TOKEN;
-		if (expected && token !== expected) {
-			ws.close(4001, 'Unauthorized');
-			return;
-		}
-
-		// Set initial activity timestamp and connection info
-		ws._lastActivity = Date.now();
-		ws._clientInfo = {
-			ip: req.socket.remoteAddress,
-			userAgent: req.headers['user-agent'] || 'Unknown',
-			connectedAt: new Date().toISOString()
+	// Handle connections
+	io.on('connection', (socket) => {
+		const clientInfo = {
+			id: socket.id,
+			userId: socket.userId,
+			userName: socket.userName,
+			connectedAt: new Date().toISOString(),
+			lastActivity: Date.now(),
+			ip: socket.handshake.address,
+			userAgent: socket.handshake.headers['user-agent'] || 'Unknown'
 		};
+		
+		connectedClients.set(socket.id, clientInfo);
+		
+		logger.info(`Client connected: ${socket.id} (${socket.userName}) - Total: ${connectedClients.size}/${MAX_CONNECTIONS}`);
+		
+		// Send initial data to new client
+		socket.emit('connected', {
+			socketId: socket.id,
+			userId: socket.userId,
+			serverTime: new Date().toISOString()
+		});
+		
+		// Broadcast user joined to others
+		socket.broadcast.emit('userJoined', {
+			userId: socket.userId,
+			userName: socket.userName,
+			socketId: socket.id
+		});
+		
+		// Send current tasks to new client
+		try {
+			const data = readJSON(TASKS_FILE) || { tasks: [] };
+			socket.emit('tasksUpdated', {
+				tasks: data.master?.tasks || data.tasks || [],
+				timestamp: new Date().toISOString()
+			});
+		} catch (err) {
+			logger.error('Failed to send initial tasks to client', err);
+		}
 
-		clients.add(ws);
-		logger.info(`WebSocket client connected (${clients.size}/${MAX_CONNECTIONS})`);
-
-		// Update last activity on any message
-		ws.on('message', (data) => {
-			ws._lastActivity = Date.now();
+		// Handle real-time task updates
+		socket.on('taskUpdate', (data) => {
+			connectedClients.get(socket.id).lastActivity = Date.now();
 			
-			try {
-				for (const client of clients) {
-					if (client.readyState === client.OPEN) {
-						try {
-							client.send(data);
-						} catch (err) {
-							logger.error('Failed to relay message to client', err);
-						}
-					}
-				}
-			} catch (err) {
-				logger.error('Error processing WebSocket message', err);
+			// Broadcast to all other clients
+			socket.broadcast.emit('taskUpdate', {
+				...data,
+				userId: socket.userId,
+				userName: socket.userName,
+				timestamp: new Date().toISOString()
+			});
+			
+			logger.debug(`Task update from ${socket.userName}: ${data.type}`);
+		});
+
+		// Handle user presence updates
+		socket.on('presenceUpdate', (data) => {
+			connectedClients.get(socket.id).lastActivity = Date.now();
+			
+			// Update client info
+			const client = connectedClients.get(socket.id);
+			if (client) {
+				client.presence = data;
 			}
+			
+			// Broadcast presence to others
+			socket.broadcast.emit('presenceUpdate', {
+				userId: socket.userId,
+				userName: socket.userName,
+				socketId: socket.id,
+				...data
+			});
 		});
 
-		ws.on('pong', () => {
-			// Update activity on pong response
-			ws._lastActivity = Date.now();
+		// Handle cursor position updates
+		socket.on('cursorUpdate', (data) => {
+			connectedClients.get(socket.id).lastActivity = Date.now();
+			
+			// Broadcast cursor position to others
+			socket.broadcast.emit('cursorUpdate', {
+				userId: socket.userId,
+				userName: socket.userName,
+				socketId: socket.id,
+				...data
+			});
 		});
 
-		ws.on('error', (err) => {
-			logger.error('WebSocket client error', err);
-			try {
-				ws.terminate();
-			} catch (e) {
-				// Ignore errors during termination
-			}
-			clients.delete(ws);
+		// Handle collaborative editing locks
+		socket.on('requestLock', (data) => {
+			connectedClients.get(socket.id).lastActivity = Date.now();
+			
+			// Simple lock implementation - first come, first served
+			// In a production app, you'd want more sophisticated locking
+			socket.broadcast.emit('lockRequested', {
+				userId: socket.userId,
+				userName: socket.userName,
+				socketId: socket.id,
+				...data
+			});
 		});
 
-		ws.on('close', () => {
-			clients.delete(ws);
-			logger.info(`WebSocket client disconnected (${clients.size}/${MAX_CONNECTIONS})`);
+		socket.on('releaseLock', (data) => {
+			connectedClients.get(socket.id).lastActivity = Date.now();
+			
+			socket.broadcast.emit('lockReleased', {
+				userId: socket.userId,
+				userName: socket.userName,
+				socketId: socket.id,
+				...data
+			});
+		});
+
+		// Handle typing indicators
+		socket.on('typing', (data) => {
+			connectedClients.get(socket.id).lastActivity = Date.now();
+			
+			socket.broadcast.emit('userTyping', {
+				userId: socket.userId,
+				userName: socket.userName,
+				socketId: socket.id,
+				...data
+			});
+		});
+
+		// Handle notifications
+		socket.on('notification', (data) => {
+			connectedClients.get(socket.id).lastActivity = Date.now();
+			
+			// Broadcast notification to all clients
+			broadcast('notification', {
+				...data,
+				fromUserId: socket.userId,
+				fromUserName: socket.userName,
+				timestamp: new Date().toISOString()
+			});
+		});
+
+		// Handle ping for connection health
+		socket.on('ping', () => {
+			connectedClients.get(socket.id).lastActivity = Date.now();
+			socket.emit('pong');
+		});
+
+		// Handle disconnection
+		socket.on('disconnect', (reason) => {
+			connectedClients.delete(socket.id);
+			
+			logger.info(`Client disconnected: ${socket.id} (${socket.userName}) - Reason: ${reason} - Remaining: ${connectedClients.size}`);
+			
+			// Broadcast user left to others
+			socket.broadcast.emit('userLeft', {
+				userId: socket.userId,
+				userName: socket.userName,
+				socketId: socket.id,
+				reason
+			});
+		});
+
+		// Handle connection errors
+		socket.on('error', (error) => {
+			logger.error(`Socket error for ${socket.id}:`, error);
 		});
 	});
 
-	// Graceful shutdown handler
-	process.on('SIGTERM', () => {
-		logger.info('SIGTERM received, closing WebSocket connections...');
-		if (pingInterval) {
-			clearInterval(pingInterval);
-			pingInterval = null;
-		}
+	// Start cleanup interval
+	const cleanupInterval = setInterval(cleanupInactiveConnections, PING_INTERVAL);
 
-		wss.close(() => {
-			logger.info('WebSocket server closed');
-		});
-
-		for (const client of clients) {
-			try {
-				client.close(1001, 'Server shutting down');
-			} catch (err) {
-				// Ignore errors during shutdown
-			}
-		}
-	});
-
+	// Watch tasks file for changes
 	watchTasksFile();
 
-	return wss;
+	// Graceful shutdown
+	process.on('SIGTERM', () => {
+		logger.info('SIGTERM received, closing Socket.io server...');
+		
+		clearInterval(cleanupInterval);
+		
+		// Notify all clients of server shutdown
+		broadcast('serverShutdown', {
+			message: 'Server is shutting down',
+			timestamp: new Date().toISOString()
+		});
+		
+		// Close all connections
+		io.close(() => {
+			logger.info('Socket.io server closed');
+		});
+	});
+
+	logger.info('Socket.io server initialized successfully');
+	return io;
 }

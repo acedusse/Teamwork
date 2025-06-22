@@ -1,180 +1,181 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { io } from 'socket.io-client';
 
-const useWebSocket = (url, options = {}) => {
+const useSocketIO = (url, options = {}) => {
   const [socket, setSocket] = useState(null);
-  const [lastMessage, setLastMessage] = useState(null);
-  const [readyState, setReadyState] = useState(0); // 0: CONNECTING, 1: OPEN, 2: CLOSING, 3: CLOSED
+  const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState(null);
-  const reconnectTimeoutRef = useRef(null);
+  const [lastMessage, setLastMessage] = useState(null);
   const reconnectAttemptsRef = useRef(0);
   const messageQueueRef = useRef([]);
 
   const {
     reconnectLimit = 5,
-    reconnectInterval = 3000,
-    onOpen,
-    onMessage,
-    onClose,
+    reconnectDelay = 3000,
+    auth = {},
+    onConnect,
+    onDisconnect,
     onError,
-    shouldReconnect = true
+    onMessage,
+    autoConnect = true,
+    transports = ['websocket', 'polling']
   } = options;
 
   const connect = useCallback(() => {
     try {
-      const ws = new WebSocket(url);
-      
-      ws.onopen = (event) => {
-        console.log('WebSocket connected');
-        setReadyState(1);
+      // Disconnect existing socket if any
+      if (socket) {
+        socket.disconnect();
+      }
+
+      const socketInstance = io(url, {
+        auth,
+        transports,
+        reconnection: true,
+        reconnectionAttempts: reconnectLimit,
+        reconnectionDelay: reconnectDelay,
+        timeout: 20000,
+        forceNew: true
+      });
+
+      // Connection established
+      socketInstance.on('connect', () => {
+        console.log('Socket.io connected:', socketInstance.id);
+        setIsConnected(true);
         setError(null);
         reconnectAttemptsRef.current = 0;
-        
+
         // Send queued messages
         while (messageQueueRef.current.length > 0) {
-          const message = messageQueueRef.current.shift();
-          ws.send(message);
+          const { event, data } = messageQueueRef.current.shift();
+          socketInstance.emit(event, data);
         }
-        
-        if (onOpen) onOpen(event);
-      };
 
-      ws.onmessage = (event) => {
-        try {
-          // Check if the message is a Blob
-          if (event.data instanceof Blob) {
-            // Handle Blob data - read as text then try to parse
-            const reader = new FileReader();
-            reader.onload = () => {
-              try {
-                const jsonData = JSON.parse(reader.result);
-                setLastMessage(jsonData);
-                if (onMessage) onMessage(jsonData);
-              } catch (err) {
-                // If parsing fails, just send the text data
-                console.log('Received non-JSON blob data');
-                setLastMessage(reader.result);
-                if (onMessage) onMessage(reader.result);
-              }
-            };
-            reader.readAsText(event.data);
-            return;
-          }
-          
-          // Handle string data
-          if (typeof event.data === 'string') {
-            try {
-              const data = JSON.parse(event.data);
-              setLastMessage(data);
-              if (onMessage) onMessage(data);
-            } catch (err) {
-              // If not valid JSON, use as-is
-              console.log('Received non-JSON string data');
-              setLastMessage(event.data);
-              if (onMessage) onMessage(event.data);
-            }
-            return;
-          }
-          
-          // For other types, just use the data as-is
-          console.log('Received data of type:', typeof event.data);
-          setLastMessage(event.data);
-          if (onMessage) onMessage(event.data);
-        } catch (err) {
-          console.error('Error handling WebSocket message:', err);
-          setLastMessage(event.data);
-          if (onMessage) onMessage(event.data);
+        if (onConnect) {
+          onConnect(socketInstance);
         }
-      };
+      });
 
-      ws.onclose = (event) => {
-        console.log('WebSocket disconnected:', event.code, event.reason);
-        setReadyState(3);
-        setSocket(null);
+      // Connection failed
+      socketInstance.on('connect_error', (err) => {
+        console.error('Socket.io connection error:', err);
+        setError(err);
+        setIsConnected(false);
         
-        if (onClose) onClose(event);
-        
-        // Attempt to reconnect if enabled and within limits
-        if (shouldReconnect && reconnectAttemptsRef.current < reconnectLimit) {
-          reconnectAttemptsRef.current += 1;
-          console.log(`Attempting to reconnect... (${reconnectAttemptsRef.current}/${reconnectLimit})`);
-          
-          reconnectTimeoutRef.current = setTimeout(() => {
-            setReadyState(0);
-            connect();
-          }, reconnectInterval);
+        if (onError) {
+          onError(err);
         }
-      };
+      });
 
-      ws.onerror = (event) => {
-        console.error('WebSocket error:', event);
-        setError(event);
-        if (onError) onError(event);
-      };
+      // Disconnected
+      socketInstance.on('disconnect', (reason) => {
+        console.log('Socket.io disconnected:', reason);
+        setIsConnected(false);
+        
+        if (onDisconnect) {
+          onDisconnect(reason);
+        }
+      });
 
-      setSocket(ws);
-      setReadyState(0);
+      // Reconnection attempts
+      socketInstance.on('reconnect_attempt', (attempt) => {
+        console.log(`Socket.io reconnection attempt ${attempt}/${reconnectLimit}`);
+        reconnectAttemptsRef.current = attempt;
+      });
+
+      socketInstance.on('reconnect', (attempt) => {
+        console.log(`Socket.io reconnected after ${attempt} attempts`);
+        setIsConnected(true);
+        setError(null);
+      });
+
+      socketInstance.on('reconnect_failed', () => {
+        console.error('Socket.io reconnection failed');
+        setError(new Error('Reconnection failed'));
+      });
+
+      // Generic message handler
+      if (onMessage) {
+        socketInstance.onAny((event, ...args) => {
+          const data = args.length === 1 ? args[0] : args;
+          setLastMessage({ event, data, timestamp: new Date().toISOString() });
+          onMessage(event, data);
+        });
+      }
+
+      setSocket(socketInstance);
+      return socketInstance;
     } catch (err) {
-      console.error('Error creating WebSocket:', err);
+      console.error('Error creating Socket.io connection:', err);
       setError(err);
+      return null;
     }
-  }, [url, onOpen, onMessage, onClose, onError, shouldReconnect, reconnectLimit, reconnectInterval]);
+  }, [url, auth, transports, reconnectLimit, reconnectDelay, onConnect, onDisconnect, onError, onMessage, socket]);
 
   const disconnect = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
+    if (socket) {
+      socket.disconnect();
+      setSocket(null);
+      setIsConnected(false);
     }
-    
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.close();
-    }
-    
-    setSocket(null);
-    setReadyState(3);
   }, [socket]);
 
-  const sendMessage = useCallback((message) => {
-    const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
-    
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(messageStr);
+  const emit = useCallback((event, data) => {
+    if (socket && isConnected) {
+      socket.emit(event, data);
     } else {
       // Queue message for when connection is established
-      messageQueueRef.current.push(messageStr);
+      messageQueueRef.current.push({ event, data });
       
-      // If not connected, try to connect
-      if (!socket || socket.readyState === WebSocket.CLOSED) {
+      // Try to connect if not connected
+      if (!socket && autoConnect) {
         connect();
       }
     }
-  }, [socket, connect]);
+  }, [socket, isConnected, autoConnect, connect]);
 
+  const on = useCallback((event, handler) => {
+    if (socket) {
+      socket.on(event, handler);
+      
+      // Return cleanup function
+      return () => {
+        socket.off(event, handler);
+      };
+    }
+    return () => {};
+  }, [socket]);
+
+  const off = useCallback((event, handler) => {
+    if (socket) {
+      socket.off(event, handler);
+    }
+  }, [socket]);
+
+  // Auto-connect on mount
   useEffect(() => {
-    connect();
-    
+    if (autoConnect) {
+      connect();
+    }
+
+    // Cleanup on unmount
     return () => {
       disconnect();
     };
-  }, [connect, disconnect]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-    };
-  }, []);
+  }, [autoConnect, connect, disconnect]);
 
   return {
     socket,
-    lastMessage,
-    readyState,
+    isConnected,
     error,
-    sendMessage,
+    lastMessage,
+    reconnectAttempts: reconnectAttemptsRef.current,
+    connect,
     disconnect,
-    reconnect: connect
+    emit,
+    on,
+    off
   };
 };
 
-export default useWebSocket; 
+export default useSocketIO; 
