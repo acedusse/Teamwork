@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -31,6 +31,8 @@ import {
 } from '@mui/material';
 import { useCollaborativePlanning } from '../../hooks/useCollaborativePlanning';
 import { useDashboardModals } from './MainDashboard';
+import AIResponseDisplay from '../ai/AIResponseDisplay';
+import { useBrainstormingAI } from '../../hooks/useBrainstormingAI';
 import { styled } from '@mui/material/styles';
 import {
   Psychology as BrainIcon,
@@ -395,7 +397,7 @@ const AIParticipantsPanel = ({ participants }) => {
                 height: 40,
               }}
             >
-              {participant.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
+              {participant.name ? participant.name.split(' ').map(word => word[0]).join('').slice(0, 2) : '??'}
             </Avatar>
             <Box flex={1}>
               <Typography variant="subtitle2" fontWeight="bold">
@@ -854,6 +856,23 @@ const CollaborativePlanningTab = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
 
+  // AI brainstorming integration
+  const {
+    agentContributions,
+    agentRecommendations,
+    isGeneratingIdeas,
+    sessionActive: aiSessionActive,
+    error: aiError,
+    startAISession,
+    generateIdeas,
+    evaluateIdeas,
+    getIdeaRecommendations
+  } = useBrainstormingAI({
+    focusArea: 'Collaborative Planning',
+    participantTypes: ['optimization', 'estimation', 'planning'],
+    autoGenerateIdeas: true
+  });
+
   // Utility function to show notifications
   const showNotification = (message, severity = 'success') => {
     setSnackbarMessage(message);
@@ -878,7 +897,7 @@ const CollaborativePlanningTab = () => {
     }
   };
 
-  const handleStartSession = () => {
+  const handleStartSession = async () => {
     actions.updateSession({
       isActive: true,
       startTime: new Date().toISOString(),
@@ -890,8 +909,19 @@ const CollaborativePlanningTab = () => {
         actions.updateParticipantStatus(participant.id, 'active');
       }
     });
-    
-    showNotification('🚀 AI-powered brainstorming session started! All agents are now active.', 'success');
+
+    // Start AI brainstorming session
+    try {
+      await startAISession({
+        focusArea: computed.currentPhaseName,
+        duration: 90,
+        mode: 'idea-generation'
+      });
+      showNotification('🚀 AI-powered brainstorming session started! All agents are now active.', 'success');
+    } catch (error) {
+      console.error('Failed to start AI session:', error);
+      showNotification('⚠️ Session started but AI agents may not be fully active.', 'warning');
+    }
   };
 
   const handleInviteAgents = async () => {
@@ -1024,6 +1054,46 @@ const CollaborativePlanningTab = () => {
     actions.setResearchTab(tab);
   };
 
+  // Handle AI response actions
+  const handleAIResponseAction = async (actionType, response, data = {}) => {
+    try {
+      switch (actionType) {
+        case 'approve':
+          // Convert AI suggestion to idea
+          const ideaFromAI = {
+            type: 'ai-suggestion',
+            title: response.content.title || 'AI Suggestion',
+            content: response.content.description || response.content.content,
+            author: response.agentName,
+            tags: ['ai-generated', 'brainstorming'],
+            aiResponse: response
+          };
+          actions.addIdea(ideaFromAI);
+          showNotification(`✅ AI suggestion from ${response.agentName} added to ideation board!`, 'success');
+          break;
+          
+        case 'implement':
+          showNotification(`🚀 Implementing suggestion from ${response.agentName}...`, 'info');
+          // Here you could integrate with task creation or other implementation logic
+          break;
+          
+        case 'save':
+          showNotification(`💾 Saved suggestion from ${response.agentName}`, 'info');
+          break;
+          
+        case 'reject':
+          showNotification(`❌ Rejected suggestion from ${response.agentName}`, 'warning');
+          break;
+          
+        default:
+          console.log('Unhandled AI response action:', actionType, response);
+      }
+    } catch (error) {
+      console.error('Error handling AI response action:', error);
+      showNotification('Failed to process AI response action', 'error');
+    }
+  };
+
   const handlePhaseAction = async (action) => {
     try {
       switch (action) {
@@ -1129,6 +1199,44 @@ const CollaborativePlanningTab = () => {
           onGroupIdeas={handleGroupIdeas}
         />
       </IdeationBoardContainer>
+
+      {/* AI Agent Responses Section */}
+      {(agentContributions.length > 0 || agentRecommendations.length > 0 || isGeneratingIdeas) && (
+        <Box sx={{ mb: 4 }}>
+          <StyledPaper>
+            <AIResponseDisplay
+              title="🤖 AI Agent Insights & Recommendations"
+              responses={[
+                ...agentContributions.map(contrib => ({
+                  id: contrib.id,
+                  agentId: contrib.agentId,
+                  agentName: contrib.agentName,
+                  type: 'BRAINSTORMING_IDEA',
+                  content: contrib.idea,
+                  status: 'pending',
+                  timestamp: contrib.timestamp
+                })),
+                ...agentRecommendations.map(rec => ({
+                  id: rec.id,
+                  agentId: rec.agentId,
+                  agentName: rec.agentName,
+                  type: 'PLANNING_RECOMMENDATION',
+                  content: rec.recommendation,
+                  status: 'pending',
+                  timestamp: rec.timestamp
+                }))
+              ]}
+              loading={isGeneratingIdeas}
+              error={aiError}
+              onResponseAction={handleAIResponseAction}
+              maxDisplayed={8}
+              showActions={true}
+              emptyMessage="AI agents will contribute ideas and recommendations as the session progresses"
+              groupByStatus={false}
+            />
+          </StyledPaper>
+        </Box>
+      )}
 
       {/* Research Panel */}
       <Box mb={4}>

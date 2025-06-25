@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import App from './App';
+import App from './App.jsx';
 import theme from './theme';
 import './index.css';
 import './services/performanceMonitoring'; // Initialize performance monitoring

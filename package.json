@@ -53,9 +53,14 @@
 		"@ai-sdk/perplexity": "^1.1.7",
 		"@ai-sdk/xai": "^1.2.15",
 		"@anthropic-ai/sdk": "^0.39.0",
-		"@aws-sdk/credential-providers": "^3.817.0",
+		"@aws-sdk/client-bedrock-runtime": "^3.835.0",
+		"@aws-sdk/credential-providers": "^3.835.0",
+		"@emotion/react": "^11.11.4",
+		"@emotion/styled": "^11.11.5",
+		"@mui/material": "^5.15.14",
 		"@openrouter/ai-sdk-provider": "^0.4.5",
 		"ai": "^4.3.10",
+		"axios": "^1.6.8",
 		"boxen": "^8.0.1",
 		"chalk": "^5.4.1",
 		"cli-table3": "^0.6.5",
@@ -82,11 +87,14 @@
 		"openai": "^4.89.0",
 		"ora": "^8.2.0",
 		"pdfkit": "^0.15.1",
+		"react": "^18.3.1",
+		"react-router-dom": "^6.23.1",
 		"socket.io": "^4.8.1",
 		"task-master-ai": "^0.16.2",
 		"uuid": "^11.1.0",
 		"ws": "^8.18.2",
-		"zod": "^3.23.8"
+		"zod": "^3.23.8",
+		"zustand": "^4.5.2"
 	},
 	"engines": {
 		"node": ">=18.0.0"
@@ -128,7 +136,6 @@
 		"jest-environment-node": "^29.7.0",
 		"mock-fs": "^5.5.0",
 		"prettier": "^3.5.3",
-		"react": "^18.3.1",
 		"rollup-plugin-visualizer": "^6.0.3",
 		"supertest": "^7.1.0",
 		"tsx": "^4.16.2"

@@ -17,7 +17,9 @@ import mcpRouter from './routes/mcp.js';
 import cliRouter from './routes/cli.js';
 import teamPerformanceRouter from './routes/team-performance.js';
 import aiAgentsRouter from './routes/ai-agents.js';
+import aiServicesRouter from './routes/ai-services.js';
 import flowOptimizationRouter from './routes/flow-optimization.js';
+import agentPermissionsRouter from './routes/agent-permissions.js';
 import sanitizeInputs from './middleware/sanitize.js';
 import errorHandler from './middleware/error-handler.js';
 import rateLimiter from './middleware/rate-limit.js';
@@ -83,6 +85,8 @@ app.use('/api/prd', prdRouter);
 app.use('/api/generate-tasks', generateTasksRouter);
 app.use('/api/agents', agentsRouter);
 app.use('/api/ai-agents', aiAgentsRouter);
+app.use('/api/ai', aiServicesRouter);
+app.use('/api/agent-permissions', agentPermissionsRouter);
 app.use('/api/team/performance', teamPerformanceRouter);
 // Debug logging for flow optimization route
 logger.debug('Registering flow optimization routes');

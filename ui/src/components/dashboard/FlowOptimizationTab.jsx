@@ -37,6 +37,9 @@ import BottleneckDetection from './BottleneckDetection';
 import FlowMetricsCharts from './FlowMetricsCharts';
 import AdvancedAnalytics from './AdvancedAnalytics';
 import ConnectionStatusIndicator from './ConnectionStatusIndicator';
+import AIBottleneckAnalysisPanel from './AIBottleneckAnalysisPanel';
+import AIOptimizationSuggestionsPanel from './AIOptimizationSuggestionsPanel';
+import AIResponseParser from '../ai/AIResponseParser';
 import useFlowOptimizationData from '../../hooks/useFlowOptimizationData';
 
 /**
@@ -86,6 +89,8 @@ const FlowOptimizationTab = ({
 
   // Component state for UI interactions
   const [selectedSuggestions, setSelectedSuggestions] = useState([]);
+  const [aiResponses, setAiResponses] = useState([]);
+  const [showAIResponsesPanel, setShowAIResponsesPanel] = useState(false);
 
   // Fallback to sample data if no real data is available
   const optimizationData = flowData || {
@@ -181,6 +186,53 @@ const FlowOptimizationTab = ({
         ? prev.filter(id => id !== suggestionId)
         : [...prev, suggestionId]
     );
+  }, []);
+
+  // Handle AI responses from analysis panels
+  const handleAIResponse = useCallback((response, source) => {
+    const formattedResponse = {
+      id: `${source}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      agentId: response.agentId || 'optimization-agent',
+      agentName: response.agentName || 'Optimization Agent',
+      type: source === 'bottleneck' ? 'BOTTLENECK_ANALYSIS' : 'OPTIMIZATION_SUGGESTION',
+      content: response,
+      status: 'pending',
+      timestamp: new Date().toISOString(),
+      source
+    };
+
+    setAiResponses(prev => [formattedResponse, ...prev.slice(0, 19)]); // Keep last 20 responses
+    
+    // Show the AI responses panel if it's not visible and we have responses
+    if (!showAIResponsesPanel && aiResponses.length === 0) {
+      setShowAIResponsesPanel(true);
+    }
+  }, [showAIResponsesPanel, aiResponses.length]);
+
+  // Handle AI response actions
+  const handleAIResponseAction = useCallback((actionType, response, data = {}) => {
+    switch (actionType) {
+      case 'approve':
+        // Mark as approved and potentially apply the suggestion
+        setAiResponses(prev => 
+          prev.map(r => r.id === response.id ? { ...r, status: 'approved' } : r)
+        );
+        break;
+      case 'implement':
+        // Mark as implemented
+        setAiResponses(prev => 
+          prev.map(r => r.id === response.id ? { ...r, status: 'implemented' } : r)
+        );
+        break;
+      case 'reject':
+        // Mark as rejected
+        setAiResponses(prev => 
+          prev.map(r => r.id === response.id ? { ...r, status: 'rejected' } : r)
+        );
+        break;
+      default:
+        console.log('Unhandled AI response action:', actionType, response);
+    }
   }, []);
 
   // Handle apply suggestions with optimistic updates
@@ -294,6 +346,81 @@ const FlowOptimizationTab = ({
             cacheStats={getCacheStats()}
           />
         </Box>
+
+        {/* AI-Driven Bottleneck Analysis Panel */}
+        <Box sx={{ mt: 3 }}>
+          <AIBottleneckAnalysisPanel
+            workflowData={optimizationData}
+            onBottleneckAction={(bottleneck, action) => {
+              console.log('AI Bottleneck action:', bottleneck, action);
+              handleAIResponse(bottleneck, 'bottleneck');
+            }}
+            onSuggestionApply={(suggestions) => {
+              console.log('AI Suggestions to apply:', suggestions);
+              suggestions.forEach(suggestion => handleAIResponse(suggestion, 'bottleneck'));
+              if (onApplySuggestions) {
+                onApplySuggestions(suggestions.map(s => s.id));
+              }
+            }}
+            autoAnalysis={true}
+            showConfiguration={true}
+          />
+        </Box>
+
+        {/* AI-Driven Optimization Suggestions Panel */}
+        <Box sx={{ mt: 3 }}>
+          <AIOptimizationSuggestionsPanel
+            workflowData={optimizationData}
+            autoStart={true}
+            showConfiguration={true}
+            onSuggestionImplemented={(suggestion) => {
+              console.log('AI Optimization suggestion implemented:', suggestion);
+              handleAIResponse(suggestion, 'optimization');
+            }}
+            onSuggestionDismissed={(suggestion) => {
+              console.log('AI Optimization suggestion dismissed:', suggestion);
+              handleAIResponse({ ...suggestion, status: 'dismissed' }, 'optimization');
+            }}
+            onError={(error) => {
+              console.error('AI Optimization suggestions error:', error);
+            }}
+          />
+        </Box>
+
+        {/* Unified AI Responses Panel */}
+        {(aiResponses.length > 0 || showAIResponsesPanel) && (
+          <Box sx={{ mt: 3 }}>
+            <Paper elevation={2} sx={{ borderRadius: 2 }}>
+              <Box sx={{ p: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    🤖 AI Analysis & Recommendations
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => setShowAIResponsesPanel(!showAIResponsesPanel)}
+                  >
+                    {showAIResponsesPanel ? 'Hide' : 'Show'} AI Responses
+                  </Button>
+                </Box>
+                
+                {showAIResponsesPanel && (
+                  <AIResponseParser
+                    responses={aiResponses}
+                    loading={isLoading}
+                    error={error}
+                    maxResponses={10}
+                    groupByAgent={true}
+                    showSummary={true}
+                    onResponseAction={handleAIResponseAction}
+                    emptyMessage="AI agents will provide analysis and optimization suggestions as data is processed"
+                  />
+                )}
+              </Box>
+            </Paper>
+          </Box>
+        )}
 
         {/* Main Content Grid */}
         <Grid container spacing={3}>

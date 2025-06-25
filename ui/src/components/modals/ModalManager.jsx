@@ -53,7 +53,8 @@ const MODAL_CONFIGS = {
     component: AgentModal,
     defaultProps: {
       maxWidth: 'md',
-      fullWidth: true
+      fullWidth: true,
+      onSave: (agentData) => console.log('Agent saved:', agentData)
     },
     deepLinkPath: '/modals/agent',
     title: 'Agent Configuration'

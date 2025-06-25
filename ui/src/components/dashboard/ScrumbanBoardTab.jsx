@@ -64,6 +64,8 @@ import BoardSettings from './BoardSettings';
 import AIAgentPresence from './AIAgentPresence';
 import SprintMetrics from './SprintMetrics';
 import useAIAgents from '../../hooks/useAIAgents';
+import useBottleneckAnalysis from '../../hooks/useBottleneckAnalysis';
+import AIBottleneckAnalysisPanel from './AIBottleneckAnalysisPanel';
 
 // Column configuration constants
 const DEFAULT_COLUMNS = [
@@ -513,6 +515,20 @@ const ScrumbanBoardTab = ({
     fetchAIAgents
   } = useAIAgents();
 
+  // AI Bottleneck Analysis integration
+  const {
+    isLoading: isAnalyzing,
+    bottlenecks,
+    suggestions: workflowSuggestions,
+    startAnalysis,
+    applySuggestion: applyWorkflowSuggestion,
+    clearResults: clearAnalysisResults,
+    error: analysisError
+  } = useBottleneckAnalysis({
+    context: 'scrumban-board',
+    autoAnalyze: false
+  });
+
   // Drag and drop sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -700,6 +716,51 @@ const ScrumbanBoardTab = ({
       });
     }
   }, [agents, simulateAgentWork]);
+
+  // AI Workflow Analysis handlers
+  const handleWorkflowAnalysis = useCallback(async () => {
+    const workflowData = {
+      tasks: filteredTasks,
+      columns,
+      wipViolations,
+      metrics: {
+        totalTasks: tasks.length,
+        tasksInProgress: filteredTasksByColumn['development']?.length || 0,
+        blockedTasks: filteredTasksByColumn['code-review']?.length || 0,
+        completedTasks: filteredTasksByColumn['done']?.length || 0
+      }
+    };
+
+    await startAnalysis({
+      type: 'workflow-analysis',
+      data: workflowData,
+      focusAreas: ['wip-limits', 'task-flow', 'resource-allocation']
+    });
+  }, [filteredTasks, columns, wipViolations, tasks, filteredTasksByColumn, startAnalysis]);
+
+  const handleApplyWorkflowSuggestion = useCallback(async (suggestion) => {
+    if (suggestion.action === 'adjust-wip-limit') {
+      const { columnId, newLimit } = suggestion.data;
+      const updatedColumns = columns.map(col => 
+        col.id === columnId ? { ...col, wipLimit: newLimit } : col
+      );
+      setColumns(updatedColumns);
+      setNotification({
+        open: true,
+        message: `Applied AI suggestion: Adjusted WIP limit for ${columnId}`,
+        severity: 'success'
+      });
+    } else if (suggestion.action === 'rebalance-tasks') {
+      // Handle task rebalancing suggestions
+      setNotification({
+        open: true,
+        message: 'Applied AI suggestion: Task rebalancing recommendations noted',
+        severity: 'info'
+      });
+    }
+    
+    await applyWorkflowSuggestion(suggestion.id);
+  }, [columns, applyWorkflowSuggestion]);
 
   const handleImportConfig = useCallback(() => {
     const input = document.createElement('input');
@@ -1001,6 +1062,30 @@ const ScrumbanBoardTab = ({
             onBurndownChart={handleBurndownChart}
             onCumulativeFlow={handleCumulativeFlow}
           />
+
+          {/* AI Workflow Analysis */}
+          <Box sx={{ mb: 3 }}>
+            <AIBottleneckAnalysisPanel
+              context="scrumban-workflow"
+              onAnalysisStart={handleWorkflowAnalysis}
+              onSuggestionApplied={handleApplyWorkflowSuggestion}
+              isLoading={isAnalyzing}
+              bottlenecks={bottlenecks}
+              suggestions={workflowSuggestions}
+              error={analysisError}
+              showAdvancedOptions={false}
+              maxHeight={200}
+              customTitle="AI Workflow Analysis"
+              customActions={[
+                {
+                  label: 'Analyze Workflow',
+                  action: handleWorkflowAnalysis,
+                  icon: <Assessment />,
+                  disabled: isAnalyzing
+                }
+              ]}
+            />
+          </Box>
 
           {/* Kanban Board */}
           <Paper elevation={1} sx={{ p: 2, minHeight: '70vh' }}>

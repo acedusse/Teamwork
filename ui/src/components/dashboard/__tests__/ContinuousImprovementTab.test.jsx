@@ -830,4 +830,78 @@ describe('ContinuousImprovementTab', () => {
       expect(screen.getByText('Continuous Improvement')).toBeInTheDocument();
     });
   });
+
+  describe('AgentEventsPanel', () => {
+    const mockAgents = [
+      { id: 'task-optimizer', name: 'Task Optimizer', avatar: '🤖', color: '#2196F3', status: 'active', description: 'AI agent that analyzes task flow', lastActivity: '2025-06-24T04:42:50.298Z' },
+      { id: 'story-estimator', name: 'Story Estimator', avatar: '📊', color: '#4CAF50', status: 'active', description: 'AI agent for estimation', lastActivity: '2025-06-24T01:51:42.494Z' }
+    ];
+    const mockEvents = [
+      { id: '1', agentId: 'task-optimizer', action: 'status_change', details: { status: 'active' }, timestamp: '2025-06-24T04:42:50.299Z' },
+      { id: '2', agentId: 'story-estimator', action: 'recommendation', details: { title: 'Estimate', description: 'Estimate story points' }, timestamp: '2025-06-24T04:40:00.000Z' }
+    ];
+
+    beforeEach(() => {
+      jest.spyOn(global, 'fetch').mockImplementation((url) => {
+        if (url.includes('/api/ai-agents/activities')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: { activities: mockEvents } }) });
+        }
+        if (url.includes('/api/ai-agents')) {
+          return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: { agents: mockAgents } }) });
+        }
+        return Promise.reject(new Error('Unknown endpoint'));
+      });
+    });
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    test('renders loading state', async () => {
+      jest.spyOn(global, 'fetch').mockImplementation(() => new Promise(() => {}));
+      renderWithTheme(<ContinuousImprovementTab />);
+      expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    });
+
+    test('renders error state', async () => {
+      jest.spyOn(global, 'fetch').mockImplementation(() => Promise.resolve({ ok: false }));
+      renderWithTheme(<ContinuousImprovementTab />);
+      await waitFor(() => expect(screen.getByText(/failed to fetch/i)).toBeInTheDocument());
+    });
+
+    test('renders event list and agent health', async () => {
+      renderWithTheme(<ContinuousImprovementTab />);
+      await waitFor(() => expect(screen.getByText('Recent AI Agent Events & Health')).toBeInTheDocument());
+      expect(screen.getByText('Task Optimizer')).toBeInTheDocument();
+      expect(screen.getByText('Story Estimator')).toBeInTheDocument();
+      expect(screen.getByText('status_change')).toBeInTheDocument();
+      expect(screen.getByText('recommendation')).toBeInTheDocument();
+    });
+
+    test('filters by event type', async () => {
+      renderWithTheme(<ContinuousImprovementTab />);
+      await waitFor(() => expect(screen.getByText('Recent AI Agent Events & Health')).toBeInTheDocument());
+      const eventTypeSelect = screen.getByLabelText('Event Type');
+      userEvent.click(eventTypeSelect);
+      userEvent.click(screen.getByText('recommendation'));
+      expect(screen.queryByText('status_change')).not.toBeInTheDocument();
+      expect(screen.getByText('recommendation')).toBeInTheDocument();
+    });
+
+    test('filters by agent', async () => {
+      renderWithTheme(<ContinuousImprovementTab />);
+      await waitFor(() => expect(screen.getByText('Recent AI Agent Events & Health')).toBeInTheDocument());
+      const agentSelect = screen.getByLabelText('Agent');
+      userEvent.click(agentSelect);
+      userEvent.click(screen.getByText('Task Optimizer'));
+      expect(screen.getByText('status_change')).toBeInTheDocument();
+      expect(screen.queryByText('recommendation')).not.toBeInTheDocument();
+    });
+
+    test('refresh button reloads data', async () => {
+      renderWithTheme(<ContinuousImprovementTab />);
+      await waitFor(() => expect(screen.getByLabelText('Refresh events')).toBeInTheDocument());
+      userEvent.click(screen.getByLabelText('Refresh events'));
+      await waitFor(() => expect(screen.getByText('Recent AI Agent Events & Health')).toBeInTheDocument());
+    });
+  });
 }); 

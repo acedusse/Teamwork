@@ -1,6 +1,226 @@
 {
   "activities": [
     {
+      "id": "1750763133041",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T11:05:33.041Z"
+    },
+    {
+      "id": "1750763132962",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T11:05:32.962Z"
+    },
+    {
+      "id": "1750763132949",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T11:05:32.949Z"
+    },
+    {
+      "id": "1750741002384",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T04:56:42.384Z"
+    },
+    {
+      "id": "1750740514933",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T04:48:34.933Z"
+    },
+    {
+      "id": "1750740514833",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T04:48:34.833Z"
+    },
+    {
+      "id": "1750740170299",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T04:42:50.299Z"
+    },
+    {
+      "id": "1750735420094",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T03:23:40.094Z"
+    },
+    {
+      "id": "1750733906266",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T02:58:26.266Z"
+    },
+    {
+      "id": "1750733906174",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T02:58:26.174Z"
+    },
+    {
+      "id": "1750733905939",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "idle",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T02:58:25.939Z"
+    },
+    {
+      "id": "1750733901755",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T02:58:21.755Z"
+    },
+    {
+      "id": "1750729902515",
+      "agentId": "resource-planner",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T01:51:42.515Z"
+    },
+    {
+      "id": "1750729902496",
+      "agentId": "story-estimator",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T01:51:42.496Z"
+    },
+    {
+      "id": "1750729902475",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T01:51:42.475Z"
+    },
+    {
+      "id": "1750725929746",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-24T00:45:29.746Z"
+    },
+    {
+      "id": "1750712586448",
+      "agentId": "resource-planner",
+      "action": "status_change",
+      "details": {
+        "status": "idle",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-23T21:03:06.448Z"
+    },
+    {
+      "id": "1750712586435",
+      "agentId": "story-estimator",
+      "action": "status_change",
+      "details": {
+        "status": "idle",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-23T21:03:06.435Z"
+    },
+    {
+      "id": "1750712586416",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "idle",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-23T21:03:06.416Z"
+    },
+    {
+      "id": "1750712581465",
+      "agentId": "resource-planner",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-23T21:03:01.465Z"
+    },
+    {
+      "id": "1750712581452",
+      "agentId": "story-estimator",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-23T21:03:01.452Z"
+    },
+    {
+      "id": "1750712581439",
+      "agentId": "task-optimizer",
+      "action": "status_change",
+      "details": {
+        "status": "active",
+        "currentTask": null
+      },
+      "timestamp": "2025-06-23T21:03:01.439Z"
+    },
+    {
       "id": "1750256710932",
       "agentId": "task-optimizer",
       "action": "task_completed",
@@ -55,6 +275,6 @@
     }
   ],
   "metadata": {
-    "updated": "2025-06-18T14:25:10.932Z"
+    "updated": "2025-06-24T11:05:33.041Z"
   }
 }

@@ -5,6 +5,8 @@
 import { jest } from '@jest/globals';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import request from 'supertest';
+import app from '../../../server/app.js';
 
 // Get the current module's directory
 const __filename = fileURLToPath(import.meta.url);
@@ -741,5 +743,44 @@ describe('MCP Server Direct Functions', () => {
 			expect(mockEnableSilentMode).toHaveBeenCalled();
 			expect(mockDisableSilentMode).toHaveBeenCalled();
 		});
+	});
+});
+
+describe('AI Agents API Integration', () => {
+	test('GET /api/ai-agents returns agents with health', async () => {
+		const res = await request(app).get('/api/ai-agents');
+		expect(res.status).toBe(200);
+		expect(res.body.data.agents).toBeInstanceOf(Array);
+		expect(res.body.data.agents[0]).toHaveProperty('id');
+		expect(res.body.data.agents[0]).toHaveProperty('status');
+		expect(res.body.data.agents[0]).toHaveProperty('lastActivity');
+	});
+
+	test('GET /api/ai-agents/activities returns recent events', async () => {
+		const res = await request(app).get('/api/ai-agents/activities?limit=5');
+		expect(res.status).toBe(200);
+		expect(res.body.data.activities).toBeInstanceOf(Array);
+		if (res.body.data.activities.length > 0) {
+			const event = res.body.data.activities[0];
+			expect(event).toHaveProperty('id');
+			expect(event).toHaveProperty('agentId');
+			expect(event).toHaveProperty('action');
+			expect(event).toHaveProperty('timestamp');
+		}
+	});
+
+	test('POST /api/ai-agents/:agentId/status logs a status change event', async () => {
+		// Get an agent ID
+		const agentsRes = await request(app).get('/api/ai-agents');
+		const agentId = agentsRes.body.data.agents[0]?.id;
+		if (!agentId) return;
+		const res = await request(app)
+			.post(`/api/ai-agents/${agentId}/status`)
+			.send({ status: 'active' });
+		expect(res.status).toBe(200);
+		// Check that a new event is logged
+		const eventsRes = await request(app).get('/api/ai-agents/activities?limit=1');
+		expect(eventsRes.body.data.activities[0].agentId).toBe(agentId);
+		expect(eventsRes.body.data.activities[0].action).toBe('status_change');
 	});
 });

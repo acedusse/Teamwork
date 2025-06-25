@@ -18,6 +18,16 @@ const CONNECTION_TIMEOUT = parseInt(process.env.WS_CONNECTION_TIMEOUT || '120000
 
 // Store connected clients with metadata
 const connectedClients = new Map();
+
+// Store active locks with metadata
+const activeLocks = new Map();
+
+// Store client sync data for conflict resolution
+const clientSyncData = new Map();
+
+// Store offline message queues per client
+const clientOfflineQueues = new Map();
+
 let io = null;
 
 /**
@@ -70,7 +80,7 @@ export function getConnectedClients() {
 }
 
 /**
- * Clean up inactive connections
+ * Clean up inactive connections and expired locks
  */
 function cleanupInactiveConnections() {
 	if (!io) return;
@@ -78,6 +88,7 @@ function cleanupInactiveConnections() {
 	const now = Date.now();
 	const socketsToDisconnect = [];
 	
+	// Clean up inactive connections
 	connectedClients.forEach((client, socketId) => {
 		if (now - client.lastActivity > CONNECTION_TIMEOUT) {
 			socketsToDisconnect.push(socketId);
@@ -87,10 +98,78 @@ function cleanupInactiveConnections() {
 	socketsToDisconnect.forEach(socketId => {
 		const socket = io.sockets.sockets.get(socketId);
 		if (socket) {
+			// Release locks before disconnecting
+			releaseUserLocks(socket.userId);
 			socket.disconnect(true);
 			logger.info(`Disconnected inactive client: ${socketId}`);
 		}
 	});
+	
+	// Clean up expired locks
+	const expiredLocks = [];
+	activeLocks.forEach((lockInfo, lockId) => {
+		if (now >= lockInfo.expiresAt) {
+			expiredLocks.push(lockId);
+		}
+	});
+	
+	expiredLocks.forEach(lockId => {
+		releaseLockInternal(lockId);
+		logger.debug(`Released expired lock: ${lockId}`);
+	});
+}
+
+/**
+ * Release a lock internally and notify all clients
+ * @param {string} lockId - The lock ID to release
+ */
+function releaseLockInternal(lockId) {
+	const lockInfo = activeLocks.get(lockId);
+	if (!lockInfo) return;
+	
+	// Clear timeout if exists
+	if (lockInfo.timeoutId) {
+		clearTimeout(lockInfo.timeoutId);
+	}
+	
+	// Remove from active locks
+	activeLocks.delete(lockId);
+	
+	// Broadcast lock released to all clients
+	if (io) {
+		io.emit('lockReleased', {
+			lockId,
+			userId: lockInfo.userId,
+			userName: lockInfo.userName,
+			resourceType: lockInfo.resourceType,
+			resourceId: lockInfo.resourceId,
+			field: lockInfo.field,
+			releasedAt: Date.now(),
+			timestamp: new Date().toISOString()
+		});
+	}
+}
+
+/**
+ * Release all locks owned by a user
+ * @param {string} userId - The user ID whose locks to release
+ */
+function releaseUserLocks(userId) {
+	const locksToRelease = [];
+	
+	activeLocks.forEach((lockInfo, lockId) => {
+		if (lockInfo.userId === userId) {
+			locksToRelease.push(lockId);
+		}
+	});
+	
+	locksToRelease.forEach(lockId => {
+		releaseLockInternal(lockId);
+	});
+	
+	if (locksToRelease.length > 0) {
+		logger.debug(`Released ${locksToRelease.length} locks for user ${userId}`);
+	}
 }
 
 /**
@@ -260,25 +339,116 @@ export default function initWebSocketServer(server) {
 		socket.on('requestLock', (data) => {
 			connectedClients.get(socket.id).lastActivity = Date.now();
 			
-			// Simple lock implementation - first come, first served
-			// In a production app, you'd want more sophisticated locking
-			socket.broadcast.emit('lockRequested', {
+			const { lockId, resourceType, resourceId, field, timeout = 30000, extend = false } = data;
+			
+			// Check if this is a lock extension
+			if (extend) {
+				const existingLock = activeLocks.get(lockId);
+				if (existingLock && existingLock.userId === socket.userId) {
+					// Extend the lock
+					existingLock.expiresAt = Date.now() + timeout;
+					
+					// Clear existing timeout
+					if (existingLock.timeoutId) {
+						clearTimeout(existingLock.timeoutId);
+					}
+					
+					// Set new timeout
+					existingLock.timeoutId = setTimeout(() => {
+						releaseLockInternal(lockId);
+					}, timeout);
+					
+					// Broadcast lock extended
+					io.emit('lockExtended', {
+						lockId,
+						userId: socket.userId,
+						userName: socket.userName,
+						expiresAt: existingLock.expiresAt,
+						timestamp: new Date().toISOString()
+					});
+					
+					logger.debug(`Lock extended: ${lockId} by ${socket.userName}`);
+					return;
+				}
+			}
+			
+			// Check if resource is already locked
+			if (activeLocks.has(lockId)) {
+				const existingLock = activeLocks.get(lockId);
+				
+				// If lock has expired, remove it
+				if (existingLock.expiresAt <= Date.now()) {
+					releaseLockInternal(lockId);
+				} else {
+					// Send lock denied
+					socket.emit('lockDenied', {
+						lockId,
+						reason: `Resource is already locked by ${existingLock.userName}`,
+						lockedBy: existingLock.userName,
+						expiresAt: existingLock.expiresAt,
+						timestamp: new Date().toISOString()
+					});
+					
+					logger.debug(`Lock denied: ${lockId} for ${socket.userName} - already locked by ${existingLock.userName}`);
+					return;
+				}
+			}
+			
+			// Grant the lock
+			const lockInfo = {
+				lockId,
 				userId: socket.userId,
 				userName: socket.userName,
 				socketId: socket.id,
-				...data
+				resourceType,
+				resourceId,
+				field,
+				grantedAt: Date.now(),
+				expiresAt: Date.now() + timeout,
+				timeoutId: null
+			};
+			
+			// Set automatic release timeout
+			lockInfo.timeoutId = setTimeout(() => {
+				releaseLockInternal(lockId);
+			}, timeout);
+			
+			activeLocks.set(lockId, lockInfo);
+			
+			// Notify the requester that lock was granted
+			socket.emit('lockGranted', {
+				...lockInfo,
+				timestamp: new Date().toISOString()
 			});
+			
+			// Broadcast to all other clients that lock was granted
+			socket.broadcast.emit('lockGranted', {
+				...lockInfo,
+				timestamp: new Date().toISOString()
+			});
+			
+			logger.debug(`Lock granted: ${lockId} to ${socket.userName} for ${timeout}ms`);
 		});
 
 		socket.on('releaseLock', (data) => {
 			connectedClients.get(socket.id).lastActivity = Date.now();
 			
-			socket.broadcast.emit('lockReleased', {
-				userId: socket.userId,
-				userName: socket.userName,
-				socketId: socket.id,
-				...data
-			});
+			const { lockId } = data;
+			const existingLock = activeLocks.get(lockId);
+			
+			// Verify the user owns this lock
+			if (!existingLock || existingLock.userId !== socket.userId) {
+				socket.emit('lockReleaseError', {
+					lockId,
+					reason: 'You do not own this lock',
+					timestamp: new Date().toISOString()
+				});
+				logger.warn(`Unauthorized lock release attempt: ${lockId} by ${socket.userName}`);
+				return;
+			}
+			
+			releaseLockInternal(lockId);
+			logger.debug(`Lock released: ${lockId} by ${socket.userName}`);
 		});
 
 		// Handle typing indicators
@@ -315,6 +485,9 @@ export default function initWebSocketServer(server) {
 		// Handle disconnection
 		socket.on('disconnect', (reason) => {
 			connectedClients.delete(socket.id);
+			
+			// Release all locks owned by this user
+			releaseUserLocks(socket.userId);
 			
 			logger.info(`Client disconnected: ${socket.id} (${socket.userName}) - Reason: ${reason} - Remaining: ${connectedClients.size}`);
 			

@@ -43,4 +43,9 @@ export const logger = {
 	debug: (msg, meta) => log('debug', msg, meta)
 };
 
+// Helper for AI agent event logging
+logger.agentEvent = (eventType, meta = {}) => {
+	log('info', `AI_AGENT_${eventType.toUpperCase()}`, meta);
+};
+
 export default logger;

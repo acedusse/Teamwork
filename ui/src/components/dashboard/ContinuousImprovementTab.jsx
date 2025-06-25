@@ -35,7 +35,12 @@ import {
   CircularProgress,
   Badge,
   Avatar,
-  AvatarGroup
+  AvatarGroup,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  ListItemSecondaryAction
 } from '@mui/material';
 import {
   Psychology,
@@ -444,6 +449,180 @@ class ErrorBoundary extends React.Component {
 
     return this.props.children;
   }
+}
+
+// AgentEventsPanel: Shows recent agent events and agent health
+function AgentEventsPanel() {
+  const [events, setEvents] = useState([]);
+  const [agents, setAgents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [filterAction, setFilterAction] = useState('all');
+  const [filterAgent, setFilterAgent] = useState('all');
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [eventsRes, agentsRes] = await Promise.all([
+        fetch('/api/ai-agents/activities?limit=20'),
+        fetch('/api/ai-agents')
+      ]);
+      if (!eventsRes.ok || !agentsRes.ok) throw new Error('Failed to fetch agent data');
+      const eventsData = await eventsRes.json();
+      const agentsData = await agentsRes.json();
+      setEvents(eventsData.data.activities || []);
+      setAgents(agentsData.data.agents || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const getAgent = (agentId) => agents.find(a => a.id === agentId) || {};
+  const getEventColor = (action) => {
+    switch (action) {
+      case 'status_change': return 'info';
+      case 'recommendation': return 'success';
+      case 'task_completed': return 'primary';
+      case 'error': return 'error';
+      default: return 'default';
+    }
+  };
+
+  // Get unique actions and agent IDs for filter dropdowns
+  const uniqueActions = useMemo(() => ['all', ...Array.from(new Set(events.map(e => e.action)))], [events]);
+  const uniqueAgents = useMemo(() => ['all', ...agents.map(a => a.id)], [agents]);
+
+  // Filter events based on selected filters
+  const filteredEvents = useMemo(() => {
+    return events.filter(event =>
+      (filterAction === 'all' || event.action === filterAction) &&
+      (filterAgent === 'all' || event.agentId === filterAgent)
+    );
+  }, [events, filterAction, filterAgent]);
+
+  return (
+    <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Analytics sx={{ color: 'primary.main' }} /> Recent AI Agent Events & Health
+        </Typography>
+        <IconButton aria-label="Refresh events" onClick={() => { setRefreshing(true); fetchData(); }} disabled={refreshing}>
+          {refreshing ? <CircularProgress size={24} /> : <Refresh />}
+        </IconButton>
+      </Box>
+      {/* Filters */}
+      <Box display="flex" gap={2} mb={2} flexWrap="wrap">
+        <FormControl size="small" sx={{ minWidth: 160 }}>
+          <InputLabel id="filter-action-label">Event Type</InputLabel>
+          <Select
+            labelId="filter-action-label"
+            value={filterAction}
+            label="Event Type"
+            onChange={e => setFilterAction(e.target.value)}
+          >
+            {uniqueActions.map(action => (
+              <MenuItem key={action} value={action}>
+                {action === 'all' ? 'All Types' : action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl size="small" sx={{ minWidth: 160 }}>
+          <InputLabel id="filter-agent-label">Agent</InputLabel>
+          <Select
+            labelId="filter-agent-label"
+            value={filterAgent}
+            label="Agent"
+            onChange={e => setFilterAgent(e.target.value)}
+          >
+            {uniqueAgents.map(agentId => {
+              const agent = agents.find(a => a.id === agentId);
+              return (
+                <MenuItem key={agentId} value={agentId}>
+                  {agentId === 'all' ? 'All Agents' : (agent?.name || agentId)}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </FormControl>
+      </Box>
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight={120}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Alert severity="error">{error}</Alert>
+      ) : (
+        <>
+          <List dense>
+            {filteredEvents.length === 0 && (
+              <ListItem><ListItemText primary="No recent agent events." /></ListItem>
+            )}
+            {filteredEvents.map(event => {
+              const agent = getAgent(event.agentId);
+              return (
+                <ListItem key={event.id} alignItems="flex-start">
+                  <ListItemAvatar>
+                    <Avatar sx={{ bgcolor: agent.color || 'grey.300' }}>
+                      {agent.avatar || agent.name?.[0] || '?'}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={<>
+                      <Chip label={event.action} color={getEventColor(event.action)} size="small" sx={{ mr: 1 }} />
+                      <b>{agent.name || event.agentId}</b>
+                      {event.details?.title && <>: <span>{event.details.title}</span></>}
+                    </>}
+                    secondary={<>
+                      <Typography component="span" variant="body2" color="text.secondary">
+                        {event.details?.description || event.details?.status || ''}
+                        {event.details?.priority && <> | Priority: {event.details.priority}</>}
+                        {event.details?.currentTask && <> | Task: {event.details.currentTask}</>}
+                      </Typography>
+                      <br />
+                      <Typography component="span" variant="caption" color="text.secondary">
+                        {new Date(event.timestamp).toLocaleString()}
+                      </Typography>
+                    </>}
+                  />
+                </ListItem>
+              );
+            })}
+          </List>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="subtitle1" sx={{ mb: 1 }}>Agent Health</Typography>
+          <Grid container spacing={2}>
+            {agents.map(agent => (
+              <Grid item xs={12} sm={6} md={4} key={agent.id}>
+                <Paper variant="outlined" sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Avatar sx={{ bgcolor: agent.color || 'grey.300', width: 40, height: 40 }}>
+                    {agent.avatar || agent.name?.[0] || '?'}
+                  </Avatar>
+                  <Box flex={1}>
+                    <Typography variant="subtitle2">{agent.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">{agent.description}</Typography>
+                    <Chip label={agent.status} color={agent.status === 'active' ? 'success' : 'default'} size="small" sx={{ mt: 1 }} />
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                      Last activity: {agent.lastActivity ? new Date(agent.lastActivity).toLocaleString() : 'N/A'}
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </>
+      )}
+    </Paper>
+  );
 }
 
 /**
@@ -1058,6 +1237,7 @@ const ContinuousImprovementTab = ({
           </TabPanel>
 
           <TabPanel value={activeTab} index={2}>
+            <AgentEventsPanel />
             <ImprovementMetrics
               retrospectives={retrospectives}
               actionItems={actionItems}

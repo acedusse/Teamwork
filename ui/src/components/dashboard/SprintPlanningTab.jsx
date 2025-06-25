@@ -11,16 +11,25 @@ import {
   Card,
   CardContent,
   Chip,
-  LinearProgress
+  LinearProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Divider
 } from '@mui/material';
 import {
   CalendarToday,
   Assignment,
   People,
-  AccountTree
+  AccountTree,
+  Psychology,
+  ExpandMore
 } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 import DependencyManager from './DependencyManager';
+import AIStoryEstimationPanel from '../estimation/AIStoryEstimationPanel';
+import AIResponseDisplay from '../ai/AIResponseDisplay';
+import { useStoryEstimation } from '../../hooks/useStoryEstimation';
 
 // Note: Individual subcomponents not used in this layout approach
 
@@ -48,6 +57,13 @@ const SprintPlanningTab = ({
   });
   const [errors, setErrors] = useState({});
 
+  const {
+    responses,
+    loading,
+    error,
+    handleResponseAction
+  } = useStoryEstimation();
+
   // State update handlers
   const handleStorySelection = useCallback((selectedStories) => {
     setSprintData(prev => ({
@@ -58,6 +74,38 @@ const SprintPlanningTab = ({
 
   // Calculate sprint metrics
   const totalStoryPoints = sprintData.selectedStories.reduce((sum, story) => sum + (story.points || 0), 0);
+
+  // Handle AI estimation completion
+  const handleEstimationComplete = useCallback((estimation) => {
+    // Update the estimated story in the selected stories
+    if (estimation && estimation.story) {
+      const updatedStories = sprintData.selectedStories.map(story => 
+        story.id === estimation.story.id 
+          ? { ...story, points: estimation.estimatedPoints, aiEstimated: true, confidence: estimation.confidence }
+          : story
+      );
+      setSprintData(prev => ({
+        ...prev,
+        selectedStories: updatedStories
+      }));
+    }
+  }, [sprintData.selectedStories]);
+
+  // Handle batch estimation completion
+  const handleBatchEstimationComplete = useCallback((batchEstimations) => {
+    if (batchEstimations && batchEstimations.length > 0) {
+      const updatedStories = sprintData.selectedStories.map(story => {
+        const estimation = batchEstimations.find(est => est.story.id === story.id);
+        return estimation 
+          ? { ...story, points: estimation.estimatedPoints, aiEstimated: true, confidence: estimation.confidence }
+          : story;
+      });
+      setSprintData(prev => ({
+        ...prev,
+        selectedStories: updatedStories
+      }));
+    }
+  }, [sprintData.selectedStories]);
 
   return (
     <Container maxWidth="xl" className={className}>
@@ -162,12 +210,22 @@ const SprintPlanningTab = ({
                   >
                     <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
-                        <Chip 
-                          label={`${story.points}SP`} 
-                          size="small" 
-                          color="primary"
-                          sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}
-                        />
+                        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                          <Chip 
+                            label={`${story.points}SP`} 
+                            size="small" 
+                            color={story.aiEstimated ? "secondary" : "primary"}
+                            sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}
+                          />
+                          {story.aiEstimated && (
+                            <Chip 
+                              label="AI" 
+                              size="small" 
+                              color="info"
+                              sx={{ fontSize: '0.6rem', height: 18 }}
+                            />
+                          )}
+                        </Box>
                         <Chip 
                           label={story.priority} 
                           size="small" 
@@ -220,12 +278,61 @@ const SprintPlanningTab = ({
                   </Card>
                 ))}
               </Box>
+              {/* AI Agent Response Display Integration */}
+              <Box mt={4}>
+                <AIResponseDisplay
+                  responses={responses}
+                  loading={loading}
+                  error={error}
+                  onResponseAction={handleResponseAction}
+                  title="AI Story Estimation"
+                  showActions
+                  showAgent
+                />
+              </Box>
             </Paper>
           </Grid>
 
-          {/* Right Column - AI Agent Capacity, Dependencies & Sprint Commitment */}
+          {/* Right Column - AI Story Estimation, AI Agent Capacity, Dependencies & Sprint Commitment */}
           <Grid item xs={12} md={4}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              
+              {/* AI Story Estimation */}
+              <Accordion defaultExpanded>
+                <AccordionSummary
+                  expandIcon={<ExpandMore />}
+                  aria-controls="ai-estimation-content"
+                  id="ai-estimation-header"
+                  sx={{ 
+                    bgcolor: 'primary.light',
+                    color: 'primary.contrastText',
+                    '&.Mui-expanded': {
+                      minHeight: 48
+                    }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Psychology />
+                    <Typography variant="h6">AI Story Estimation</Typography>
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails sx={{ p: 0 }}>
+                  <AIStoryEstimationPanel
+                    stories={sprintData.selectedStories}
+                    onEstimationComplete={handleEstimationComplete}
+                    onBatchEstimationComplete={handleBatchEstimationComplete}
+                    initialConfiguration={{
+                      scale: 'fibonacci',
+                      includeBreakdown: true,
+                      parallelProcessing: true
+                    }}
+                    showAdvancedOptions={true}
+                    showHistory={true}
+                    showAnalytics={false}
+                    maxHeight={400}
+                  />
+                </AccordionDetails>
+              </Accordion>
               
               {/* AI Agent Capacity */}
               <Paper elevation={1} sx={{ p: 3, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>

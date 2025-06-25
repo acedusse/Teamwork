@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import useSocketIO from '../hooks/useWebSocket.js';
 
 const WebSocketContext = createContext();
@@ -41,12 +41,20 @@ export const WebSocketProvider = ({ children }) => {
   const {
     socket,
     isConnected,
+    isOnline: socketOnline,
+    connectionState,
     error,
+    offlineQueue,
+    lastSyncTime,
     connect,
     disconnect,
     emit,
     on,
-    off
+    off,
+    forceReconnect,
+    clearOfflineQueue,
+    getConnectionStats,
+    processOfflineQueue
   } = useSocketIO(getWebSocketUrl(), {
     auth: {
       userId: currentUser.userId,
@@ -247,23 +255,48 @@ export const WebSocketProvider = ({ children }) => {
     }
   }, [isConnected, disconnect, connect]);
 
-  // Track location changes for presence
+  // Use ref for current pathname to avoid dependency issues in strict mode
+  const currentPathRef = useRef(window.location.pathname);
+  
+  // Update pathname on navigation
   useEffect(() => {
+    const handleLocationChange = () => {
+      currentPathRef.current = window.location.pathname;
+      if (isConnected) {
+        updatePresence({
+          status: 'online',
+          location: currentPathRef.current,
+          lastSeen: new Date().toISOString()
+        });
+      }
+    };
+
+    // Set initial presence
     if (isConnected) {
-      updatePresence({ 
-        status: 'online', 
-        location: window.location.pathname,
+      updatePresence({
+        status: 'online',
+        location: currentPathRef.current,
         lastSeen: new Date().toISOString()
       });
     }
-  }, [window.location.pathname, isConnected, updatePresence]);
+
+    // Listen for pathname changes
+    window.addEventListener('popstate', handleLocationChange);
+    
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+    };
+  }, [isConnected, updatePresence]);
 
   const contextValue = {
     // Connection state
     socket,
     isConnected,
     isOnline,
+    connectionState,
     error,
+    offlineQueue,
+    lastSyncTime,
     
     // User data
     currentUser,
@@ -285,6 +318,12 @@ export const WebSocketProvider = ({ children }) => {
     updatePresence,
     sendNotification,
     updateUserName,
+    
+    // Resilience features
+    forceReconnect,
+    clearOfflineQueue,
+    getConnectionStats,
+    processOfflineQueue,
     
     // Utility functions for real-time features
     broadcastTaskUpdate: (taskData) => {

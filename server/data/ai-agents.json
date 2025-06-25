@@ -5,7 +5,7 @@
       "name": "Task Optimizer",
       "type": "optimization",
       "description": "AI agent that analyzes task flow and suggests optimizations",
-      "status": "idle",
+      "status": "active",
       "avatar": "🤖",
       "color": "#2196F3",
       "capabilities": [
@@ -14,8 +14,10 @@
         "task-prioritization",
         "flow-analysis"
       ],
-      "lastActivity": "2025-06-18T14:25:10.926Z",
-      "currentTask": null,
+      "lastActivity": "2025-06-24T11:05:33.041Z",
+      "currentTask": {
+        "sessionId": "session_task-optimizer_1750763133038"
+      },
       "recommendations": [
         {
           "id": "1750256710916",
@@ -33,7 +35,7 @@
       "name": "Story Estimator",
       "type": "estimation",
       "description": "AI agent specialized in story point estimation and effort prediction",
-      "status": "idle",
+      "status": "active",
       "avatar": "📊",
       "color": "#4CAF50",
       "capabilities": [
@@ -42,8 +44,10 @@
         "complexity-analysis",
         "historical-analysis"
       ],
-      "lastActivity": null,
-      "currentTask": null,
+      "lastActivity": "2025-06-24T01:51:42.494Z",
+      "currentTask": {
+        "sessionId": "session_story-estimator_1750729902462"
+      },
       "recommendations": []
     },
     {
@@ -87,7 +91,7 @@
       "name": "Resource Planner",
       "type": "planning",
       "description": "AI agent that manages resource allocation and capacity planning",
-      "status": "idle",
+      "status": "active",
       "avatar": "📅",
       "color": "#607D8B",
       "capabilities": [
@@ -96,14 +100,16 @@
         "workload-balancing",
         "timeline-optimization"
       ],
-      "lastActivity": null,
-      "currentTask": null,
+      "lastActivity": "2025-06-24T01:51:42.513Z",
+      "currentTask": {
+        "sessionId": "session_resource-planner_1750729902462"
+      },
       "recommendations": []
     }
   ],
   "metadata": {
     "created": "2025-01-17T12:00:00.000Z",
-    "updated": "2025-06-18T14:25:10.926Z",
+    "updated": "2025-06-24T11:05:33.041Z",
     "version": "1.0.0"
   }
 }

@@ -1,5 +1,5 @@
 import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock';
-import { fromNodeProviderChain } from '@aws-sdk/credential-providers';
+import { fromIni } from '@aws-sdk/credential-providers';
 import { BaseAIProvider } from './base-provider.js';
 
 export class BedrockAIProvider extends BaseAIProvider {
@@ -27,7 +27,7 @@ export class BedrockAIProvider extends BaseAIProvider {
 				baseURL
 			} = params;
 
-			const credentialProvider = fromNodeProviderChain({ profile });
+			const credentialProvider = fromIni({ profile });
 
 			return createAmazonBedrock({
 				region,

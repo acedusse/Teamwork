@@ -14,7 +14,11 @@ import {
   Button,
   Chip,
   LinearProgress,
-  Avatar
+  Avatar,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Divider
 } from '@mui/material';
 import {
   CalendarToday,
@@ -23,7 +27,10 @@ import {
   Add,
   SmartToy,
   PlayArrow,
-  Assessment
+  Assessment,
+  Psychology,
+  ExpandMore,
+  AutoAwesome
 } from '@mui/icons-material';
 import PropTypes from 'prop-types';
 // TimeBuckets is imported but not used in the render method
@@ -43,6 +50,8 @@ import {
 import StoryCard from './StoryCard';
 import DraggableStoryCard from './DraggableStoryCard';
 import DroppableBucket from './DroppableBucket';
+import AIOptimizationSuggestionsPanel from './AIOptimizationSuggestionsPanel';
+import useOptimizationSuggestions from '../../hooks/useOptimizationSuggestions';
 
 // Time horizon constants
 const TIME_HORIZONS = {
@@ -292,6 +301,19 @@ const BucketPlanningTab = ({
   const BUCKETS_STORAGE_KEY = 'bucketPlanningBuckets';
   const STORIES_STORAGE_KEY = 'bucketPlanningStories';
 
+  // AI optimization suggestions hook
+  const {
+    isLoading: isOptimizing,
+    suggestions,
+    generateSuggestions,
+    applySuggestion,
+    clearSuggestions,
+    error: optimizationError
+  } = useOptimizationSuggestions({
+    context: 'bucket-planning',
+    autoGenerate: false
+  });
+
   // Load from localStorage on mount
   useEffect(() => {
     try {
@@ -414,6 +436,73 @@ const BucketPlanningTab = ({
     }));
     onBucketConfigUpdate?.(buckets);
   }, [buckets, onBucketConfigUpdate]);
+
+  // AI optimization handlers
+  const handleGenerateOptimizations = useCallback(async () => {
+    const currentBuckets = getCurrentBuckets();
+    const bucketData = {
+      stories,
+      activeTimeHorizon,
+      buckets: currentBuckets,
+      totalCapacity: currentBuckets.reduce((sum, bucket) => sum + bucket.capacity, 0),
+      utilization: currentBuckets.map(bucket => ({
+        id: bucket.id,
+        capacity: bucket.capacity,
+        used: bucket.stories?.length || 0
+      }))
+    };
+
+    await generateSuggestions({
+      type: 'bucket-optimization',
+      data: bucketData,
+      focusAreas: ['capacity-balancing', 'timeline-optimization', 'priority-alignment']
+    });
+  }, [stories, activeTimeHorizon, getCurrentBuckets, generateSuggestions]);
+
+  const handleApplyOptimization = useCallback(async (suggestion) => {
+    pushHistory();
+    
+    if (suggestion.action === 'move-story') {
+      const { storyId, fromBucket, toBucket } = suggestion.data;
+      
+      setBuckets(prev => {
+        const newBuckets = { ...prev };
+        const currentHorizonBuckets = [...(newBuckets[activeTimeHorizon] || [])];
+        
+        // Remove from source bucket
+        const fromBucketIndex = currentHorizonBuckets.findIndex(b => b.id === fromBucket);
+        if (fromBucketIndex !== -1) {
+          const storyToMove = currentHorizonBuckets[fromBucketIndex].stories?.find(s => s.id === storyId);
+          if (storyToMove) {
+            currentHorizonBuckets[fromBucketIndex] = {
+              ...currentHorizonBuckets[fromBucketIndex],
+              stories: currentHorizonBuckets[fromBucketIndex].stories.filter(s => s.id !== storyId)
+            };
+            
+            // Add to target bucket
+            const toBucketIndex = currentHorizonBuckets.findIndex(b => b.id === toBucket);
+            if (toBucketIndex !== -1) {
+              currentHorizonBuckets[toBucketIndex] = {
+                ...currentHorizonBuckets[toBucketIndex],
+                stories: [...(currentHorizonBuckets[toBucketIndex].stories || []), storyToMove]
+              };
+            }
+          }
+        }
+        
+        newBuckets[activeTimeHorizon] = currentHorizonBuckets;
+        return newBuckets;
+      });
+      
+      setSnackbar({
+        open: true,
+        message: `Applied AI suggestion: Moved story to optimize bucket allocation`,
+        severity: 'success'
+      });
+    }
+    
+    await applySuggestion(suggestion.id);
+  }, [activeTimeHorizon, pushHistory, applySuggestion]);
 
   // Add item to bucket handler
   const handleAddItem = useCallback((bucketId) => {
@@ -704,6 +793,47 @@ const BucketPlanningTab = ({
 
           {/* Sidebar */}
           <Grid item xs={12} lg={4}>
+            {/* AI Bucket Optimization */}
+            <Accordion defaultExpanded sx={{ mb: 3 }}>
+              <AccordionSummary
+                expandIcon={<ExpandMore />}
+                aria-controls="ai-optimization-content"
+                id="ai-optimization-header"
+                sx={{ 
+                  bgcolor: 'secondary.light',
+                  color: 'secondary.contrastText',
+                  '&.Mui-expanded': {
+                    minHeight: 48
+                  }
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <AutoAwesome />
+                  <Typography variant="h6">AI Bucket Optimization</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 2 }}>
+                <AIOptimizationSuggestionsPanel
+                  context="bucket-planning"
+                  onSuggestionGenerated={handleGenerateOptimizations}
+                  onSuggestionApplied={handleApplyOptimization}
+                  isLoading={isOptimizing}
+                  suggestions={suggestions}
+                  error={optimizationError}
+                  showAdvancedOptions={false}
+                  maxHeight={300}
+                  customActions={[
+                    {
+                      label: 'Optimize Buckets',
+                      action: handleGenerateOptimizations,
+                      icon: <AutoAwesome />,
+                      disabled: isOptimizing
+                    }
+                  ]}
+                />
+              </AccordionDetails>
+            </Accordion>
+            
             <AIAgentsCapacity />
             <SprintIntegration />
           </Grid>
